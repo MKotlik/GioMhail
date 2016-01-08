@@ -27,7 +27,12 @@ public class SMTP{
 	    in=new BufferedReader(new InputStreamReader(is));
 	    out=new PrintWriter(new OutputStreamWriter(os),true);
 	    out.print("HELO "+localHost.getHostName());
-	    System.out.println("response: "+in.readLine());
+	    String response=in.readLine();
+	    System.out.println("response: "+response);
+	    if(not response.substring(0,1).equals("2")){
+		return false;
+	    }
+	    out.print("MAIL <"+to+">");
 	}catch(IOException e){
 	    System.out.println("IOException");
 	}
