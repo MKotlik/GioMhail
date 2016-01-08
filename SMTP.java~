@@ -1,0 +1,14 @@
+import java.net.*;
+import java.io.*;
+public class SMTP{
+    InetAdress mailHost;
+    InetAdress localHost;
+    BufferedReader in;
+    PrintWriter out;
+    public SMTP(String host){
+	mailHost=InetAdress.getByName(host);
+	localHost=InetAdress.getLocalHost();
+	System.out.println("mailHost: "+mailHost);	
+	System.out.println("localHost: "+localHost);
+    }
+    public boolean send(
