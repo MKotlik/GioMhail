@@ -54,5 +54,10 @@ http://tools.ietf.org/html/rfc4422
 
 Answer to SMTP issues
 http://serverfault.com/questions/280309/mail-server-on-port-25-only-response-with-500-command-not-recognized
-
-
+- Another issue is that ISP blocks outbound port 25 (plus some others in my case) as security/anti-spam measures.
+	Solution is to use alternatives ports (ex. 26, 587), SSL/TSL (ex. 465, 993), get a verizon.net email account (allows port 25), or install our own local server for testing.
+	
+Telnet:
+Use telnet to test connectivity/protocols with servers.
+http://windows.microsoft.com/en-us/windows/telnet-commands#1TC=windows-7
+http://www.telnet.org/htm/faq.htm

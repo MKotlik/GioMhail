@@ -1,5 +1,5 @@
 Team Members									          Period
-Giovanni Topa										    7
+Giovanni Topa										    	7
 Mikhail Kotlik (Misha)
 
 Team Name
@@ -9,95 +9,95 @@ Project Title
 GioMhail
 
 I. Project Idea
-A graphical, Java-based email client. Works with various email hosts/accounts, allows sending, access, and offline editing and storage of emails. Supports SMTP, POP3, and IMAP (IMAP4rev1).
-Uses sockets (IO & net) for client-server communication
-CLI for console use of the client.
-Supports use of multiple email accounts simultaneously (like Gmail, or Android email clients)
-Securely store server & account info
-Securely store emails (encryption & maildir)
-Supports TLS & SSL for security.
-Allows sending and receiving of attachments (MIME)
-Cool, material-design-based graphical interface.
+	A graphical, Java-based email client. Works with various email hosts/accounts, allows sending, access, and offline editing and storage of emails. Supports SMTP, POP3, and IMAP (IMAP4rev1).
+	Uses sockets (IO & net) for client-server communication
+	CLI for console use of the client.
+	Supports use of multiple email accounts simultaneously (like Gmail, or Android email clients)
+	Securely store server & account info
+	Securely store emails (encryption & maildir)
+	Supports TLS & SSL for security.
+	Allows sending and receiving of attachments (MIME)
+	Cool, material-design-based graphical interface.
 
 II. Critical Features
-SMTP (CLI)
-Connect to SMTP server
-Send plain-text email through SMTP server
-POP3 (CLI)
-Connect to unsecured POP3 server
-View & download plain-text email(s)
-Store downloaded emails
+	SMTP (CLI)
+	Connect to SMTP server
+	Send plain-text email through SMTP server
+	POP3 (CLI)
+	Connect to unsecured POP3 server
+	View & download plain-text email(s)
+	Store downloaded emails
 
 III. Later Features
 Level 1:
-SMTP
-Send multipart email & email w/attachment
-POP3
-Download emails w/attachments
-Store downloaded emails & attachments
-IMAP
-Connect to unsecured IMAP server
-Download plain-text emails
-Store downloaded emails
+	SMTP
+		Send multipart email & email w/attachment
+	POP3
+		Download emails w/attachments
+		Store downloaded emails & attachments
+	IMAP
+		Connect to unsecured IMAP server
+		Download plain-text emails
+		Store downloaded emails
 Level 2:
-POP3
-Connect to secured POP3 server, etc.
-IMAP
-Connect to secured IMAP server
-Check emails (view headers), work with flags, download multipart email(s) & email(s) w/ attachments
-Store downloaded emails & attachments
+	POP3
+		Connect to secured POP3 server, etc.
+	IMAP
+		Connect to secured IMAP server
+		Check emails (view headers), work with flags, download multipart email(s) & email(s) w/ attachments
+		Store downloaded emails & attachments
 Level 3:
-GUI (shell for existing functionality)
-Setup & logging-into email accounts
-View list of downloaded and available emails
-View plain-text emails (w/o inline attachments)
-WYSIWYG editor for sending email
-Send email
-View HTML email
-Download attachments
-View emails w/ inline attachments
-Flag emails
-View folders, and move emails between folders
-Create, modify, and assign labels
-Access multiple email accounts
-Email (the messages themselves)
-Store drafts
-Store emails securely (encrypted)
-Accounts
-Store encrypted account details (login info, server addresses)
-Access multiple accounts with one client
+	GUI (shell for existing functionality)
+		Setup & logging-into email accounts
+		View list of downloaded and available emails
+		View plain-text emails (w/o inline attachments)
+		WYSIWYG editor for sending email
+		Send email
+		View HTML email
+		Download attachments
+		View emails w/ inline attachments
+		Flag emails
+		View folders, and move emails between folders
+		Create, modify, and assign labels
+		Access multiple email accounts
+	Email (the messages themselves)
+		Store drafts
+		Store emails securely (encrypted)
+	Accounts
+		Store encrypted account details (login info, server addresses)
+		Access multiple accounts with one client
 
 IV. Development Stages
 Stage 1
-Create basic, manual SMTP client, for auto-connecting to server and manually typing SMTP commands and email. (CLI) (Gio)
-Also setup a local, test SMTP server to test client.
-Create basic, manual POP3 client, for auto-connecting to server and manually typing POP3 commands to get email. (CLI) (Misha)
-Also setup a local, test POP3 server to test client.
+	Create basic, manual SMTP client, for auto-connecting to server and manually typing SMTP commands and email. (CLI) (Gio)
+	Also setup a local, test SMTP server to test client.
+	Create basic, manual POP3 client, for auto-connecting to server and manually typing POP3 commands to get email. (CLI) (Misha)
+	Also setup a local, test POP3 server to test client.
 Stage 2
-Automated sending of emails, given host credentials, email headers, and email text (or email text file), or given email file with headers & body, via SMTP utility. (CLI) (Gio)
-Automated viewing/downloading of emails, given host credentials, and user credentials. View email list, select emails to view/download, and interact with POP3 server. (CLI) (Misha)
+	Automated sending of emails, given host credentials, email headers, and email text (or email text file), or given email file with headers & body, via SMTP utility. (CLI) (Gio)
+	Automated viewing/downloading of emails, given host credentials, and user credentials. View email list, select emails to view/download, and interact with POP3 server. (CLI) (Misha)
 Stage 3
-Level 1 SMTP & POP3 Goals - Gio
-Level 1 IMAP Goals - Misha
+	Level 1 SMTP & POP3 Goals - Gio
+	Level 1 IMAP Goals - Misha
 Stage 4
-Level 2 POP3 & IMAP Security - Gio & Misha
-Level 2 IMAP Headers & Flags - Misha
-Level 2 IMAP Multipart & Attachment Download & Storage - Gio
+	Level 2 POP3 & IMAP Security - Gio & Misha
+	Level 2 IMAP Headers & Flags - Misha
+	Level 2 IMAP Multipart & Attachment Download & Storage - Gio
 Stage 5
-Level 3, GUI
-General window, look, settings, & login - Gio & Misha
-View email list & folders; Work with folders, flags, and labels - Misha
-Send emails - Gio
-View plain-text emails - Misha
-Download attachments - Gio
-View HTML emails & emails w/ inline attachments (use existing HTML renderer (for Swing) or make our own?) - Gio & Misha+
-Switching between accounts - Gio+ & Misha
-Level 3, Emails
-Drafts - Misha
-Storage encryption - Gio+ & Misha
-Level 3, Accounts
-Account details encryption - Gio & Misha+
-Multiple accounts - Gio
+	Level 3, GUI
+		General window, look, settings, & login - Gio & Misha
+		View email list & folders; Work with folders, flags, and labels - Misha
+		Send emails - Gio
+		View plain-text emails - Misha
+		Download attachments - Gio
+		View HTML emails & emails w/ inline attachments (use existing HTML renderer (for Swing) or make our own?) - Gio & Misha+
+		Switching between accounts - Gio+ & Misha
+	Level 3, Emails
+		Drafts - Misha
+		Storage encryption - Gio+ & Misha
+	Level 3, Accounts
+		Account details encryption - Gio & Misha+
+		Multiple accounts - Gio
 
 (Note: *+ specifies emphasis on a person’s responsibility)
 

@@ -1,0 +1,61 @@
+GioMhail
+by CoolGle
+Misha Kotlik and Gio Topa
+
+--- CHANGELOG ---
+
+=====
+1/4/15 @ 22:51
+Commit: TBD
+Misha
+-----
+- Modified prototype format
+- Added known SMTP solutions + telnet info to research
+- Created and updated changelog
+=====
+
+=====
+1/4/15 @ 20:18
+Commit: 7c56393
+Gio
+-----
+Added prototype file to repo
+=====
+
+=====
+1/4/15 @ 20:16
+Commit: dbdee7c
+Gio
+-----
+Added research file to repo
+=====
+
+=====
+1/4/15 @ 13:00
+Commit: 82a6514
+Misha
+-----
+Made the Git repo
+=====
+==--==--==--==
+
+Template log:
+=====
+<>
+Commit: <>
+<>
+-----
+
+=====
+
+Format:
+Newest logs at top.
+Example log:
+
+=====
+<Date & Time>
+Commit: <First 7 commit sha chars>
+<Developer name>
+-----
+<Change description/list>
+=====
