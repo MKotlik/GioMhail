@@ -1,0 +1,58 @@
+GioMhail
+by CoolGle (Misha Kotlik & Gio Topa)
+
+Basic protocols:
+- Lesson on email structure, basic protocol info, SMTP commands and function, and using Java networking to send emails. (Read pages 1 & 2)
+http://www.quepublishing.com/articles/article.aspx?p=26672
+- SMTP Official Protocol Document (not anything new, but useful to have around)
+https://www.ietf.org/rfc/rfc0821.txt
+- Working with Java Sockets (ignore the server part)
+http://www.tutorialspoint.com/java/java_networking.htm
+- I/O, Files, and streams in Java
+http://www.tutorialspoint.com/java/java_files_io.htm
+- Another example of using Sockets and SMTP in Java
+http://www.java2s.com/Code/Java/Network-Protocol/SendingMailUsingSockets.htm
+- IMAP description on Wikipedia
+https://en.wikipedia.org/wiki/Internet_Message_Access_Protocol
+- Latest official IMAP protocol (4rev1)
+http://tools.ietf.org/html/rfc3501
+
+Mime:
+- MIME on Wikipedia
+https://en.wikipedia.org/wiki/MIME
+^ Follow links here for protocols
+- Java mimetypes map might be useful
+https://docs.oracle.com/javase/7/docs/api/javax/activation/MimetypesFileTypeMap.html
+
+TSL/SSL:
+https://en.wikipedia.org/wiki/Transport_Layer_Security
+http://info.ssl.com/article.aspx?id=10241
+https://www.digicert.com/ssl.htm
+https://www.symantec.com/page.jsp?id=how-ssl-works
+
+https://docs.oracle.com/javase/7/docs/api/javax/net/ssl/SSLSocket.html
+https://docs.oracle.com/cd/E11035_01/wls100/security/SSL_client.html
+http://www.javacodegeeks.com/2013/06/java-security-tutorial-step-by-step-guide-to-create-ssl-connection-and-certificates.html
+
+Use google from simple/test SMTP, POP3, and IMAP servers
+
+Maildir (for local email storage)
+https://en.wikipedia.org/wiki/Maildir
+We would have to create our own system(classes) for working with maildir format.
+Folder full of files, and a directory file in folder to map file names to message ids/titles
+Example APIs:
+https://github.com/ktheory/maildir
+http://javamaildir.sourceforge.net/
+
+Gmail Specific/Examples:
+https://developers.google.com/gmail/oauth_overview?hl=en
+https://developers.google.com/identity/protocols/OAuth2
+
+SASL & OAuth2:
+http://tools.ietf.org/html/rfc6749
+http://tools.ietf.org/html/rfc4422
+
+Answer to SMTP issues
+http://serverfault.com/questions/280309/mail-server-on-port-25-only-response-with-500-command-not-recognized
+
+
