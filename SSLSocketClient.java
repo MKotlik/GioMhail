@@ -1,42 +1,104 @@
+//GioMhail by Coolgle
+//Misha Kotlik & Gio Topa
+//SSLSocketClient test
+//Based on work of author attributed below
+
 /* SslSocketClient.java
  - Copyright (c) 2014, HerongYang.com, All Rights Reserved.
  */
+ 
 import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
 public class SSLSocketClient {
-   public static void main(String[] args) {
-	  java.lang.System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "false");
-      BufferedReader in = new BufferedReader(
-         new InputStreamReader(System.in));
-      PrintStream out = System.out;
-      SSLSocketFactory f = 
-         (SSLSocketFactory) SSLSocketFactory.getDefault();
-      try {
-         SSLSocket c =
-           (SSLSocket) f.createSocket("smtp.gmail.com", 465);
-         printSocketInfo(c);
-         //c.startHandshake();
-		 printConnectionInfo(c);
-         BufferedWriter w = new BufferedWriter(
-            new OutputStreamWriter(c.getOutputStream()));
-         BufferedReader r = new BufferedReader(
-            new InputStreamReader(c.getInputStream()));
-         String m = null;
-         while ((m=r.readLine())!= null) {
-            out.println(m);
-            m = in.readLine();
-            w.write(m,0,m.length());
-            w.newLine();
-            w.flush();
-         }
-         w.close();
-         r.close();
-         c.close();
-      } catch (IOException e) {
-         System.err.println(e.toString());
-      }
-   }
+	public static void main(String[] args) {
+		//java.lang.System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "false");
+		//Exerimenting with no_renegotiation error
+		BufferedReader sysIn = new BufferedReader(new InputStreamReader(System.in));
+		PrintStream sysOut = System.out;
+		SSLSocketFactory mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+		try {
+			SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket("smtp.gmail.com", 465);
+			printSocketInfo(clientSocket);
+			//clientSocket.startHandshake(); //This has been causing no_renegotiation error
+			//Apparently handshake is automatically started after connection
+			printConnectionInfo(clientSocket);
+			BufferedWriter serverWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+			BufferedReader serverReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			/*
+			String m = null;
+			while ((m=r.readLine())!= null) {
+				out.println(m);
+				m = in.readLine();
+				w.write(m,0,m.length());
+				w.newLine();
+				w.flush();
+			}
+			*/
+			String userInput = null;
+			String serverInput = null;
+			String text = "";
+			/*
+			while(serverReader.ready()){
+				sysOut.println(serverReader.readLine());
+			}
+			*/
+			
+			/*
+			while (true) {
+				sysOut.println(serverReader.readLine());
+				if ((text = sysIn.readLine()).equals("~")) {
+					break;
+				}
+			}
+			*/
+			/*
+			for (String i = serverReader.readLine(); ! i.equals(""); i = serverReader.readLine()) {
+				sysOut.println(i);
+			}
+			*/
+			text = serverReader.readLine();
+			System.out.println(text);
+			userInput = "EHLO smtp.gmail.com";
+			serverWriter.write(userInput, 0, userInput.length());
+			serverWriter.newLine();
+			serverWriter.flush();
+			System.out.println(serverReader.ready());
+			while(serverReader.ready()){
+				text = serverReader.readLine();
+				System.out.println(text);
+			}
+			/*
+			while ((serverInput = serverReader.readLine()) != null && ! serverInput.equals("")){
+				sysOut.println(serverInput);
+			}
+			userInput = "EHLO smtp.gmail.com";
+			serverWriter.write(userInput, 0, userInput.length());
+			serverWriter.newLine();
+			serverWriter.flush();
+			while ((serverInput = serverReader.readLine()) != null){
+					sysOut.println(serverInput);
+			}
+			*/
+			/*
+			while ((userInput = sysIn.readLine()) != null && ! userInput.equals("exit")) {
+				while ((serverInput = serverReader.readLine()) != null){
+					sysOut.println(serverInput);
+				}
+				serverWriter.write(userInput, 0, userInput.length());
+				serverWriter.newLine();
+				serverWriter.flush();
+			}
+			*/
+			serverWriter.close();
+			serverReader.close();
+			clientSocket.close();
+			sysIn.close();
+			sysOut.close();
+		} catch (IOException e) {
+			System.err.println(e.toString());
+		}
+    }
    private static void printSocketInfo(SSLSocket s) {
       System.out.println("Socket class: "+s.getClass());
       System.out.println("   Remote address = "
@@ -61,5 +123,5 @@ public class SSLSocketClient {
 	   System.out.println("Host: " + currentSession.getPeerHost());
 	   System.out.println("Host Port: " + currentSession.getPeerPort());
 	   
-   }
 }
+   }
