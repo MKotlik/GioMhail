@@ -6,6 +6,7 @@ import java.net.*;
 import javax.net.ssl.*;
 public class SSLSocketClient {
    public static void main(String[] args) {
+	  java.lang.System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "false");
       BufferedReader in = new BufferedReader(
          new InputStreamReader(System.in));
       PrintStream out = System.out;
@@ -15,7 +16,8 @@ public class SSLSocketClient {
          SSLSocket c =
            (SSLSocket) f.createSocket("smtp.gmail.com", 465);
          printSocketInfo(c);
-         c.startHandshake();
+         //c.startHandshake();
+		 printConnectionInfo(c);
          BufferedWriter w = new BufferedWriter(
             new OutputStreamWriter(c.getOutputStream()));
          BufferedReader r = new BufferedReader(
@@ -50,5 +52,14 @@ public class SSLSocketClient {
       SSLSession ss = s.getSession();
       System.out.println("   Cipher suite = "+ss.getCipherSuite());
       System.out.println("   Protocol = "+ss.getProtocol());
+   }
+   
+   private static void printConnectionInfo(SSLSocket s) {
+	   SSLSession currentSession = s.getSession();
+	   System.out.println("Protocol: " + currentSession.getProtocol());
+	   System.out.println("Cipher Suite: " + currentSession.getCipherSuite());
+	   System.out.println("Host: " + currentSession.getPeerHost());
+	   System.out.println("Host Port: " + currentSession.getPeerPort());
+	   
    }
 }
