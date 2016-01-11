@@ -5,6 +5,12 @@ Misha Kotlik and Gio Topa
 --- CHANGELOG ---
 
 =====
+1/10/15
+Misha & Gio both worked a lot.
+Should update the changelog with achievements.
+=====
+
+=====
 1/4/15 @ 22:51
 Commit: TBD
 Misha

@@ -17,6 +17,10 @@ https://en.wikipedia.org/wiki/Internet_Message_Access_Protocol
 - Latest official IMAP protocol (4rev1)
 http://tools.ietf.org/html/rfc3501
 
+More SMTP:
+http://www.samlogic.net/articles/smtp-commands-reference.htm
+
+
 Mime:
 - MIME on Wikipedia
 https://en.wikipedia.org/wiki/MIME
@@ -32,7 +36,21 @@ https://www.symantec.com/page.jsp?id=how-ssl-works
 
 https://docs.oracle.com/javase/7/docs/api/javax/net/ssl/SSLSocket.html
 https://docs.oracle.com/cd/E11035_01/wls100/security/SSL_client.html
-http://www.javacodegeeks.com/2013/06/java-security-tutorial-step-by-step-guide-to-create-ssl-connection-and-certificates.html
+^This is probably over complicated, but explains some usage.
+Xhttp://www.javacodegeeks.com/2013/06/java-security-tutorial-step-by-step-guide-to-create-ssl-connection-and-certificates.html
+
+https://www.fastmail.com/help/technical/ssltlsstarttls.html
+
+http://blog.trifork.com/2009/11/10/securing-connections-with-tls/
+http://juliusdavies.ca/not-yet-commons-ssl-0.3.9/ssl.html
+
+>http://stackoverflow.com/questions/13135230/difference-between-ssl-and-tls-and-their-usage-in-java
+
+http://stackoverflow.com/questions/8873855/how-to-implement-ssl-tls-secure-communication-through-normal-java-sockets
+^Explains how to upgrade connections following STARTTLS(I’m not sure if they’re handshaken?, need to test)
+
+http://gerardnico.com/wiki/smtp_telnet
+^Useful info about TSL & Telnet (Basically telnet doesn’t support TSL)
 
 Use google from simple/test SMTP, POP3, and IMAP servers
 
@@ -54,10 +72,8 @@ http://tools.ietf.org/html/rfc4422
 
 Answer to SMTP issues
 http://serverfault.com/questions/280309/mail-server-on-port-25-only-response-with-500-command-not-recognized
-- Another issue is that ISP blocks outbound port 25 (plus some others in my case) as security/anti-spam measures.
-	Solution is to use alternatives ports (ex. 26, 587), SSL/TSL (ex. 465, 993), get a verizon.net email account (allows port 25), or install our own local server for testing.
-	
-Telnet:
-Use telnet to test connectivity/protocols with servers.
-http://windows.microsoft.com/en-us/windows/telnet-commands#1TC=windows-7
-http://www.telnet.org/htm/faq.htm
+
+https://commons.apache.org/proper/commons-net/examples/mail/SMTPMail.java
+
+WOOHOOO!
+http://stackoverflow.com/questions/7776369/how-to-determine-the-the-end-of-a-smtp-and-pop-response
