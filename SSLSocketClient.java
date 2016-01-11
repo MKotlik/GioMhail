@@ -16,7 +16,7 @@ public class SSLSocketClient {
 	    PrintStream sysOut = System.out; //Print to console
 	    SSLSocketFactory mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault(); //Get default SSL socket factory
 		try {
-		    SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket("smtp.gmail.com", 465); //create, connect, start handshake
+		    SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket("smtp.mail.yahoo.com", 465); //create, connect, start handshake
 		    printSocketInfo(clientSocket); //Print connection info
 		    BufferedWriter serverWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())); //Write to server
 		    BufferedReader serverReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); //Read from server
@@ -29,6 +29,9 @@ public class SSLSocketClient {
 		    boolean quitUser = false; //Whether the user has entered quit, might be unnecessary
 		    boolean openRead = true; //Whether serverReader is still open (serverInput != null)
 		    boolean openSocket = true; //Whether clientSocket is still open (clientSocket != null)
+
+		    //SMTP data boolean
+		    boolean sendingData = false;
 
 		    //Main connection loop
 		    while (openSocket && openRead && ! quitUser) {
