@@ -7,10 +7,11 @@
  - Copyright (c) 2014, HerongYang.com, All Rights Reserved.
  */
  
+import java.util.Scanner;
 import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
-public class SSLSocketClient {
+public class SSLSocketClient2 {
 	public static void main(String[] args) {
 		//java.lang.System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "false");
 		//Exerimenting with no_renegotiation error
@@ -26,6 +27,7 @@ public class SSLSocketClient {
 			BufferedWriter serverWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
 			InputStream clientInputStream = clientSocket.getInputStream();
 			BufferedReader serverReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			Scanner serverScanner = new Scanner(serverReader);
 			/*
 			String m = null;
 			while ((m=r.readLine())!= null) {
@@ -36,19 +38,16 @@ public class SSLSocketClient {
 				w.flush();
 			}
 			*/
-			String serverInput;
-			String userInput;
-			while ((serverInput = serverReader.readLine()) != null && clientSocket != null) {
-				sysOut.println(serverInput);
-				//sysOut.println("C: ");
-				userInput = sysIn.readLine();
-				if (! userInput.equals("")) {
-					serverWriter.write(userInput, 0, userInput.length());
-					serverWriter.newLine();
-					serverWriter.flush();
-					System.out.println("Sent something");
-				} 
+			String msg = "EHLO smtp.gmail.com";
+			System.out.println(serverScanner.nextLine());
+			serverWriter.write(msg,0,msg.length());
+			serverWriter.newLine();
+			serverWriter.flush();
+			while (serverScanner.hasNextLine()) {
+				System.out.println(serverScanner.nextLine());
 			}
+			System.out.println("exited while loop");
+			serverScanner.close();
 			serverWriter.close();
 			serverReader.close();
 			clientSocket.close();
