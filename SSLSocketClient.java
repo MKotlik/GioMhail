@@ -12,56 +12,49 @@ import java.net.*;
 import javax.net.ssl.*;
 public class SSLSocketClient {
 	public static void main(String[] args) {
-		//java.lang.System.setProperty("sun.security.ssl.allowUnsafeRenegotiation", "false");
-		//Exerimenting with no_renegotiation error
-		BufferedReader sysIn = new BufferedReader(new InputStreamReader(System.in));
-		PrintStream sysOut = System.out;
-		SSLSocketFactory mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+	    BufferedReader sysIn = new BufferedReader(new InputStreamReader(System.in)); //Read from console
+	    PrintStream sysOut = System.out; //Print to console
+	    SSLSocketFactory mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault(); //Get default SSL socket factory
 		try {
-			SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket("smtp.gmail.com", 465);
-			printSocketInfo(clientSocket);
-			//clientSocket.startHandshake(); //This has been causing no_renegotiation error
-			//Apparently handshake is automatically started after connection
-			printConnectionInfo(clientSocket);
-			BufferedWriter serverWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-			InputStream clientInputStream = clientSocket.getInputStream();
-			BufferedReader serverReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			/*
-			String m = null;
-			while ((m=r.readLine())!= null) {
-				out.println(m);
-				m = in.readLine();
-				w.write(m,0,m.length());
-				w.newLine();
-				w.flush();
-			}
-			*/
-			String serverInput;
-			String userInput = "";
-			boolean tryRead = true;
-			boolean quitUser = false;
-			boolean openRead = true;
-			boolean openSocket = true;
-			while (openSocket && openRead && ! quitUser) {
-			    if (clientSocket == null) {
+		    SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket("smtp.gmail.com", 465); //create, connect, start handshake
+		    printSocketInfo(clientSocket); //Print connection info
+		    BufferedWriter serverWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())); //Write to server
+		    BufferedReader serverReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); //Read from server
+		    
+		    String serverInput = null; //Stores latest line from server
+		    String userInput = ""; //Stores lastest input line from user
+		    boolean tryRead = true; //Whether to read next line from serverReader (prevents blocking on multiline SMTP responses)
+		    
+		    //The below booleans, used to successully close the connection, might be unnecessary
+		    boolean quitUser = false; //Whether the user has entered quit, might be unnecessary
+		    boolean openRead = true; //Whether serverReader is still open (serverInput != null)
+		    boolean openSocket = true; //Whether clientSocket is still open (clientSocket != null)
+
+		    //Main connection loop
+		    while (openSocket && openRead && ! quitUser) {
+			if (clientSocket == null) { //Break if socket is closed
 				openSocket = false;
 				break;
 			    }
 			    //Display server response/message
 			    while (tryRead) {
 				serverInput = serverReader.readLine();
-				if (serverInput == null) {
+				if (serverInput == null) { //If serverReader gets closed/connection broken
 				    openRead = false;
+				    tryRead = false;
 				    break;
 				}
 				sysOut.println(serverInput);
-				if (serverInput.substring(3,4).equals("-")) {
+				if (serverInput.substring(3,4).equals("-")) { //Check if multiline response
 				    tryRead = true;
 				} else {
 				    tryRead = false;
 				}
 			    }
-			    if (openSocket == false || openRead == false) {
+			    if (serverInput != null && serverInput.substring(0,3).equals("221")) { //Check if server sent 221 Bye code
+				break;
+			    }
+			    if (openSocket == false || openRead == false) { //Check if socket or serverReader closed
 				break;
 			    }
 			    //Read user input, display prompt if blank enter, otherwise send to server
@@ -69,25 +62,13 @@ public class SSLSocketClient {
 				sysOut.print("C: ");
 				userInput = sysIn.readLine();
 			    }
-			    serverWriter.write(userInput, 0, userInput.length());
+			    serverWriter.write(userInput, 0, userInput.length()); //Writing to server
 			    serverWriter.newLine();
 			    serverWriter.flush();
 			    userInput = "";
 			    tryRead = true;
 			}
-			/*
-			while ((serverInput = serverReader.readLine()) != null && clientSocket != null) {
-				sysOut.println(serverInput);
-				//sysOut.println("C: ");
-				userInput = sysIn.readLine();
-				if (! userInput.equals("")) {
-				    serverWriter.write(userInput, 0, userInput.length());
-				    serverWriter.newLine();
-				    serverWriter.flush();
-				    System.out.println("Sent something");
-				} 
-			}
-			*/
+		    //Clean up all connection objects
 			serverWriter.close();
 			serverReader.close();
 			clientSocket.close();
