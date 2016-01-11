@@ -37,18 +37,57 @@ public class SSLSocketClient {
 			}
 			*/
 			String serverInput;
-			String userInput;
+			String userInput = "";
+			boolean tryRead = true;
+			boolean quitUser = false;
+			boolean openRead = true;
+			boolean openSocket = true;
+			while (openSocket && openRead && ! quitUser) {
+			    if (clientSocket == null) {
+				openSocket = false;
+				break;
+			    }
+			    //Display server response/message
+			    while (tryRead) {
+				serverInput = serverReader.readLine();
+				if (serverInput == null) {
+				    openRead = false;
+				    break;
+				}
+				sysOut.println(serverInput);
+				if (serverInput.substring(3,4).equals("-")) {
+				    tryRead = true;
+				} else {
+				    tryRead = false;
+				}
+			    }
+			    if (openSocket == false || openRead == false) {
+				break;
+			    }
+			    //Read user input, display prompt if blank enter, otherwise send to server
+			    while (userInput.equals("")) {
+				sysOut.print("C: ");
+				userInput = sysIn.readLine();
+			    }
+			    serverWriter.write(userInput, 0, userInput.length());
+			    serverWriter.newLine();
+			    serverWriter.flush();
+			    userInput = "";
+			    tryRead = true;
+			}
+			/*
 			while ((serverInput = serverReader.readLine()) != null && clientSocket != null) {
 				sysOut.println(serverInput);
 				//sysOut.println("C: ");
 				userInput = sysIn.readLine();
 				if (! userInput.equals("")) {
-					serverWriter.write(userInput, 0, userInput.length());
-					serverWriter.newLine();
-					serverWriter.flush();
-					System.out.println("Sent something");
+				    serverWriter.write(userInput, 0, userInput.length());
+				    serverWriter.newLine();
+				    serverWriter.flush();
+				    System.out.println("Sent something");
 				} 
 			}
+			*/
 			serverWriter.close();
 			serverReader.close();
 			clientSocket.close();
