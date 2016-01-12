@@ -15,7 +15,7 @@ public class SslPopClient{
 
             String serverInput = null; //Stores latest line from server
             String userInput = ""; //Stores lastest input line from user
-	    boolean tryRead = true; //Whether to read next line from serverReader (prevents blocking on multiline SMTP responses)
+			boolean tryRead = true; //Whether to read next line from serverReader (prevents blocking on multiline SMTP responses)
 
             //The below booleans, used to successully close the connection, might be unnecessary
             boolean quitUser = false; //Whether the user has entered quit, might be unnecessary
@@ -24,7 +24,7 @@ public class SslPopClient{
 
             //SMTP input variables
             boolean sendingData = false;
-	    boolean multi=false;
+			boolean multi=false;
 
             //Main connection loop
             while (openSocket && openRead && !quitUser) {
@@ -33,55 +33,56 @@ public class SslPopClient{
                     break;
                 }
                 //Display server response/message
-		if(multi){
-		    while (tryRead) {
-			serverInput = serverReader.readLine();
-			if (serverInput == null) { //If serverReader gets closed/connection broken
-			    openRead = false;
-			    tryRead = false;
-			    break;
-			}
-			sysOut.println(serverInput);
-			if (serverInput.equals(".")) { //Check if multiline response
-			    tryRead = false;
-			} else {
-			    tryRead = true;
-			}
-		    }
-		}else{
-		    serverInput=serverReader.readLine();
-		    if (serverInput == null) { //If serverReader gets closed/connection broken
+				if(multi){
+					while (tryRead) {
+						serverInput = serverReader.readLine();
+						if (serverInput == null) { //If serverReader gets closed/connection broken
+							openRead = false;
+							tryRead = false;
+							break;
+						}
+						sysOut.println(serverInput);
+						if (serverInput.equals(".")) { //Check if multiline response
+							tryRead = false;
+						} else {
+							tryRead = true;
+						}
+					}
+				}else{
+					serverInput=serverReader.readLine();
+					if (serverInput == null) { //If serverReader gets closed/connection broken
                         openRead = false;
                         tryRead = false;
                         break;
                     }
-		    sysOut.println(serverInput);
-		}
-		multi=false;
+					sysOut.println(serverInput);
+				}
+				multi=false;
                 //Exit client if connection lost/closed prematurely
                 if (openSocket == false || openRead == false) {
                     break;
                 }
-                //Enter data mode if data command sent and 354 confirmation received
+                //If user previously entered quit
                 if (userInput.equalsIgnoreCase("quit")) {
-		    quitUser=true;
+					quitUser=true;
+					break;
                 }
-                //In regular command mode (single-line)
-		userInput = ""; //Reset userInput to show prompt
-		//Read user input, display prompt if blank enter, otherwise send to server
-		while (userInput.equals("")) {
-		    sysOut.print("C: ");
-		    userInput = sysIn.readLine();
-		}
-		serverWriter.write(userInput, 0, userInput.length()); //Writing to server
-		serverWriter.newLine();
-		serverWriter.flush();
-		tryRead = true;
-	        if (userInput.equalsIgnoreCase("list")||userInput.substring(0,4).equalsIgnoreCase("retr")){
-		    multi=true;
-		}
-		sysOut.println("ECHO: "+multi);
-	    }
+                //Get user input
+				userInput = ""; //Reset userInput to show prompt
+				//Read user input, display prompt if blank enter, otherwise send to server
+				while (userInput.equals("")) {
+					sysOut.print("C: ");
+					userInput = sysIn.readLine();
+				}
+				serverWriter.write(userInput, 0, userInput.length()); //Writing to server
+				serverWriter.newLine();
+				serverWriter.flush();
+				tryRead = true;
+				//Prepare for multi-line response if list, or retr
+				if (userInput.length() > 3 && (userInput.equalsIgnoreCase("list")||userInput.substring(0,4).equalsIgnoreCase("retr"))){
+					multi=true;
+				}
+			}
             //Clean up all connection objects
             serverWriter.close();
             serverReader.close();
