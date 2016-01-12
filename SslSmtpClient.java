@@ -11,7 +11,7 @@ import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
 
-public class SSLSocketClient {
+public class SslSmtpClient {
     public static void main(String[] args) {
         BufferedReader sysIn = new BufferedReader(new InputStreamReader(System.in)); //Read from console
         PrintStream sysOut = System.out; //Print to console
