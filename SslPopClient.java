@@ -8,7 +8,7 @@ public class SslPopClient{
         PrintStream sysOut = System.out; //Print to console
         SSLSocketFactory mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault(); //Get default SSL socket factory
         try {
-            SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket("smtp.mail.yahoo.com", 465); //create, connect, start handshake
+            SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket("pop.mail.yahoo.com", 995); //create, connect, start handshake
             printSocketInfo(clientSocket); //Print connection info
             BufferedWriter serverWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())); //Write to server
             BufferedReader serverReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); //Read from server
@@ -33,20 +33,30 @@ public class SslPopClient{
                     break;
                 }
                 //Display server response/message
-                while (tryRead && multi) {
-                    serverInput = serverReader.readLine();
-                    if (serverInput == null) { //If serverReader gets closed/connection broken
+		if(multi){
+		    while (tryRead) {
+			serverInput = serverReader.readLine();
+			if (serverInput == null) { //If serverReader gets closed/connection broken
+			    openRead = false;
+			    tryRead = false;
+			    break;
+			}
+			sysOut.println(serverInput);
+			if (serverInput.equals(".")) { //Check if multiline response
+			    tryRead = true;
+			} else {
+			    tryRead = false;
+			}
+		    }
+		}else{
+		    serverInput=serverReader.readLine();
+		    if (serverInput == null) { //If serverReader gets closed/connection broken
                         openRead = false;
                         tryRead = false;
                         break;
                     }
-                    sysOut.println(serverInput);
-                    if (serverInput.substring(3, 4).equals("-")) { //Check if multiline response
-                        tryRead = true;
-                    } else {
-                        tryRead = false;
-                    }
-                }
+		    sysOut.println(serverInput);
+		}
                 //Exit client if connection lost/closed prematurely
                 if (openSocket == false || openRead == false) {
                     break;
