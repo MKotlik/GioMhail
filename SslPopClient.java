@@ -43,9 +43,9 @@ public class SslPopClient{
 			}
 			sysOut.println(serverInput);
 			if (serverInput.equals(".")) { //Check if multiline response
-			    tryRead = true;
-			} else {
 			    tryRead = false;
+			} else {
+			    tryRead = true;
 			}
 		    }
 		}else{
@@ -57,14 +57,14 @@ public class SslPopClient{
                     }
 		    sysOut.println(serverInput);
 		}
+		multi=false;
                 //Exit client if connection lost/closed prematurely
                 if (openSocket == false || openRead == false) {
                     break;
                 }
                 //Enter data mode if data command sent and 354 confirmation received
                 if (userInput.equalsIgnoreCase("quit")) {
-		    tryRead=false;
-		    openRead=false;
+		    quitUser=true;
                 }
                 //In regular command mode (single-line)
 		userInput = ""; //Reset userInput to show prompt
@@ -77,9 +77,10 @@ public class SslPopClient{
 		serverWriter.newLine();
 		serverWriter.flush();
 		tryRead = true;
-	        if (userInput.equalsIgnoreCase("list")||userInput.equalsIgnoreCase("retr")){
+	        if (userInput.equalsIgnoreCase("list")||userInput.substring(0,4).equalsIgnoreCase("retr")){
 		    multi=true;
 		}
+		sysOut.println("ECHO: "+multi);
 	    }
             //Clean up all connection objects
             serverWriter.close();
