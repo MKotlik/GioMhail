@@ -42,7 +42,9 @@ public class SslPopClient{
 							break;
 						}
 						sysOut.println(serverInput);
-						if (serverInput.equals(".")) { //Check if multiline response
+                        //Check for multiline response or error
+						if (serverInput.equals(".") ||
+                                (serverInput.length() >= 4 && serverInput.substring(0, 4).equals("-ERR"))) {
 							tryRead = false;
 						} else {
 							tryRead = true;
@@ -63,7 +65,7 @@ public class SslPopClient{
                     break;
                 }
                 //If user previously entered quit
-                if (userInput.equalsIgnoreCase("quit")) {
+                if (userInput.length() >= 4 && userInput.substring(0, 4).equalsIgnoreCase("quit")) {
 					quitUser=true;
 					break;
                 }
@@ -79,7 +81,8 @@ public class SslPopClient{
 				serverWriter.flush();
 				tryRead = true;
 				//Prepare for multi-line response if list, or retr
-				if (userInput.equalsIgnoreCase("list")||(userInput.length() > 5 && userInput.substring(0,4).equalsIgnoreCase("retr"))){
+				if (userInput.equalsIgnoreCase("list") ||
+                        (userInput.length() >= 4 && userInput.substring(0,4).equalsIgnoreCase("retr"))){
 					multi=true;
 				}
 			}
