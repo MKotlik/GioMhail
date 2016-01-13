@@ -34,7 +34,7 @@ public class SMTPConsole {
     }
 
     //Main
-    public static void main(String[]args) {
+    public static void main(String[] args) {
         SMTPConsole mainConsole = new SMTPConsole();
         //Run different connection method based on port, print msg and quit if unacceptable port
         if (mainConsole.SMTPPort == 465) {
@@ -69,7 +69,7 @@ public class SMTPConsole {
 
             //Check for server greeting
             serverInput = serverReader.readLine();
-            if (! checkResponseCode(serverInput, "220")) {
+            if (!checkResponseCode(serverInput, "220")) {
                 sysOut.println("Client ERROR: Server didn't properly greet.");
                 return false;
             }
@@ -81,7 +81,7 @@ public class SMTPConsole {
             writeServer("HELO " + SMTPHost);
             //Check for HELO response
             serverInput = serverReader.readLine();
-            if (! checkResponseCode(serverInput, "250")) {
+            if (!checkResponseCode(serverInput, "250")) {
                 sysOut.println("Client ERROR: Server didn't properly respond to HELO.");
                 return false;
             }
@@ -93,7 +93,7 @@ public class SMTPConsole {
             writeServer("STARTTLS");
             //Check for STARTTLS response
             serverInput = serverReader.readLine();
-            if (! checkResponseCode(serverInput, "220")) {
+            if (!checkResponseCode(serverInput, "220")) {
                 sysOut.println("Client ERROR: Server didn't properly respond to STARTTLS.");
                 return false;
             }
@@ -228,7 +228,7 @@ public class SMTPConsole {
 
     //Check if server response string contains wanted response code
     private boolean checkResponseCode(String response, String code) {
-        return (response != null && response.length() >= 3 && response.substring(0,3).equals(code));
+        return (response != null && response.length() >= 3 && response.substring(0, 3).equals(code));
     }
 
     //Send message/command line to the server
@@ -245,30 +245,7 @@ public class SMTPConsole {
         }
     }
 
-    private void close() {
-        try {
-            if (serverWriter != null) {
-                serverWriter.close();
-            }
-            if (serverReader != null) {
-                serverReader.close();
-            }
-            if (plainSocket != null) {
-                plainSocket.close();
-            }
-            if (secureSocket != null) {
-                secureSocket.close();
-            }
-            if (sysIn != null) {
-                sysIn.close();
-            }
-            if (sysOut != null) {
-                sysOut.close();
-            }
-        } catch (IOException e) {
-            System.err.println(e.toString());
-        }
-    }
+    top
 
     private static void printSocketInfo(SSLSocket s) {
         System.out.println("Socket class: " + s.getClass());

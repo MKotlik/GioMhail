@@ -2,9 +2,9 @@ import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
 
-public class SslPopClient{
-    public static void main(String[]args){
-	BufferedReader sysIn = new BufferedReader(new InputStreamReader(System.in)); //Read from console
+public class SslPopClient {
+    public static void main(String[] args) {
+        BufferedReader sysIn = new BufferedReader(new InputStreamReader(System.in)); //Read from console
         PrintStream sysOut = System.out; //Print to console
         SSLSocketFactory mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault(); //Get default SSL socket factory
         try {
@@ -15,7 +15,7 @@ public class SslPopClient{
 
             String serverInput = null; //Stores latest line from server
             String userInput = ""; //Stores lastest input line from user
-			boolean tryRead = true; //Whether to read next line from serverReader (prevents blocking on multiline SMTP responses)
+            boolean tryRead = true; //Whether to read next line from serverReader (prevents blocking on multiline SMTP responses)
 
             //The below booleans, used to successully close the connection, might be unnecessary
             boolean quitUser = false; //Whether the user has entered quit, might be unnecessary
@@ -24,7 +24,7 @@ public class SslPopClient{
 
             //SMTP input variables
             boolean sendingData = false;
-			boolean multi=false;
+            boolean multi = false;
 
             //Main connection loop
             while (openSocket && openRead && !quitUser) {
@@ -33,59 +33,60 @@ public class SslPopClient{
                     break;
                 }
                 //Display server response/message
-				if(multi){
-					while (tryRead) {
-						serverInput = serverReader.readLine();
-						if (serverInput == null) { //If serverReader gets closed/connection broken
-							openRead = false;
-							tryRead = false;
-							break;
-						}
-						sysOut.println(serverInput);
+                if (multi) {
+                    while (tryRead) {
+                        serverInput = serverReader.readLine();
+                        if (serverInput == null) { //If serverReader gets closed/connection broken
+                            openRead = false;
+                            tryRead = false;
+                            break;
+                        }
+                        sysOut.println(serverInput);
                         //Check for multiline response or error
-						if (serverInput.equals(".") ||
+                        if (serverInput.equals(".") ||
                                 (serverInput.length() >= 4 && serverInput.substring(0, 4).equals("-ERR"))) {
-							tryRead = false;
-						} else {
-							tryRead = true;
-						}
-					}
-				}else{
-					serverInput=serverReader.readLine();
-					if (serverInput == null) { //If serverReader gets closed/connection broken
+                            tryRead = false;
+                        } else {
+                            tryRead = true;
+                        }
+                    }
+                } else {
+                    serverInput = serverReader.readLine();
+                    if (serverInput == null) { //If serverReader gets closed/connection broken
                         openRead = false;
                         tryRead = false;
                         break;
                     }
-					sysOut.println(serverInput);
-				}
-				multi=false;
+                    sysOut.println(serverInput);
+                }
+                multi = false;
                 //Exit client if connection lost/closed prematurely
                 if (openSocket == false || openRead == false) {
                     break;
                 }
                 //If user previously entered quit
                 if (userInput.length() >= 4 && userInput.substring(0, 4).equalsIgnoreCase("quit")) {
-					quitUser=true;
-					break;
+                    quitUser = true;
+                    break;
                 }
                 //Get user input
-				userInput = ""; //Reset userInput to show prompt
-				//Read user input, display prompt if blank enter, otherwise send to server
-				while (userInput.equals("")) {
-					sysOut.print("C: ");
-					userInput = sysIn.readLine();
-				}
-				serverWriter.write(userInput, 0, userInput.length()); //Writing to server
-				serverWriter.newLine();
-				serverWriter.flush();
-				tryRead = true;
-				//Prepare for multi-line response if list, or retr
-				if (userInput.equalsIgnoreCase("list") ||
-                        (userInput.length() >= 4 && userInput.substring(0,4).equalsIgnoreCase("retr"))){
-					multi=true;
-				}
-			}
+                userInput = ""; //Reset userInput to show prompt
+                //Read user input, display prompt if blank enter, otherwise send to server
+                while (userInput.equals("")) {
+                    sysOut.print("C: ");
+                    userInput = sysIn.readLine();
+                }
+                serverWriter.write(userInput, 0, userInput.length()); //Writing to server
+                serverWriter.newLine();
+                serverWriter.flush();
+                tryRead = true;
+                //Prepare for multi-line response if list, or retr
+                if (userInput.equalsIgnoreCase("list") ||
+                        (userInput.length() >= 4 && userInput.substring(0, 4).equalsIgnoreCase("retr")) ||
+                        (userInput.length() >= 4 && userInput.substring(0, 3).equalsIgnoreCase("top"))) {
+                    multi = true;
+                }
+            }
             //Clean up all connection objects
             serverWriter.close();
             serverReader.close();
