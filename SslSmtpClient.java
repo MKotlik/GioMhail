@@ -17,7 +17,7 @@ public class SslSmtpClient {
         PrintStream sysOut = System.out; //Print to console
         SSLSocketFactory mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault(); //Get default SSL socket factory
         try {
-            SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket("smtp.mail.yahoo.com", 465); //create, connect, start handshake
+            SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket("smtp.live.com", 465); //create, connect, start handshake
             printSocketInfo(clientSocket); //Print connection info
             BufferedWriter serverWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())); //Write to server
             BufferedReader serverReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); //Read from server
@@ -27,18 +27,19 @@ public class SslSmtpClient {
             boolean tryRead = true; //Whether to read next line from serverReader (prevents blocking on multiline SMTP responses)
 
             //The below booleans, used to successully close the connection, might be unnecessary
-            boolean quitUser = false; //Whether the user has entered quit, might be unnecessary
             boolean openRead = true; //Whether serverReader is still open (serverInput != null)
             boolean openSocket = true; //Whether clientSocket is still open (clientSocket != null)
+            //boolean quitUser = false; //Whether the user has entered quit, might be unnecessary
 
             //SMTP input variables
             boolean sendingData = false;
             String cmdMode = "regular";
 
             //Main connection loop
-            while (openSocket && openRead && !quitUser) {
+            while (openSocket && openRead) {
                 if (clientSocket == null) { //Break if socket is closed
                     openSocket = false;
+                    sysOut.println("Connection closed unexpectedly.");
                     break;
                 }
                 //Display server response/message
@@ -56,12 +57,13 @@ public class SslSmtpClient {
                         tryRead = false;
                     }
                 }
-                //Exit client if 221 stream close msg received
-                if (serverInput != null && serverInput.substring(0, 3).equals("221")) {
-                    break;
-                }
                 //Exit client if connection lost/closed prematurely
                 if (openSocket == false || openRead == false) {
+                    sysOut.println("Connection closed unexpectedly.");
+                    break;
+                }
+                //Exit client if 221 stream close msg received
+                if (serverInput != null && serverInput.substring(0, 3).equals("221")) {
                     break;
                 }
                 //Enter data mode if data command sent and 354 confirmation received
