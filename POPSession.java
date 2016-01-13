@@ -10,10 +10,18 @@ public class POPSession {
     //Copy the variable declarations from SMTPConsole, you'll need all of them anyway
     //Just note that userInput and serverInput need to get defined separately in every method that would use them
     //As in, don't define them as globals
-    public int POPPort;
-    public String POPHost;
-    public BufferedWriter serverWriter;
-    public BufferedReader serverReader;
+    private String POPHost;
+    private int POPPort;
+
+    //Console communication
+    private static BufferedReader sysIn = new BufferedReader(new InputStreamReader(System.in)); //Read from console
+    private static PrintStream sysOut = System.out; //Print to console
+
+    //Socket-related
+    private SSLSocketFactory mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+    private SSLSocket secureSocket = null;
+    private BufferedReader serverReader = null; //Read from server
+    private BufferedWriter serverWriter = null; //Write to server
 
     public POPSession(int port, String host) {
         POPPort = port;
@@ -21,42 +29,30 @@ public class POPSession {
     }
 
     public boolean connect() {
-        //Modify this later, since variables will be declared as globals
-        //Only need to instantiate
-        SSLSocketFactory mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault(); //Get default SSL socket factory
+	SSLSocketFactory mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault(); //Get default SSL socket factory
         try {
-            SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket(POPHost, POPPort); //create, connect, start handshake
-            if (clientSocket == null) {
-                return false;
-            }
-            BufferedWriter serverWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())); //Write to server
-            BufferedReader serverReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); //Read from server
-            return true;
+            SSLSocket secureSocket = (SSLSocket) mainFactory.createSocket(POPHost, POPPort); //create, connect, start handshake
+            BufferedWriter serverWriter = new BufferedWriter(new OutputStreamWriter(secureSocket.getOutputStream())); //Write to server
+            BufferedReader serverReader = new BufferedReader(new InputStreamReader(secureSocket.getInputStream())); //Read from server
         } catch (IOException e) {
             System.err.println(e.toString());
             return false;
         }
-
+	return true;
     }
 
     //Use writeServer from SMTPConsole (copy the code) to send messages to server
     public boolean login(String user, String pass) {
         try {
             String serverInput = null;
-            serverWriter.write("user " + user, 0, 5 + user.length());
-            serverWriter.newLine();
-            serverWriter.flush();
+	    writeServer("user " + user);
             serverInput = serverReader.readLine();
-            if (!serverInput.substring(0, 3).equalsIgnoreCase("+OK")) {
+            if (! checkResponseCode(serverInput,"+OK")) {
                 return false;
             }
-            serverWriter.write("pass " + pass, 0, 5 + pass.length());
-            serverWriter.newLine();
-            serverWriter.flush();
-            serverWriter.flush();
+	    writeServer("pass " + pass);
             serverInput = serverReader.readLine();
-            //USE checkResponseCode from SMTPConsole
-            if (!serverInput.substring(0, 3).equalsIgnoreCase("+OK")) {
+            if (! checkResponseCode(serverInput,"+OK")) {
                 return false;
             }
             return true;
@@ -67,23 +63,53 @@ public class POPSession {
     }
 
     public int getMessageCount() {
-        //Returns number of messages in server mailbox (looks at number of latest message/last line of list)
+        writeServer("list");
+	String message=null;
+	boolean tryRead=true;
+	String serverInput=null;
+	try{
+	    while (tryRead) {
+		serverInput = serverReader.readLine();
+		if (serverInput == null) { //If serverReader gets closed/connection broken
+		    tryRead = false;
+		    break;
+		}
+		message+=serverInput;
+		if (serverInput.equals(".")) { //Check if multiline response
+		    tryRead = false;
+		} else {
+		    tryRead = true;
+		}
+	    }
+	}catch(IOException e){
+	    System.err.println(e.toString());
+	}
+	return message.charAt(4)-48;		
     }
 
-    //Actually just copy and modify the methods used in here,
-    //http://inetjava.sourceforge.net/lectures/part1_sockets/InetJava-1.8-Email-Examples.html
-    //It seems like this is actually good code. Just make sure that it functions correctly when you adapt it.
-
     public void close() {
-        //Close any sockets, printstreams, and bufferedreaders here
-        //Will need to encapsulate code in try block catching IOExceptions and printing to error
+	try{
+	    serverReader.close();
+	    serverWriter.close();
+	    secureSocket.close();
+	}catch(IOException e){
+	    System.err.println(e.toString());
+	}
     }
 
     private boolean checkResponseCode(String response, String code){
-        //Copy from SMTPConsole
+        return (response != null && response.length() >= 3 && response.substring(0,3).equals(code));
     }
 
     private boolean writeServer(String userLine){
-        //Copy from SMTPConsole
+        try {
+            serverWriter.write(userLine, 0, userLine.length()); //Writing to server
+            serverWriter.newLine();
+            serverWriter.flush();
+            return true;
+        } catch (IOException e) {
+            System.err.println(e.toString());
+            return false;
+        }
     }
 }
