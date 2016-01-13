@@ -43,51 +43,45 @@ public class POPSession {
 
     //Use writeServer from SMTPConsole (copy the code) to send messages to server
     public boolean login(String user, String pass) {
-        try {
             String serverInput = null;
 	    writeServer("user " + user);
-            serverInput = serverReader.readLine();
+            serverInput = read(false);
             if (! checkResponseCode(serverInput,"+OK")) {
                 return false;
             }
 	    writeServer("pass " + pass);
-            serverInput = serverReader.readLine();
+            serverInput = read(false);
             if (! checkResponseCode(serverInput,"+OK")) {
                 return false;
             }
             return true;
-        } catch (IOException e) {
-            System.err.println(e.toString());
-            return false;
-        }
     }
 
-    public int getMessageCount() {
+    public int getMessageCount() {//returns amount of messages in inbox
         writeServer("list");
-	String message=null;
-	boolean tryRead=true;
-	String serverInput=null;
-	try{
-	    while (tryRead) {
-		serverInput = serverReader.readLine();
-		if (serverInput == null) { //If serverReader gets closed/connection broken
-		    tryRead = false;
-		    break;
-		}
-		message+=serverInput;
-		if (serverInput.equals(".")) { //Check if multiline response
-		    tryRead = false;
-		} else {
-		    tryRead = true;
-		}
+	String serverInput=read(true);
+	int end=0;
+	for (int i=5;i<serverInput.length();i++){
+	    if (serverInput.substring(i,i+1).equals(" ")){
+		end =i;
 	    }
-	}catch(IOException e){
-	    System.err.println(e.toString());
 	}
-	return message.charAt(4)-48;		
+	return Integer.parseInt(serverInput.substring(5,end));
+    }
+    
+    public boolean delete(int messageNum){//deletes specified message
+	writeServer("dele "+messageNum);
+	String serverInput=read(false);
+	return checkResponseCode(serverInput, "+OK");
     }
 
-    public void close() {
+    public String retrieve(int messageNum){
+	writeServer("retr "+messageNum);
+	String message=read(true);
+	return message;
+    }
+	
+    public void close() {//closses all connections
 	try{
 	    serverReader.close();
 	    serverWriter.close();
@@ -97,11 +91,11 @@ public class POPSession {
 	}
     }
 
-    private boolean checkResponseCode(String response, String code){
+    private boolean checkResponseCode(String response, String code){//makes sure client is recieveing correct response
         return (response != null && response.length() >= 3 && response.substring(0,3).equals(code));
     }
 
-    private boolean writeServer(String userLine){
+    private boolean writeServer(String userLine){//writes specified userLine to the server
         try {
             serverWriter.write(userLine, 0, userLine.length()); //Writing to server
             serverWriter.newLine();
@@ -111,5 +105,32 @@ public class POPSession {
             System.err.println(e.toString());
             return false;
         }
+    }
+    public String read(boolean multi){//reads server responses, can read multiline or single line responses depending on value of multi
+	String message=null;
+	boolean tryRead=true;
+	String serverInput=null;
+	try{
+	    if (multi){
+		while (tryRead) {
+		    serverInput = serverReader.readLine();
+		    if (serverInput == null) { //If serverReader gets closed/connection broken
+			tryRead = false;
+			break;
+		    }
+		    message+=serverInput;
+		    if (serverInput.equals(".")) { //Check if multiline response
+			tryRead = false;
+		    } else {
+		    tryRead = true;
+		    }
+		}
+	    }else{
+		message=serverReader.readLine();
+	    }
+	}catch(IOException e){
+	    System.err.println(e.toString());
+	}
+	return message;
     }
 }
