@@ -1,0 +1,19 @@
+public class POP{
+    public int POP_Port;
+    public String host;
+    public POPSession(int port, String tHost){
+	POP_Port=port;
+	host=tHost;
+    }
+    public boolean connect(){
+	try {
+            SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket("pop.mail.yahoo.com", 995); //create, connect, start handshake
+            printSocketInfo(clientSocket); //Print connection info
+            BufferedWriter serverWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())); //Write to server
+            BufferedReader serverReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); //Read from server
+
+            String serverInput = null; //Stores latest line from server
+	}catch(IOException e){
+	    System.err.println(e.toString());
+	}
+    }
