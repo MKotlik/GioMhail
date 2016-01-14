@@ -245,7 +245,31 @@ public class SMTPConsole {
         }
     }
 
-    top
+    //Close all connections
+    private void close() {
+        try {
+            if (serverWriter != null) {
+                serverWriter.close();
+            }
+            if (serverReader != null) {
+                serverReader.close();
+            }
+            if (plainSocket != null) {
+                plainSocket.close();
+            }
+            if (secureSocket != null) {
+                secureSocket.close();
+            }
+            if (sysIn != null) {
+                sysIn.close();
+            }
+            if (sysOut != null) {
+                sysOut.close();
+            }
+        } catch (IOException e) {
+            System.err.println(e.toString());
+        }
+    }
 
     private static void printSocketInfo(SSLSocket s) {
         System.out.println("Socket class: " + s.getClass());

@@ -8,9 +8,6 @@ import java.net.*;
 import javax.net.ssl.*;
 
 public class POPSession {
-    //Copy the variable declarations from SMTPConsole, you'll need all of them anyway
-    //Just note that userInput and serverInput need to get defined separately in every method that would use them
-    //As in, don't define them as globals
     private String POPHost;
     private int POPPort;
 
@@ -25,8 +22,9 @@ public class POPSession {
     private BufferedWriter serverWriter = null; //Write to server
 
     //Debug Setting
-    boolean debug = true;
+    private boolean debugP = true; //print client updates to console
 
+    //Session constructor
     public POPSession(int port, String host) {
         POPPort = port;
         POPHost = host;
@@ -42,10 +40,7 @@ public class POPSession {
             serverWriter = new BufferedWriter(new OutputStreamWriter(secureSocket.getOutputStream()));
             serverReader = new BufferedReader(new InputStreamReader(secureSocket.getInputStream()));
             String serverInput = read(false);
-            if (! checkOK(serverInput)) {
-                return false;
-            }
-            return true;
+            return checkOK(serverInput);
         } catch (IOException e) {
             System.err.println(e.toString());
             return false;
@@ -57,22 +52,20 @@ public class POPSession {
         String serverInput = null;
         writeServer("user " + user);
         serverInput = read(false);
-        if (!checkResponseCode(serverInput, "+OK")) {
+        if (!checkOK(serverInput)) {
             return false;
         }
         writeServer("pass " + pass);
         serverInput = read(false);
-        if (!checkResponseCode(serverInput, "+OK")) {
-            return false;
-        }
-        return true;
+        return checkOK(serverInput);
     }
 
+    //This could probably be replaced by a different command, such as last or stat
     public int getMessageCount() {//returns amount of messages in inbox
         writeServer("list");
         String serverInput = read(true);
         int end = 0;
-        for (int i = 5; i < serverInput.length(); i++) {
+        for (int i = 4; i < serverInput.length(); i++) {
             if (serverInput.substring(i, i + 1).equals(" ")) {
                 end = i;
             }
@@ -83,7 +76,7 @@ public class POPSession {
     public boolean delete(int messageNum) {//deletes specified message
         writeServer("dele " + messageNum);
         String serverInput = read(false);
-        return checkResponseCode(serverInput, "+OK");
+        return checkOK(serverInput);
     }
 
     public String retrieve(int messageNum) {
@@ -101,9 +94,7 @@ public class POPSession {
             if (serverReader != null) {
                 serverReader.close();
             }
-            if (plainSocket != null) {
-                plainSocket.close();
-            }
+            //Note, no plainSocket for POP, only secureSocket
             if (secureSocket != null) {
                 secureSocket.close();
             }
@@ -160,12 +151,7 @@ public class POPSession {
                     }
                     message += serverInput;
                     //Check if multiline or if error
-                    if (serverInput.equals(".") ||
-                            checkResponseCode(serverInput, "-ERR")) {
-                        tryRead = false;
-                    } else {
-                        tryRead = true;
-                    }
+                    tryRead = !(serverInput.equals(".") || checkResponseCode(serverInput, "-ERR"));
                 }
             } else {
                 message = serverReader.readLine();
@@ -173,6 +159,7 @@ public class POPSession {
             return message;
         } catch (IOException e) {
             System.err.println(e.toString());
+            return null; //NOTE, implementations need to check that message is not null
         }
     }
 }

@@ -80,8 +80,9 @@ public class SslPopClient {
                 serverWriter.newLine();
                 serverWriter.flush();
                 tryRead = true;
-                //Prepare for multi-line response if list, or retr
+                //Prepare for multi-line response if list, uidl, retr, or top
                 if (userInput.equalsIgnoreCase("list") ||
+                        userInput.equalsIgnoreCase("uidl") ||
                         (userInput.length() >= 4 && userInput.substring(0, 4).equalsIgnoreCase("retr")) ||
                         (userInput.length() >= 4 && userInput.substring(0, 3).equalsIgnoreCase("top"))) {
                     multi = true;
