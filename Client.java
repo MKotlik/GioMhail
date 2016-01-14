@@ -16,8 +16,8 @@ public class Client{
 		if (userInput.equalsIgnoreCase("y")){
 		    mode="PROT_CHOOSE";
 		}if else(userInput.equalsIgnoreCase("exit")){
-		    quitUser=true;
-		}else{
+			quitUser=true;
+		    }else{
 		    sysOut.println("please enter valid text");
 		}
 	    }else if(mode.equals("PROT_CHOOSE")){
@@ -33,6 +33,19 @@ public class Client{
 		    sysOut.println("please enter valid text");
 		}
 	    }else if(mode.equals("SMTP_SETUP")){
-		sysOut.println("Please enter host and what port you would like to connect to, or enter back [back] to return to raed/send, or enter exit [exit] to exit");
-		
-		
+	    }
+	}else if(mode.equals("POP_SETUP")){
+	    sysOut.println("Please enter host and what port you would like to connect to, or enter back [back] to return to send/view, or enter exit [exit] to exit");
+	    userInput=sysIn.readLine();
+	    if(userInput.equalsIgnoreCase("back")){
+		mode="PROT_CHOOSE";
+	    }else if(userInput.equalsIgnoreCase("exit")){
+		quitUser=false;
+	    }else{
+		int space=findSpace(userInput);
+		POPSession POP=new POPSession(userInput.substring(0,space),userInput.substring(space+1,userInput.length()));
+		if(POP.connect()){
+		    mode="POP_LOGIN";
+		}
+	    }
+	}
