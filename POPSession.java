@@ -60,10 +60,25 @@ public class POPSession {
         return checkOK(serverInput);
     }
 
-    //This could probably be replaced by a different command, such as last or stat
+    public int unreadMessages(){
+	return getMessageCount()-getLastAccessedNumber();	
+    }
+
+    public int getLastAccessedNumber(){
+	writeServer("last");
+	String serverInput=read(false);
+	int end=0;
+        for (int i = 4; i < serverInput.length(); i++) {
+            if (serverInput.substring(i, i + 1).equals(" ")) {
+                end = i;
+            }
+        }
+        return Integer.parseInt(serverInput.substring(4, end));
+    }
+
     public int getMessageCount() {//returns amount of messages in inbox
-        writeServer("list");
-        String serverInput = read(true);
+        writeServer("stat");
+        String serverInput = read(false);
         int end = 0;
         for (int i = 4; i < serverInput.length(); i++) {
             if (serverInput.substring(i, i + 1).equals(" ")) {
@@ -79,6 +94,11 @@ public class POPSession {
         return checkOK(serverInput);
     }
 
+
+    public String getHeader(int messageNum){
+	writeServer("top "+messageNum+" 0");
+	String serverInput=read(true);
+    }
     public String retrieve(int messageNum) {
         writeServer("retr " + messageNum);
         String message = read(true);
