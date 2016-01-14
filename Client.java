@@ -46,6 +46,19 @@ public class Client{
 		POPSession POP=new POPSession(userInput.substring(0,space),userInput.substring(space+1,userInput.length()));
 		if(POP.connect()){
 		    mode="POP_LOGIN";
+		}else{
+		    sysOut("Connection failed, please try again");
 		}
+	    }
+	}else if(mode.equals("POP_LOGIN")){
+	    sysOut.println("please enter username and password or enter back [back] to go back or enter exit [exit] to exit");
+	    userInput=sysIn.readLine();
+	    if(userInput.equalsIgnoreCase("back")){
+		mode="POP_SETUP";
+	    }else if(userInput.equalsIgnoreCase("exit")){
+		quitUser=false;
+	    }else{
+		int space=findSpace(userInput);
+		POP.login(userInput.substring(0,space),userInput.substring(space+1,userInput.length()));
 	    }
 	}
