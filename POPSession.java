@@ -94,11 +94,26 @@ public class POPSession {
         return checkOK(serverInput);
     }
 
-
     public String getHeader(int messageNum){
 	writeServer("top "+messageNum+" 0");
 	String serverInput=read(true);
+	if (checkOK(serverInput)){
+	    return serverInput;
+	}else{
+	    writeServer("retr "+messageNum);
+	    serverInput=read(true);
+	    if (checkOK(serverInput)){
+		for(int i=0;i<serverInput.length();i++){
+		    if (serverInput.substring(i,i+1).equals("\n")){
+			return serverInput.substring(0,i);
+		    }
+		}
+	    }else{
+		return "fail";
+	    }
+	}
     }
+    
     public String retrieve(int messageNum) {
         writeServer("retr " + messageNum);
         String message = read(true);

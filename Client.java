@@ -35,7 +35,11 @@ public class Client{
 	    }else if(mode.equals("SMTP_SETUP")){
 	    }
 	}else if(mode.equals("POP_SETUP")){
+	    sysOut.println("Setup POP Session");
 	    sysOut.println("Please enter host and what port you would like to connect to, or enter back [back] to return to send/view, or enter exit [exit] to exit");
+	    sysOut.println("<host port>, [back], [exit]");
+	    sysOut.println();
+	    sysOut.println(">");
 	    userInput=sysIn.readLine();
 	    if(userInput.equalsIgnoreCase("back")){
 		mode="PROT_CHOOSE";
@@ -51,7 +55,11 @@ public class Client{
 		}
 	    }
 	}else if(mode.equals("POP_LOGIN")){
+	    sysOut.println("Login Screen");
 	    sysOut.println("please enter username and password or enter back [back] to go back or enter exit [exit] to exit");
+	    sysOut.println("<user pass>, [back], [exit]");
+	    sysOut.println();
+	    sysOut.println(">");
 	    userInput=sysIn.readLine();
 	    if(userInput.equalsIgnoreCase("back")){
 		mode="POP_SETUP";
@@ -62,3 +70,4 @@ public class Client{
 		POP.login(userInput.substring(0,space),userInput.substring(space+1,userInput.length()));
 	    }
 	}
+    }
