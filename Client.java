@@ -75,6 +75,14 @@ public class Client{
 		    sysOut("Login failed, please try again");
 		}
 	    }
+	}else if(mode.equals("POP_ACTIONS")){
+	    sysOut.println("Main POP Screen");
+	    sysOut.println("You have "+POP.unreadMessages()+" unread messages");
+	    printMessages();
+	    sysOut.println("Would you like to read [read + <number of message you want to read>], go back [back] or exit [exit]?");
+	    sysOut.println("[read <num>], [back], [exit]");
+	    sysOut.println();
+	    sysOut.println(">");
 	}
     }
     public int findSpace(String input){
@@ -84,5 +92,9 @@ public class Client{
 	    }
 	}
 	return -1;
+    }
+    public void printMessages(){
+	for (int i=POP.getMessageCount();i>-1;i--){
+	}
     }
 }
