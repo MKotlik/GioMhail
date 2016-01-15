@@ -44,7 +44,7 @@ public class SslPopClient {
                         sysOut.println(serverInput);
                         //Check for multiline response or error
                         if (serverInput.equals(".") ||
-                                (serverInput.length() >= 4 && serverInput.substring(0, 4).equals("-ERR"))) {
+                                (serverInput.length() >= 4 && serverInput.startsWith("-ERR"))) {
                             tryRead = false;
                         } else {
                             tryRead = true;
@@ -83,6 +83,8 @@ public class SslPopClient {
                 //Prepare for multi-line response if list, uidl, retr, or top
                 if (userInput.equalsIgnoreCase("list") ||
                         userInput.equalsIgnoreCase("uidl") ||
+                        userInput.equalsIgnoreCase("auth") ||
+                        (userInput.length() >= 4 && userInput.substring(0, 4).equalsIgnoreCase("capa")) ||
                         (userInput.length() >= 4 && userInput.substring(0, 4).equalsIgnoreCase("retr")) ||
                         (userInput.length() >= 4 && userInput.substring(0, 3).equalsIgnoreCase("top"))) {
                     multi = true;
