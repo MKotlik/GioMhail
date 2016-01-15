@@ -8,6 +8,7 @@ public class Client{
         PrintStream sysOut = System.out; //Print to console
 	boolean quitUser=false;
 	String mode="WELCOME";
+	POPSession POP;
 	while (! quitUser){
 	    if (mode.equals("WELCOME")){
 		sysOut.println("Welcome to GioMhail, your go to email client");
@@ -47,7 +48,7 @@ public class Client{
 		quitUser=false;
 	    }else{
 		int space=findSpace(userInput);
-		POPSession POP=new POPSession(userInput.substring(0,space),userInput.substring(space+1,userInput.length()));
+		POP=new POPSession(userInput.substring(0,space),userInput.substring(space+1,userInput.length()));
 		if(POP.connect()){
 		    mode="POP_LOGIN";
 		}else{
@@ -67,7 +68,21 @@ public class Client{
 		quitUser=false;
 	    }else{
 		int space=findSpace(userInput);
-		POP.login(userInput.substring(0,space),userInput.substring(space+1,userInput.length()));
+		if(POP.login(userInput.substring(0,space),userInput.substring(space+1,userInput.length()))){
+		    sysOut("Login succesful");
+		    mode="POP_ACTIONS";
+		}else{
+		    sysOut("Login failed, please try again");
+		}
 	    }
 	}
     }
+    public int findSpace(String input){
+	for (int i=0;i<input.length;i++){
+	    if (input.substring(i,i+1).equals(" ")){
+		return i;
+	    }
+	}
+	return -1;
+    }
+}
