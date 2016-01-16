@@ -1,6 +1,19 @@
+/* GioMhail by Coolgle
+ - POPConsole
+ - Copyright (c) 2016, Giovanni Topa and Mikhail Kotlik, All Rights Reserved.
+ - APCS Term 1 Final Project, Stuyvesant High School
+ */
+
 import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
+
+/* TODO
+ - Fix socket write error/exception on undetected inactivity timeout
+ - Rename to POPConsole
+ - Update code format
+ - Ask user for host address & port in main
+ */
 
 public class SslPopClient {
     public static void main(String[] args) {

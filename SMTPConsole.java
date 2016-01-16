@@ -1,7 +1,8 @@
-//GioMhail by Coolgle
-//Misha Kotlik & Gio Topa
-//SSLSocketClient test
-//Based on work of author attributed below
+/* GioMhail by Coolgle
+ - SMTPConsole
+ - Copyright (c) 2016, Giovanni Topa and Mikhail Kotlik, All Rights Reserved.
+ - APCS Term 1 Final Project, Stuyvesant High School
+ */
 
 /* SslSocketClient.java
  - Copyright (c) 2014, HerongYang.com, All Rights Reserved.

@@ -1,3 +1,9 @@
+/* GioMhail by Coolgle
+ - Client
+ - Copyright (c) 2016, Giovanni Topa and Mikhail Kotlik, All Rights Reserved.
+ - APCS Term 1 Final Project, Stuyvesant High School
+ */
+
 import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
