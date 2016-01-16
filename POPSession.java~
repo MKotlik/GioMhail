@@ -24,6 +24,7 @@
  - Modify all methods using read to support new return method
  */
 
+import java.util.*;
 import java.io.*;
 import java.net.*;
 import javax.net.ssl.*;
@@ -55,8 +56,8 @@ public class POPSession {
             secureSocket = (SSLSocket) mainFactory.createSocket(POPHost, POPPort);
             serverWriter = new BufferedWriter(new OutputStreamWriter(secureSocket.getOutputStream()));
             serverReader = new BufferedReader(new InputStreamReader(secureSocket.getInputStream()));
-            String serverInput = read(false);
-            return checkOK(serverInput);
+            ArrayList<String> serverInput = read(false);
+            return checkOK(serverInput.get(0));
         } catch (IOException e) {
             System.err.println(e.toString());
             return false;
@@ -89,8 +90,8 @@ public class POPSession {
             return false;
         }
         writeServer("AUTH PLAIN " + encodedPlain);
-        String serverInput = read(false);
-        return checkOK(serverInput); //Simplify as checkOK(read(false));
+        ArrayList<String> serverInput = read(false);
+        return checkOK(serverInput.get(0)); //Simplify as checkOK(read(false));
     }
 
     //Logs in using AUTH LOGIN
@@ -102,74 +103,73 @@ public class POPSession {
             return false;
         }
         writeServer("AUTH LOGIN"); //Confirm AUTH LOGIN capa, start login
-        String serverInput = read(false);
-        if (checkERR(serverInput)) { //ERR if unsupported
+        ArrayList<String> serverInput = read(false);
+        if (checkERR(serverInput.get(0))) { //ERR if unsupported
             return false;
         }
         writeServer(encodedLogin); //Send username
         serverInput = read(false);
-        if (checkERR(serverInput)) { //ERR if username in bad format
+        if (checkERR(serverInput.get(0))) { //ERR if username in bad format
             return false;
         }
         writeServer(encodedPass); //Send password
         serverInput = read(false);
         //Simplify as checkOK(read(false));
-        return checkOK(serverInput); //ERR if password in bad format or incorrect user/pass
+        return checkOK(serverInput.get(0)); //ERR if password in bad format or incorrect user/pass
     }
 
     //Logs in using unencrypted USER & PASS cmds
     private boolean loginUserPass(String user, String pass) {
         writeServer("USER " + user);
-        String serverInput = read(false);
-        if (checkERR(serverInput)) {
+        ArrayList<String> serverInput = read(false);
+        if (checkERR(serverInput.get(0))) {
             return false;
         }
         writeServer("PASS " + pass);
         serverInput = read(false);
-        return checkOK(serverInput);
+        return checkOK(serverInput.get(0));
     }
 
     public int getMessageCount() {//returns amount of messages in inbox
         writeServer("STAT");
-        String serverInput = read(false);
+        ArrayList<String> serverInput = read(false);
         int end = 0;
-        for (int i = 4; i < serverInput.length(); i++) {
-            if (serverInput.substring(i, i + 1).equals(" ")) {
+        for (int i = 4; i < serverInput.get(0).length(); i++) {
+            if (serverInput.get(0).substring(i, i + 1).equals(" ")) {
                 end = i;
             }
         }
-        return Integer.parseInt(serverInput.substring(4, end));
+        return Integer.parseInt(serverInput.get(0).substring(4, end));
     }
 
     public boolean delete(int messageNum) {//deletes specified message
         writeServer("DELE " + messageNum);
-        String serverInput = read(false);
-        return checkOK(serverInput);
+        ArrayList<String> serverInput = read(false);
+        return checkOK(serverInput.get(0));
     }
 
-    public String getHeader(int messageNum) {
+    public Header getHeader(int messageNum) {
         writeServer("TOP " + messageNum + " 0");
-        String serverInput = read(true);
-        if (checkOK(serverInput)) {
-            return serverInput;
+        ArrayList<String> serverInput = read(true);
+	if (checkOK(serverInput.get(0))){
+	    Header h=new Header(serverInput);
         } else {
             writeServer("RETR " + messageNum);
             serverInput = read(true);
-            if (checkOK(serverInput)) {
-                for (int i = 0; i < serverInput.length(); i++) {
-                    if (serverInput.substring(i, i + 1).equals("\n")) {
-                        return serverInput.substring(0, i);
-                    }
+            if (checkOK(serverInput.get(0))) {
+                for (int i = 0; i < serverInput.size(); i++) {
+                    if (serverInput.get(i).equals("\n")) {
+			serverInput=serverInput.removeRange(i,serverInput.size());
+                        Header h=new Header(serverInput);
+		    }
                 }
-            } else {
-                return "fail";
             }
         }
     }
 
-    public String retrieve(int messageNum) {
+    public ArrayList<String> retrieve(int messageNum) {
         writeServer("RETR " + messageNum);
-        String message = read(true);
+        ArrayList<String> message = read(true);
         return message;
     }
 
@@ -228,8 +228,8 @@ public class POPSession {
     }
 
     //reads server responses, can read multiline or single line responses depending on value of multi
-    private String read(boolean multi) {
-        String message = null;
+    private ArrayList<String> read(boolean multi) {
+        ArrayList<String> message = new ArrayList();
         boolean tryRead = true;
         String serverInput = null;
         try {
@@ -240,12 +240,12 @@ public class POPSession {
                         tryRead = false;
                         break;
                     }
-                    message += serverInput;
+                    message.add(serverInput);
                     //Check if multiline or if error
                     tryRead = !(serverInput.equals(".") || checkERR(serverInput));
                 }
             } else {
-                message = serverReader.readLine();
+                message.add(serverReader.readLine());
             }
             return message;
         } catch (IOException e) {

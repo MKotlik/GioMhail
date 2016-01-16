@@ -166,7 +166,13 @@ public class POPSession {
             }
         }
     }
-
+    public ArrayList<Header> getHeaderList(int numMessages){
+	ArrayList<Header> inbox=new ArrayList();
+	for(int i=getMessageCount()-numMessages;i<=getMessageCount();i++){
+	    inbox.add(getHeader(i));
+	}
+	return inbox;
+    }
     public ArrayList<String> retrieve(int messageNum) {
         writeServer("RETR " + messageNum);
         ArrayList<String> message = read(true);
