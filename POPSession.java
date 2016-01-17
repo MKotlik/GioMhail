@@ -19,13 +19,17 @@
 
    MAJOR:
    - Create new class Session, transfer common SMTP & POP methods/variables to it
-   - Create new class Header, acting as container for message header
-   - Create new class Message, acting as container for a Header obj and body
+   - [DONE] Create new class Header, acting as container for message header
+   - [DONE] Create new class Message, acting as container for a Header obj and body
    - [DONE] Modify retrieve & getHeader to return a Message and a Header respectively
    - [DONE] Create getHeaderList and getMessageList to return ArrayList<Header> and ArrayList<Messages>
    - [DONE] Modify read to return ArrayList<String>
    - [DONE] Modify all methods using read to support new return method
 */
+
+/* CODE Structure
+
+ */
 
 import java.util.*;
 import java.io.*;
