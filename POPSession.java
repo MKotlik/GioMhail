@@ -153,25 +153,25 @@ public class POPSession {
         return checkOK(serverInput.get(0));
     }
 
-    //Returns ArrayList of the latest numMessages of Headers
-    public ArrayList<Header> getHeaderList(int numMessages) {
+    //Returns ArrayList of the latest numMessages of HeaderStores
+    public ArrayList<HeaderStore> getHeaderStoreList(int numMessages) {
         int totalMsgs = getMessageCount();
-        return getHeaderList(totalMsgs - numMessages, totalMsgs);
+        return getHeaderStoreList(totalMsgs - numMessages, totalMsgs);
     }
 
-    //Returns ArrayList of Headers between minMsg and maxMsg, inclusive
-    public ArrayList<Header> getHeaderList(int minMsg, int maxMsg) {
-        ArrayList<Header> HeaderList = new ArrayList<Header>();
+    //Returns ArrayList of HeaderStores between minMsg and maxMsg, inclusive
+    public ArrayList<HeaderStore> getHeaderStoreList(int minMsg, int maxMsg) {
+        ArrayList<HeaderStore> HeaderStoreList = new ArrayList<HeaderStore>();
         for (int i = minMsg; i <= maxMsg; i++) {
-            HeaderList.add(getHeader(i));
+            HeaderStoreList.add(getHeaderStore(i));
         }
-        return HeaderList;
+        return HeaderStoreList;
     }
 
-    //Gets and returns a Header object for an email by num in inbox
+    //Gets and returns a HeaderStore object for an email by num in inbox
     //Attempts to use TOP, then RETR
     //Returns null if error
-    public Header getHeader(int messageNum) {
+    public HeaderStore getHeaderStore(int messageNum) {
         //Attempt TOP for header
         writeServer("TOP " + messageNum + " 0");
         ArrayList<String> serverInput = read(true);
@@ -179,9 +179,9 @@ public class POPSession {
             return null; //Return null if error in read
         }
         if (checkOK(serverInput.get(0))) { //If TOP supported, create Header object
-            trimHeader(serverInput);
-            Header retHeader = new Header(serverInput);
-            return retHeader;
+            trimHeaders(serverInput);
+            HeaderStore retHeaderStore = new HeaderStore(serverInput);
+            return retHeaderStore;
         } else { //Use RETR if TOP unsupported by server
             //Attempt RETR for header
             writeServer("RETR " + messageNum);
@@ -190,9 +190,9 @@ public class POPSession {
                 return null; //Return null if error in read
             }
             if (checkOK(serverInput.get(0))) {
-                trimHeader(serverInput);
-                Header retHeader = new Header(serverInput);
-                return retHeader;
+                trimHeaders(serverInput);
+                HeaderStore retHeaderStore = new HeaderStore(serverInput);
+                return retHeaderStore;
             } else {
                 return null; //Return null if TOP and RETR failed. Client must check.
             }
@@ -202,7 +202,7 @@ public class POPSession {
     //Trims TOP & RETR responses down to the header
     //Removes +OK lines and any lines following last header attribute
     //Should just modify the argument, with no need for returning
-    private void trimHeader(ArrayList<String> longResponse) {
+    private void trimHeaders(ArrayList<String> longResponse) {
         //Trim first line if +OK ...
         if (longResponse.get(0).startsWith("+OK")) {
             longResponse.remove(0);
@@ -212,7 +212,7 @@ public class POPSession {
         boolean trimmed = false;
         while (!trimmed && i < longResponse.size() - 1) {
             if (longResponse.get(i).equals("\n") || longResponse.get(i).equals("\r\n")) {
-                longResponse.removeRange(i, longResponse.size());
+                longResponse.subList(i, longResponse.size()).clear();
                 trimmed = true;
             }
             i++;
