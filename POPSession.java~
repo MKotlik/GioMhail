@@ -9,19 +9,22 @@
  - [DONE] private boolean UserPassLogin()
  - [DONE] Modify login() to reflect changes
  - [DONE] public boolean isConnected() (based on isClosed of socket)
- - public boolean disconnect() (convert from close())
+ - [DONE] public boolean disconnect() (convert from close())
  - public boolean reconnect() ??? (rather than making new socket, call connect() and handshake() on existing?)
+ - Implememt server connection checks in write/read functions
+ - Implement exception throwing/catching (needs to work with Client's simplified error output)
  - [DONE] remove sysIn and sysOut
  - Comment all methods (at least w/ function headers)
  - organize code (group methods)
 
  MAJOR:
  - Create new class Session, transfer common SMTP & POP methods/variables to it
- - Create new class Headers, acting as container for message headers
- - Create new class Message, acting as container for a Headers obj and body
- - Modify retrieve & getHeader to return a Message and a Headers respectively
- - Modify read to return String array or arrayList
- - Modify all methods using read to support new return method
+ - Create new class Header, acting as container for message header
+ - Create new class Message, acting as container for a Header obj and body
+ - [DONE] Modify retrieve & getHeader to return a Message and a Header respectively
+ - [DONE] Create getHeaderList and getMessageList to return ArrayList<Header> and ArrayList<Messages>
+ - [DONE] Modify read to return ArrayList<String>
+ - [DONE] Modify all methods using read to support new return method
  */
 
 import java.util.*;
@@ -74,7 +77,7 @@ public class POPSession {
     public boolean login(String user, String pass) {
         if (AuthPlain(user, pass)) {
             return true; //else if AUTH PLAIN unsupported
-        } else if (AuthLogin(user, pass)){
+        } else if (AuthLogin(user, pass)) {
             return true; //else if AUTH LOGIN unsupported
         } else if (loginUserPass(user, pass)) {
             return true; //always works, true if user/pass combo correct
@@ -130,7 +133,8 @@ public class POPSession {
         return checkOK(serverInput.get(0));
     }
 
-    public int getMessageCount() {//returns amount of messages in inbox
+    //Uses STAT to get number of messages in inbox
+    public int getMessageCount() {
         writeServer("STAT");
         ArrayList<String> serverInput = read(false);
         int end = 0;
@@ -142,39 +146,136 @@ public class POPSession {
         return Integer.parseInt(serverInput.get(0).substring(4, end));
     }
 
-    public boolean delete(int messageNum) {//deletes specified message
+    //Deletes a message specified by num in inbox
+    public boolean delete(int messageNum) {
         writeServer("DELE " + messageNum);
         ArrayList<String> serverInput = read(false);
         return checkOK(serverInput.get(0));
     }
 
+    //Returns ArrayList of the latest numMessages of Headers
+    public ArrayList<Header> getHeaderList(int numMessages) {
+        int totalMsgs = getMessageCount();
+        return getHeaderList(totalMsgs - numMessages, totalMsgs);
+    }
+
+    //Returns ArrayList of Headers between minMsg and maxMsg, inclusive
+    public ArrayList<Header> getHeaderList(int minMsg, int maxMsg) {
+        ArrayList<Header> HeaderList = new ArrayList<Header>();
+        for (int i = minMsg; i <= maxMsg; i++) {
+            HeaderList.add(getHeader(i));
+        }
+        return HeaderList;
+    }
+
+    //Gets and returns a Header object for an email by num in inbox
+    //Attempts to use TOP, then RETR
+    //Returns null if error
     public Header getHeader(int messageNum) {
+        //Attempt TOP for header
         writeServer("TOP " + messageNum + " 0");
         ArrayList<String> serverInput = read(true);
-	if (checkOK(serverInput.get(0))){
-	    Header h=new Header(serverInput);
-        } else {
+        if (serverInput = null) {
+            return null; //Return null if error in read
+        }
+        if (checkOK(serverInput.get(0))) { //If TOP supported, create Header object
+            trimHeader(serverInput);
+            Header retHeader = new Header(serverInput);
+            return retHeader;
+        } else { //Use RETR if TOP unsupported by server
+            //Attempt RETR for header
             writeServer("RETR " + messageNum);
             serverInput = read(true);
+            if (serverInput = null) {
+                return null; //Return null if error in read
+            }
             if (checkOK(serverInput.get(0))) {
-                for (int i = 0; i < serverInput.size(); i++) {
-                    if (serverInput.get(i).equals("\n")) {
-			serverInput=serverInput.removeRange(i,serverInput.size());
-                        Header h=new Header(serverInput);
-		    }
-                }
+                trimHeader(serverInput);
+                Header retHeader = new Header(serverInput);
+                return
+            } else {
+                return null; //Return null if TOP and RETR failed. Client must check.
             }
         }
     }
 
-    public ArrayList<String> retrieve(int messageNum) {
-        writeServer("RETR " + messageNum);
-        ArrayList<String> message = read(true);
-        return message;
+    //Trims TOP & RETR responses down to the header
+    //Removes +OK lines and any lines following last header attribute
+    //Should just modify the argument, with no need for returning
+    private void trimHeader(ArrayList<String> longResponse) {
+        //Trim first line if +OK ...
+        if (longResponse.get(0).startsWith("+OK")) {
+            longResponse.remove(0);
+        }
+        //Starting from first line/index, find blank line and remove all lines from it to end
+        int i = 0;
+        boolean trimmed = false;
+        while (!trimmed && i < longResponse.size() - 1) {
+            if (longResponse.get(i).equals("\n") || longResponse.get(i).equals("\r\n")) {
+                longResponse.removeRange(i, longResponse.size());
+                trimmed = true;
+            }
+            i++;
+        }
+        //Just in case, check if last line is "." and trim accordingly
+        if (longResponse.get(longResponse.size() - 1).equals(".")) {
+            longResponse.remove(longResponse.size() - 1);
+        }
     }
 
-    //Close all connections
-    public void close() {
+    //Returns ArrayList of the latest numMessages of Messages
+    public ArrayList<Message> getMessageList(int numMessages) {
+        int totalMsgs = getMessageCount();
+        return getMessageList(totalMsgs - numMessages, totalMsgs);
+    }
+
+    //Returns ArrayList of Messages between minMsg and maxMsg, inclusive
+    public ArrayList<Message> getMessageList(int minMsg, int maxMsg) {
+        ArrayList<Message> MessageList = new ArrayList<Message>();
+        for (int i = minMsg; i <= maxMsg; i++) {
+            MessageList.add(getMessage(i));
+        }
+        return MessageList;
+    }
+
+    //Returns Message object for email specified by messageNum using RETR
+    public Message getMessage(int messageNum) {
+        writeServer("RETR " + messageNum);
+        ArrayList<String> serverInput = read(true);
+        if (checkERR(serverInput.get(0))) {
+            return null; //return null if error in read/getting email
+        }
+        trimMessage(serverInput);
+        Message retEmail = new Message(serverInput);
+        return retEmail;
+    }
+
+    //Trims RETR response down to header attributes and message body
+    //Removes first +OK line and last . line
+    private void trimMessage(ArrayList<String> longMsg) {
+        if (longMsg.get(0).startsWith("+OK")) {
+            longMsg.remove(0);
+        }
+        if (longMsg.get(longMsg.size() - 1).equals(".")) {
+            longMsg.remove(longMsg.size() - 1);
+        }
+    }
+
+    //Send quit command, check response
+    //Close resources if true
+    public void disconnect() {
+        writeServer("QUIT");
+        ArrayList<String> serverInput = read(false);
+        if (checkOK(serverInput.get(0))) {
+            close();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //Close all connections/resources
+    private void close() {
         try {
             if (serverWriter != null) {
                 serverWriter.close();
@@ -191,15 +292,18 @@ public class POPSession {
         }
     }
 
-    private boolean checkResponseCode(String response, String code) {//makes sure client is recieveing correct response
+    //Checks server response code
+    private boolean checkResponseCode(String response, String code) {
         return (response != null && response.startsWith(code));
     }
 
-    private boolean checkOK(String response) { //Check if response starts with +OK
+    //Check if response starts with +OK
+    private boolean checkOK(String response) {
         return (response != null && response.startsWith("+OK"));
     }
 
-    private boolean checkERR(String response) { //Check if response starts with -ERR
+    //Check if response starts with -ERR
+    private boolean checkERR(String response) {
         return (response != null && response.startsWith("-ERR"));
     }
 
@@ -215,7 +319,8 @@ public class POPSession {
         }
     }
 
-    private boolean writeServer(String userLine) {//writes specified userLine to the server
+    //writes specified userLine to the server
+    private boolean writeServer(String userLine) {
         try {
             serverWriter.write(userLine, 0, userLine.length()); //Writing to server
             serverWriter.newLine();
@@ -227,9 +332,9 @@ public class POPSession {
         }
     }
 
-    //reads server responses, can read multiline or single line responses depending on value of multi
+    //Reads server response, returns ArrayList<String> with response lines
     private ArrayList<String> read(boolean multi) {
-        ArrayList<String> message = new ArrayList();
+        ArrayList<String> response = new ArrayList<String>();
         boolean tryRead = true;
         String serverInput = null;
         try {
@@ -239,18 +344,21 @@ public class POPSession {
                     if (serverInput == null) { //If serverReader gets closed/connection broken
                         tryRead = false;
                         break;
+                        //CHANGE to return null?
                     }
-                    message.add(serverInput);
+                    response.add(serverInput);
                     //Check if multiline or if error
                     tryRead = !(serverInput.equals(".") || checkERR(serverInput));
                 }
             } else {
-                message.add(serverReader.readLine());
+                response.add(serverReader.readLine());
+                //Modify this to return null if closed connection?
             }
-            return message;
+            return response;
         } catch (IOException e) {
             System.err.println(e.toString());
             return null; //NOTE, implementations need to check that message is not null
+            //Could also add "READ ERROR" to arraylist and check for that
         }
     }
 }

@@ -36,10 +36,10 @@ public class Header {
         String headerKey = "";
         String headerValue = "";
         for (int i = 0; i < HeaderLines.size(); i++) {
-            if (i = 0) { //Spec. case, start headerKey and headerValue lcl storage
+            if (i == 0) { //Spec. case, start headerKey and headerValue lcl storage
                 headerKey = findHeaderKey(HeaderLines.get(i));
                 headerValue = findHeaderValue(HeaderLines.get(i));
-            } else if (i = HeaderLines.size() - 1) { //Spec. case, always put prev. and/or new header key/value pair
+            } else if (i == HeaderLines.size() - 1) { //Spec. case, always put prev. and/or new header key/value pair
                 if (HeaderLines.get(i).startsWith(" ")) { //If continuation of multi-line headerValue
                     headerValue += HeaderLines.get(i).substring(1, HeaderLines.get(i).length()); //append to cur. value
                     setHeader(headerKey, headerValue); //Add pair to headerStore, or append to existing pair
@@ -90,7 +90,7 @@ public class Header {
     //Set/add header value for specified key
     public void setHeader(String headerKey, String headerValue) {
         if (headerStore.get(headerKey) == null) { //No values prev associated with headerKey
-            ArrayList<String> headerValueList = ArrayList<String>();
+            ArrayList<String> headerValueList = new ArrayList<String>();
             headerValueList.add(headerValue);
             headerStore.put(headerKey, headerValueList);
         } else { //headerKey already in headerStore
@@ -99,15 +99,27 @@ public class Header {
     }
 
     //Get value of To header
-    public void getTo() {}
+    public ArrayList<String> getTo() {
+	return getHeader("To");
+    }
     //Get value of From header
-    public void getFrom() {}
+    public ArrayList<String> getFrom() {
+	return getHeader("From");
+    }
     //Get value of Subject header
-    public void getSubject() {}
+    public ArrayList<String> getSubject() {
+	return getHeader("Subject");
+    }
     //Get value of Date header
-    public void getDate() {}
+    public ArrayList<String> getDate() {
+	return getHeader("Date");
+    }
     //Get value of CC header
-    public void getCC() {}
+    public ArrayList<String> getCC() {
+	return getHeader("CC");
+    }
     //Get value of BCC header
-    public void getBCC() {}
+    public ArrayList<String> getBCC() {
+	return getHeader("BCC");
+    }
 }

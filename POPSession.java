@@ -1,31 +1,31 @@
 /* GioMhail by Coolgle
- - Copyright (c) 2016, Giovanni Topa and Mikhail Kotlik, All Rights Reserved.
- - APCS Term 1 Final Project, Stuyvesant High School
- */
+   - Copyright (c) 2016, Giovanni Topa and Mikhail Kotlik, All Rights Reserved.
+   - APCS Term 1 Final Project, Stuyvesant High School
+*/
 
 /* TODO
- - [DONE] private boolean AuthPlain()
- - [DONE] private boolean AuthLogin()
- - [DONE] private boolean UserPassLogin()
- - [DONE] Modify login() to reflect changes
- - [DONE] public boolean isConnected() (based on isClosed of socket)
- - [DONE] public boolean disconnect() (convert from close())
- - public boolean reconnect() ??? (rather than making new socket, call connect() and handshake() on existing?)
- - Implememt server connection checks in write/read functions
- - Implement exception throwing/catching (needs to work with Client's simplified error output)
- - [DONE] remove sysIn and sysOut
- - Comment all methods (at least w/ function headers)
- - organize code (group methods)
+   - [DONE] private boolean AuthPlain()
+   - [DONE] private boolean AuthLogin()
+   - [DONE] private boolean UserPassLogin()
+   - [DONE] Modify login() to reflect changes
+   - [DONE] public boolean isConnected() (based on isClosed of socket)
+   - [DONE] public boolean disconnect() (convert from close())
+   - public boolean reconnect() ??? (rather than making new socket, call connect() and handshake() on existing?)
+   - Implememt server connection checks in write/read functions
+   - Implement exception throwing/catching (needs to work with Client's simplified error output)
+   - [DONE] remove sysIn and sysOut
+   - Comment all methods (at least w/ function headers)
+   - organize code (group methods)
 
- MAJOR:
- - Create new class Session, transfer common SMTP & POP methods/variables to it
- - Create new class Header, acting as container for message header
- - Create new class Message, acting as container for a Header obj and body
- - [DONE] Modify retrieve & getHeader to return a Message and a Header respectively
- - [DONE] Create getHeaderList and getMessageList to return ArrayList<Header> and ArrayList<Messages>
- - [DONE] Modify read to return ArrayList<String>
- - [DONE] Modify all methods using read to support new return method
- */
+   MAJOR:
+   - Create new class Session, transfer common SMTP & POP methods/variables to it
+   - Create new class Header, acting as container for message header
+   - Create new class Message, acting as container for a Header obj and body
+   - [DONE] Modify retrieve & getHeader to return a Message and a Header respectively
+   - [DONE] Create getHeaderList and getMessageList to return ArrayList<Header> and ArrayList<Messages>
+   - [DONE] Modify read to return ArrayList<String>
+   - [DONE] Modify all methods using read to support new return method
+*/
 
 import java.util.*;
 import java.io.*;
@@ -175,7 +175,7 @@ public class POPSession {
         //Attempt TOP for header
         writeServer("TOP " + messageNum + " 0");
         ArrayList<String> serverInput = read(true);
-        if (serverInput = null) {
+        if (serverInput == null) {
             return null; //Return null if error in read
         }
         if (checkOK(serverInput.get(0))) { //If TOP supported, create Header object
@@ -186,13 +186,13 @@ public class POPSession {
             //Attempt RETR for header
             writeServer("RETR " + messageNum);
             serverInput = read(true);
-            if (serverInput = null) {
+            if (serverInput == null) {
                 return null; //Return null if error in read
             }
             if (checkOK(serverInput.get(0))) {
                 trimHeader(serverInput);
                 Header retHeader = new Header(serverInput);
-                return
+                return retHeader;
             } else {
                 return null; //Return null if TOP and RETR failed. Client must check.
             }
@@ -263,7 +263,7 @@ public class POPSession {
 
     //Send quit command, check response
     //Close resources if true
-    public void disconnect() {
+    public boolean disconnect() {
         writeServer("QUIT");
         ArrayList<String> serverInput = read(false);
         if (checkOK(serverInput.get(0))) {
@@ -368,19 +368,19 @@ public class POPSession {
 //LAST is rarely supported by servers
 //No method of unread tracking unless client stores data locally
 
-    public int unreadMessages(){
-            return getMessageCount()-getLastAccessedNumber();
-    }
+public int unreadMessages(){
+return getMessageCount()-getLastAccessedNumber();
+}
 
-    public int getLastAccessedNumber(){
-        writeServer("last");
-        String serverInput=read(false);
-        int end=0;
-            for (int i = 4; i < serverInput.length(); i++) {
-                if (serverInput.substring(i, i + 1).equals(" ")) {
-                    end = i;
-                }
-            }
-            return Integer.parseInt(serverInput.substring(4, end));
-        }
- */
+public int getLastAccessedNumber(){
+writeServer("last");
+String serverInput=read(false);
+int end=0;
+for (int i = 4; i < serverInput.length(); i++) {
+if (serverInput.substring(i, i + 1).equals(" ")) {
+end = i;
+}
+}
+return Integer.parseInt(serverInput.substring(4, end));
+}
+*/
