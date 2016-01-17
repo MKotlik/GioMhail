@@ -1,0 +1,56 @@
++OK 3893 octets
+X-Apparently-To: giokotlik@yahoo.com; Thu, 14 Jan 2016 18:04:09 +0000
+Received-SPF: pass (domain of yahoo.com designates 98.138.229.144 as permitted sender)
+X-YMailISG: sXmGlvsWLDuhMKGNINaPZOrat1s6fwRd4LODkKJ0DRRcOigs
+ hNt7Z1hFXuYyHba0rYk3AzSBrX6L7IXCG3B9kdPFQFrHAIPXTEiP9k4sJr2O
+ YFpJaNKfmeMCswAhjl2ejP6InUjv_Ujo9UcSwBAoFQZ7vna3m1HbJ3zCHa8y
+ MxOZO9IxgFgRLg1y7YAAlMl0w0MVaxaf5BTsuGcsF5lOk5qnPMkROb5128Mg
+ x6n_aqze87ZNYRWRf.OknSIEocJoUBSamYdoOrTtr3n9Qu8hxiezm9TUiPLp
+ 3P_0UE793f_.1DfPkmzZLgqfKdP7esNY3yZdr2TptBhupv0z9uDzuiEjw789
+ waccs0GVJzdi5bdrY9EWz3eTYUV..LOHeb3kVgM04VFuHEIk4.iSePpzlY9x
+ wbGdzR.aG4zvuXEJ.5pzrhT7mnYav0FhcMCRXarCLJWyCKd2dHIXlqYlV259
+ mot.HyMz2ZpDW4ovzV6KzQ_lwkM5743ZHGA34jzqiL7XyNW9UXtwJmrdLzgH
+ gOiNj3r.h30zwcyyKAuQcQCLqpJKyTP1iTz3tO3plDYnLxW35B9JiX5C543B
+ pw9WD.rishs29VEWO1FzYb3_GqIB83mksSZQZEi_2uhajKuMZ4MZTVCXgH0N
+ tYimubFUFJ2h4sFyal2D.q247YAQPQu1woTwupO3Z0DcaQ32_UNhyHzgAfTC
+ iwhyRdKza8F1w6Do9CW50ugnRynz.yZP9SjCncICYB99loH6mjyFbM66ewn2
+ cLuNwRQak9ylfaRzMYi1.mmSlk6Z0XSFs.WnsY5SBqEqHXdrhK8ZwRqADKpr
+ vT1ynH9_oimjlCJis41WsGfaEryb0bq6RxvSl2ERq4mHeFPO98MVsa1kpNiV
+ rXgONc6FnqIfWuZHN2CyS11dmWjI7q_BLjdiknZxkoUXOCHev0IYDCIdGA5h
+ vvitRIzVX3XJbCirnW765FacsAJJsydZpaHoA8XemkW4ooMU3pKZxmdHpDgr
+ WLX8ZzQ4gow7AdCIe.oQuIFxKw28.CzARr3Gg4koytG5OEFncvBw_OCacN__
+ G8Y35eX95dxiO1AQI4PuM.hNW.AUuDEKqCUkn0XULm3LFKutMAlUMPKCriXq
+ hCtD3l8xRJJp1Sz1jQ4c6Q8Ezs1INg3JCst778byWH..l_qUkdIRKFahuOci
+ G85.QrEhZOvsyLZMdnSAkWeARXaguSbV8gSuMsS7yik0ZU3W.KmmGucUaZBy
+ 8nAYVBkk8Gb7iNk6sEYqVBZy0yLGKvmVK8UPT16W0.IezR526I6kvIuv15z_
+ t3Db.9WZQQniNvktxHOP.mOt7YZoOESYRfG2DvXnz89TKxcEHI7v0BvM2iaB
+ LcwsZvcYsy0KHPRJAause5Qply5H_VuV8Lhf5M13O2rOSCY9g_l8oXwpdwLc
+ xqpeo1l0KGyLPwVi_QLTZKo7XlZ2xsA-
+X-Originating-IP: [98.138.229.144]
+Authentication-Results: mta1027.mail.gq1.yahoo.com  from=yahoo.com; domainkeys=neutral (no sig);  from=yahoo.com; dkim=pass (ok)
+Received: from 127.0.0.1  (EHLO nm38-vm0.bullet.mail.ne1.yahoo.com) (98.138.229.144)
+  by mta1027.mail.gq1.yahoo.com with SMTPS; Thu, 14 Jan 2016 18:04:09 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=yahoo.com; s=s2048; t=1452794649; bh=B4Sdwm/LsvO9X1e98hS643RXXxvU5oFkgjJHmUF8s3k=; h=Date:From:To:Subject:From:Subject; b=E4nw1IusZAfdIy+MMzxvgmDMu7TezOKdXc6Wz3TpmHClR8nQEzMF6NzCrRdx/rBlWYHgithFxn4cFe+Dm44JF5cXOnPYp6emgZkgC44EfHoF4V+kMcTLnUoE0dSwHKVZoTRVpZ/xrsd5k7frEcSBp+E8dtc/xXn8SWA/dW9IGSXAReggfFDP3PGaV4Gc5twLozQjAs1EYytgpwkOxwh3XFBjsC9jWPo1x5a3sQq0Y2p7g4/Wbnv5AunTFmLmCN5igzb/YQEqE5ljjUqxgOrjlGCkxa1Ebo/JKMRGEw0CAmAvTf/RkaCBEx+pmtOmEcciKaTsEb50k4GK++J8Br9eHA==
+Received: from [127.0.0.1] by nm38.bullet.mail.ne1.yahoo.com with NNFMP; 14 Jan 2016 18:04:09 -0000
+Received: from [98.138.100.102] by nm38.bullet.mail.ne1.yahoo.com with NNFMP; 14 Jan 2016 18:01:07 -0000
+Received: from [98.138.84.42] by tm101.bullet.mail.ne1.yahoo.com with NNFMP; 14 Jan 2016 18:01:07 -0000
+Received: from [127.0.0.1] by smtp110.mail.ne1.yahoo.com with NNFMP; 14 Jan 2016 18:01:07 -0000
+X-Yahoo-Newman-Id: 877687.50344.bm@smtp110.mail.ne1.yahoo.com
+Message-ID: <877687.50344.bm@smtp110.mail.ne1.yahoo.com>
+Date: Thu, 14 Jan 2016 10:01:07 -0800 (PST)
+X-YMail-OSG: be_OMz8VM1lU_SOdSlj0p5mNjdOjhnxF0mEZjoIZCvI73Kl
+ CdazUwTGANfmWRj5KRrGCn6YlWCZXs1rXzpq5zGUl2oU77JwiUYJ9uXf8jEJ
+ vIKOcH9ceN5vcHnsyxM3SenDhNbUmHbZhXBXJvTZOzTGKLAT6dASQ569Hnav
+ PLuL.NXmj8SYAOf68xuPVE54mHe3c3AwjukJuMKWXyg3lD7xiSXbQJfsF9c.
+ 2mPRjsXOPXZ6aWhUpA6VzAA.qdcNnf76SEMtTGWLnxwCqsTMjMioNHdDKPEJ
+ 5g43ieaJGGRhprS1G9GFYL2nkjrZKBGU7Dn3hwmrveDj6mkiBEluQGpitIva
+ vXuzMu7jZe0BFW_ns2o7u9PXqVyOS9qUYfwDRFyTS1hlWU17InFfkYnpB5Iz
+ NGgL_.r25GihYm3vhsjN.I6Cf8PWH67kTno0KJcRUCVsG7KxGkrUppd9PSmS
+ .Vp881oGtxcDDDA9fyCQvg3Zyf0miOjK9CYG0cY65q1l4RUJTd87R4vlMeVe
+ uTWOOmwnF7lJGsAoMzRKeHmrCLMJV.w--
+X-Yahoo-SMTP: gMgCWJ2swBD.r3W1I8qm1II1rANI_A--
+From: Gio <giokotlik@yahoo.com>
+To: Gio <giokotlik@yahoo.com>
+Subject: LAST Command Test
+
+.
