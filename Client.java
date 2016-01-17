@@ -10,11 +10,13 @@
 */
 
 import java.io.*;
+import java.util.*;
 import java.net.*;
 import javax.net.ssl.*;
 
 public class Client {
     private Message message;
+    private HeaderStore header;
     
     public static void main(String[] args) {
         BufferedReader sysIn = new BufferedReader(new InputStreamReader(System.in)); //Read from console
@@ -35,7 +37,7 @@ public class Client {
 		    statusMsg="";
                 }
                 sysOut.print("|>");
-                userInput = sysIn.readLine();
+                String userInput = sysIn.readLine();
                 if (userInput.equalsIgnoreCase("y")) {
                     mode = "PROT_CHOOSE";
                 } else if (userInput.equalsIgnoreCase("exit")) {
@@ -44,43 +46,43 @@ public class Client {
                     statusMsg="Please enter a valid command!";
                 }
             } else if (mode.equals("PROT_CHOOSE")) {
-		sysOut.println("Welcome to GioMhail, your go-to email client!\n" +
+		System.out.println("Welcome to GioMhail, your go-to email client!\n" +
 			       "Would you like to read [read], send [send] or exit [exit]?\n" +
 			       "Cmds: [read], [send], [exit]");
 		if (! statusMsg.equals("")) {
-		    sysOut.println(statusMsg);
+		    System.out.println(statusMsg);
 		    statusMsg="";
 		}
-		sysOut.println("|>");
-		userInput = sysIn.readLine();
-		if (userInput.equalsIgnorecCase("send")) {
+		System.out.println("|>");
+		String userInput = sysIn.readLine();
+		if (userInput.equalsIgnoreCase("send")) {
 		    mode = "SMTP_SETUP";
-		} else if (userInput.equalsIgnorecCase("view")) {
+		} else if (userInput.equalsIgnoreCase("view")) {
 		    mode = "POP_SETUP";
-		} else if (userInput.equalsIgnorecCase("exit")) {
+		} else if (userInput.equalsIgnoreCase("exit")) {
                     quitUser = true;
 		} else {
 		    statusMsg="Please enter a valid command";
 		}
             } else if (mode.equals("SMTP_SETUP")) {
             }else if (mode.equals("POP_SETUP")) {
-		sysOut.println("Setup POP Session");
-		sysOut.println("Please enter host and what port you would like to connect to, or enter back [back] to return to send/view, or enter exit [exit] to exit");
-		sysOut.println("Cmds: <host port>, [back], [exit]");
-		sysOut.println("");
+		System.out.println("Setup POP Session");
+		System.out.println("Please enter port and what host you would like to connect to, or enter back [back] to return to send/view, or enter exit [exit] to exit");
+		System.out.println("Cmds: <port host>, [back], [exit]");
+		System.out.println("");
 		if (! statusMsg.equals("")) {
-		    sysOut.println(statusMsg);
+		    System.out.println(statusMsg);
 		    statusMsg="";
 		}
 		sysOut.println("|>");
-		userInput = sysIn.readLine();
+		String userInput = sysIn.readLine();
 		if (userInput.equalsIgnoreCase("back")) {
 		    mode = "PROT_CHOOSE";
 		} else if (userInput.equalsIgnoreCase("exit")) {
 		    quitUser = true;
 		} else {
 		    int space = findSpace(userInput);
-		    POP = new POPSession(userInput.substring(0, space), userInput.substring(space + 1, userInput.length()));
+		    POP = new POPSession(Integer.parseInt(userInput.substring(0, space)), userInput.substring(space + 1, userInput.length()));
 		    if (POP.connect()) {
 			mode = "POP_LOGIN";
 			POP.disconnect();
@@ -89,16 +91,16 @@ public class Client {
 		    }
 		}
 	    } else if (mode.equals("POP_LOGIN")) {
-		sysOut.println("Login Screen");
-		sysOut.println("please enter username and password or enter back [back] to go back or enter exit [exit] to exit");
-		sysOut.println("<user pass>, [back], [exit]");
-		sysOut.println();
+		System.out.println("Login Screen");
+		System.out.println("please enter username and password or enter back [back] to go back or enter exit [exit] to exit");
+		System.out.println("<user pass>, [back], [exit]");
+		System.out.println();
 		if (! statusMsg.equals("")) {
-		    sysOut.println(statusMsg);
+		    System.out.println(statusMsg);
 		    statusMsg="";
 		}
 		sysOut.println(">");
-		userInput = sysIn.readLine();
+		String userInput = sysIn.readLine();
 		if (userInput.equalsIgnoreCase("back")) {
 		    mode = "POP_LOGIN";
 		} else if (userInput.equalsIgnoreCase("exit")) {
@@ -106,8 +108,8 @@ public class Client {
 		} else {
 		    int space = findSpace(userInput);
 		    if (POP.connect()){
-			setUser(userInput.substring(0, space));
-			setPass(userInput.substring(space + 1, userInput.length()));
+			POP.setUser(userInput.substring(0, space));
+			POP.setPass(userInput.substring(space + 1, userInput.length()));
 			if (POP.login(POP.getUser(), POP.getPass())){
 			    mode = "POP_ACTIONS";
 			}else{
@@ -142,59 +144,65 @@ public class Client {
 		    statusMsg="";
 		}
 		sysOut.println("|>");
-		if (serverInput.equalsIgnoreCase("back")){
+		String userInput=sysIn.readLine();
+		if (userInput.equalsIgnoreCase("back")){
 		    mode="POP_SETUP";
-		}else if(serverInput.equalsIgnoreCase("exit")){
+		}else if(userInput.equalsIgnoreCase("exit")){
 		    quitUser=true;
 		}else{
 		    if(POP.connect()){
 			if (POP.login()){
-			    if(showInbox(serverInput)){
-				mode="POP_MESSAGE_SELECT";
-			    }else{
-				statusMsg="Please enter valid command";
-			    }
+			    ArrayList<HeaderStore> headers=POP.getHeaderStoreList(Integer.parseInt(userInput));
+			    printMessages(headers, Integer.parseInt(userInput));
+			    mode="POP_MESSAGE_SELECT";
 			}else{
 			    statusMsg="Login failed";
 			    mode="POP_LOGIN";
 			}
 			POP.disconnect();
 		    }else{
-			statusMs="Connection issues";
+			statusMsg="Connection issues";
 			mode="POP_SETUP";
 		    }
 		}
 	    }else if (mode.equals("POP_MESSAGE_SELECT")){
-		sysOut.println("Please enter number of message you want to read [<num less than number of messages you have>], back [back] or exit [exit]")
+		sysOut.println("Please enter number of message you want to read [<num less than number of messages you have>], back [back] or exit [exit]");
 		if (! statusMsg.equals("")) {
 		    sysOut.println(statusMsg);
 		    statusMsg="";
 		}
 		sysOut.println("|>");
-		if (serverInput.equalsIgnoreCase("back")){
+		String userInput=sysIn.readLine();
+		if (userInput.equalsIgnoreCase("back")){
 		    mode="POP_MAIN";
-		}else if(serverInput.equalsIgnoreCase("exit")){
+		}else if(userInput.equalsIgnoreCase("exit")){
 		    quitUser=true;
 		}else{
 		    if (POP.connect()){
 			if(POP.login()){
-			    message=POP.getMessage(serverInput);
+			    message=POP.getMessage(Integer.parseInt(userInput));
+			    header=message.getHeaderStore();
 			    mode="READ_MESSAGE";
 			}else{
-			    msgStatus="Login failed";
+			    statusMsg="Login failed";
 			    mode="POP_LOGIN";
 			}
 			POP.disconnect();
 		    }
 		}
 	    }else if(mode.equals("READ_MESSAGE")){
-		sysOut.println("Message\n");
+		System.out.println("Message\n");
 		printMessage();
-		sysOut.println("Enter back [back] or exit [exit] \n|>");
-		serverInput=sysIn.readLine();
-		if (serverInput.equalsIgnoreCase("back")){
+		System.out.println("Enter back [back] or exit [exit]");
+		if (! statusMsg.equals("")) {
+		    System.out.println(statusMsg);
+		    statusMsg="";
+		}
+		System.out.println("|>");
+		String userInput=sysIn.readLine();
+		if (userInput.equalsIgnoreCase("back")){
 		    mode="POP_MESSAGE_SELECTOR";
-		}else if(serverInput.equalsIgnoreCase("exit")){
+		}else if(userInput.equalsIgnoreCase("exit")){
 		    quitUser=true;
 		}else{
 		    statusMsg="Input valid command";
@@ -202,8 +210,8 @@ public class Client {
 	    }
 	}
     }
-    public int findSpace(String input){
-	for (int i = 0; i < input.length; i++) {
+    public static int findSpace(String input){
+	for (int i = 0; i < input.length(); i++) {
 	    if (input.substring(i, i + 1).equals(" ")) {
 		return i;
 	    }
@@ -211,9 +219,14 @@ public class Client {
 	return -1;
     }
     
-    public void printMessages() {
-	for (int i = POP.getMessageCount(); i > -1; i--) {
+    public static void printMessages(ArrayList<HeaderStore> headers, int num) {
+	for (int i = headers.size(); i > -1; i--) {
+	    System.out.println(i+" From: "+headers.get(i).getFrom()+"   Subject: "+headers.get(i).getSubject());
 	}
+    }
+    public static void printMessage() {
+	System.out.println("From: "+header.getFrom()+"\n"+"Subject: "+header.getSubject());
+	System.out.println(message.getMessageBody());
     }
 }
 
