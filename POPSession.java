@@ -35,7 +35,9 @@
  - delete
  */
 
-public class POPSession implements Session{
+import java.util.*;
+
+public class POPSession extends Session{
 
     //POPSession constructor
     public POPSession(int port, String host) {
