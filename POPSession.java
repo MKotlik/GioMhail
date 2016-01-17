@@ -133,7 +133,8 @@ public class POPSession {
         return checkOK(serverInput.get(0));
     }
 
-    public int getMessageCount() {//returns amount of messages in inbox
+    //Uses STAT to get number of messages in inbox
+    public int getMessageCount() {
         writeServer("STAT");
         ArrayList<String> serverInput = read(false);
         int end = 0;
@@ -145,10 +146,26 @@ public class POPSession {
         return Integer.parseInt(serverInput.get(0).substring(4, end));
     }
 
-    public boolean delete(int messageNum) {//deletes specified message
+    //Deletes a message specified by num in inbox
+    public boolean delete(int messageNum) {
         writeServer("DELE " + messageNum);
         ArrayList<String> serverInput = read(false);
         return checkOK(serverInput.get(0));
+    }
+
+    //Returns ArrayList of the lastet numMessages of Headers
+    public ArrayList<Header> getHeaderList(int numMessages) {
+        int totalMsgs = getMessageCount();
+        return getHeaderList(totalMsgs - numMessages, totalMsgs);
+    }
+
+    //Returns ArrayList of Headers between minMsg and maxMsg, inclusive
+    public ArrayList<Header> getHeaderList(int minMsg, int maxMsg) {
+        ArrayList<Header> HeaderList = new ArrayList<Header>();
+        for (int i = minMsg; i <= maxMsg; i++) {
+            HeaderList.add(getHeader(i));
+        }
+        return HeaderList;
     }
 
     //Gets and returns a Header object for an email by num in inbox
@@ -204,14 +221,6 @@ public class POPSession {
         if (longResponse.get(longResponse.size() - 1).equals(".")) {
             longResponse.remove(longResponse.size() - 1);
         }
-    }
-
-    public ArrayList<Header> getHeaderList(int numMessages) {
-        ArrayList<Header> inbox = new ArrayList<Header>();
-        for (int i = getMessageCount() - numMessages; i <= getMessageCount(); i++) {
-            inbox.add(getHeader(i));
-        }
-        return inbox;
     }
 
     //MODIFY THIS
