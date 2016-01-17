@@ -21,10 +21,10 @@
  - Create new class Session, transfer common SMTP & POP methods/variables to it
  - Create new class Header, acting as container for message header
  - Create new class Message, acting as container for a Header obj and body
- - Modify retrieve & getHeader to return a Message and a Header respectively
- - Create getHeaderList and getMessageList to return ArrayList<Header> and ArrayList<Messages>
- - Modify read to return ArrayList<String>
- - Modify all methods using read to support new return method
+ - [DONE] Modify retrieve & getHeader to return a Message and a Header respectively
+ - [DONE] Create getHeaderList and getMessageList to return ArrayList<Header> and ArrayList<Messages>
+ - [DONE] Modify read to return ArrayList<String>
+ - [DONE] Modify all methods using read to support new return method
  */
 
 import java.util.*;
@@ -153,7 +153,7 @@ public class POPSession {
         return checkOK(serverInput.get(0));
     }
 
-    //Returns ArrayList of the lastet numMessages of Headers
+    //Returns ArrayList of the latest numMessages of Headers
     public ArrayList<Header> getHeaderList(int numMessages) {
         int totalMsgs = getMessageCount();
         return getHeaderList(totalMsgs - numMessages, totalMsgs);
@@ -223,14 +223,42 @@ public class POPSession {
         }
     }
 
-    //MODIFY THIS
-    //Should send RETR + messageNum to server, save response to ArrayList
-    //Then use ArrayList to construct Message object
-    //Return Message object
-    public ArrayList<String> retrieve(int messageNum) {
+    //Returns ArrayList of the latest numMessages of Messages
+    public ArrayList<Message> getMessageList(int numMessages) {
+        int totalMsgs = getMessageCount();
+        return getMessageList(totalMsgs - numMessages, totalMsgs);
+    }
+
+    //Returns ArrayList of Messages between minMsg and maxMsg, inclusive
+    public ArrayList<Message> getMessageList(int minMsg, int maxMsg) {
+        ArrayList<Message> MessageList = new ArrayList<Message>();
+        for (int i = minMsg; i <= maxMsg; i++) {
+            MessageList.add(getMessage(i));
+        }
+        return MessageList;
+    }
+
+    //Returns Message object for email specified by messageNum using RETR
+    public Message getMessage(int messageNum) {
         writeServer("RETR " + messageNum);
-        ArrayList<String> message = read(true);
-        return message;
+        ArrayList<String> serverInput = read(true);
+        if (checkERR(serverInput.get(0))) {
+            return null; //return null if error in read/getting email
+        }
+        trimMessage(serverInput);
+        Message retEmail = new Message(serverInput);
+        return retEmail;
+    }
+
+    //Trims RETR response down to header attributes and message body
+    //Removes first +OK line and last . line
+    private void trimMessage(ArrayList<String> longMsg) {
+        if (longMsg.get(0).startsWith("+OK")) {
+            longMsg.remove(0);
+        }
+        if (longMsg.get(longMsg.size() - 1).equals(".")) {
+            longMsg.remove(longMsg.size() - 1);
+        }
     }
 
     public void disconnect() {
