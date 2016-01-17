@@ -9,7 +9,7 @@
  - [DONE] private boolean UserPassLogin()
  - [DONE] Modify login() to reflect changes
  - [DONE] public boolean isConnected() (based on isClosed of socket)
- - public boolean disconnect() (convert from close())
+ - [DONE] public boolean disconnect() (convert from close())
  - public boolean reconnect() ??? (rather than making new socket, call connect() and handshake() on existing?)
  - Implememt server connection checks in write/read functions
  - Implement exception throwing/catching (needs to work with Client's simplified error output)
@@ -207,15 +207,15 @@ public class POPSession {
         if (longResponse.get(0).startsWith("+OK")) {
             longResponse.remove(0);
         }
-        //Starting from last line/index, find blank line and remove all lines from it to end
-        int i = longResponse.size() - 1;
+        //Starting from first line/index, find blank line and remove all lines from it to end
+        int i = 0;
         boolean trimmed = false;
-        while (! trimmed && i > 0) {
+        while (!trimmed && i < longResponse.size() - 1) {
             if (longResponse.get(i).equals("\n") || longResponse.get(i).equals("\r\n")) {
                 longResponse.removeRange(i, longResponse.size());
                 trimmed = true;
             }
-            i--;
+            i++;
         }
         //Just in case, check if last line is "." and trim accordingly
         if (longResponse.get(longResponse.size() - 1).equals(".")) {
@@ -261,13 +261,21 @@ public class POPSession {
         }
     }
 
+    //Send quit command, check response
+    //Close resources if true
     public void disconnect() {
-        //Send quit command, check response
-        //Close resources if true
+        writeServer("QUIT");
+        ArrayList<String> serverInput = read(false);
+        if (checkOK(serverInput.get(0))) {
+            close();
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    //Close all connections
-    public void close() {
+    //Close all connections/resources
+    private void close() {
         try {
             if (serverWriter != null) {
                 serverWriter.close();
@@ -284,15 +292,18 @@ public class POPSession {
         }
     }
 
-    private boolean checkResponseCode(String response, String code) {//makes sure client is recieveing correct response
+    //Checks server response code
+    private boolean checkResponseCode(String response, String code) {
         return (response != null && response.startsWith(code));
     }
 
-    private boolean checkOK(String response) { //Check if response starts with +OK
+    //Check if response starts with +OK
+    private boolean checkOK(String response) {
         return (response != null && response.startsWith("+OK"));
     }
 
-    private boolean checkERR(String response) { //Check if response starts with -ERR
+    //Check if response starts with -ERR
+    private boolean checkERR(String response) {
         return (response != null && response.startsWith("-ERR"));
     }
 
@@ -308,7 +319,8 @@ public class POPSession {
         }
     }
 
-    private boolean writeServer(String userLine) {//writes specified userLine to the server
+    //writes specified userLine to the server
+    private boolean writeServer(String userLine) {
         try {
             serverWriter.write(userLine, 0, userLine.length()); //Writing to server
             serverWriter.newLine();
