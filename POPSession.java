@@ -40,8 +40,8 @@ import java.util.*;
 public class POPSession extends Session{
 
     //POPSession constructor
-    public POPSession(int port, String host) {
-        super(port, host);
+    public POPSession(String host, int port) {
+        super(host, port);
     }
 
     //-----Getting Header-----
@@ -73,7 +73,7 @@ public class POPSession extends Session{
         }
         if (checkOK(serverInput.get(0))) { //If TOP supported, create Header object
             trimHeaders(serverInput);
-            HeaderStore retHeaderStore = new HeaderStore(serverInput);
+            HeaderStore retHeaderStore = new HeaderStore(serverInput, messageNum);
             return retHeaderStore;
         } else { //Use RETR if TOP unsupported by server
             //Attempt RETR for header
@@ -84,7 +84,7 @@ public class POPSession extends Session{
             }
             if (checkOK(serverInput.get(0))) {
                 trimHeaders(serverInput);
-                HeaderStore retHeaderStore = new HeaderStore(serverInput);
+                HeaderStore retHeaderStore = new HeaderStore(serverInput, messageNum);
                 return retHeaderStore;
             } else {
                 return null; //Return null if TOP and RETR failed. Client must check.
@@ -141,7 +141,7 @@ public class POPSession extends Session{
             return null; //return null if error in read/getting email
         }
         trimMessage(serverInput);
-        Message retEmail = new Message(serverInput);
+        Message retEmail = new Message(serverInput, messageNum);
         return retEmail;
     }
 

@@ -26,6 +26,7 @@ import java.util.*;
 public class HeaderStore {
     //This should be private
     private HashMap<String, ArrayList<String>> headerMap;
+    private int messageNum; //The message number of the email in the inbox
 
     //Sending constructor
     public HeaderStore() {
@@ -36,6 +37,12 @@ public class HeaderStore {
     public HeaderStore(ArrayList<String> headerLines) {
         headerMap = new HashMap<String, ArrayList<String>>();
         fillHeaderStore(headerLines);
+    }
+
+    //Receiving Constructor + Message Number
+    public HeaderStore(ArrayList<String> headerLines, int msgNum) {
+        this(headerLines);
+        messageNum = msgNum;
     }
 
     //Fill in all header values from ArrayList<String> of HeaderStore output
@@ -90,7 +97,7 @@ public class HeaderStore {
 
     //Get ArrayList<String> containing header attributes for specified key
     //Returns null if no such headerKey in headerMap
-    public static ArrayList<String> getHeaderValue(String headerKey) {
+    public ArrayList<String> getHeaderValue(String headerKey) {
         return headerMap.get(headerKey);
     }
 
@@ -118,32 +125,42 @@ public class HeaderStore {
     //-----GET SHORTCUTS-----
 
     //Get value of To header
-    public static String getTo() {
+    public String getTo() {
         return getHeaderValue("To").get(0);
     }
 
     //Get value of From header
-    public static String getFrom() {
+    public String getFrom() {
         return getHeaderValue("From").get(0);
     }
 
     //Get value of Subject header
-    public static String getSubject() {
+    public String getSubject() {
         return getHeaderValue("Subject").get(0);
     }
 
     //Get value of Date header
-    public static String getDate() {
+    public String getDate() {
         return getHeaderValue("Date").get(0);
     }
 
     //Get value of CC header
-    public static String getCC() {
+    public String getCC() {
         return getHeaderValue("CC").get(0);
     }
 
     //Get value of BCC header
-    public static String getBCC() {
+    public String getBCC() {
         return getHeaderValue("BCC").get(0);
+    }
+
+    //-----Message Number-----
+
+    public int getMessageNum() {
+        return messageNum;
+    }
+
+    public void setMessageNum(int newMsgNum) {
+        messageNum = newMsgNum;
     }
 }

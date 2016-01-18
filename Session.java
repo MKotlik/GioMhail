@@ -46,9 +46,9 @@ public class Session {
     private boolean debugP = true; //print client updates to console
 
     //Session constructor
-    public Session(int port, String host) {
-        this.port = port;
+    public Session(String host, int port) {
         this.host = host;
+        this.port = port;
         user = "";
         pass = "";
         mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
@@ -90,7 +90,7 @@ public class Session {
     }
 
     //Close all connections/resources
-    private void close() {
+    public void close() {
         try {
             if (serverWriter != null) {
                 serverWriter.close();

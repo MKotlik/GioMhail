@@ -14,6 +14,7 @@ import java.util.*;
 public class Message {
     private HeaderStore messageHeaderStore; //HeaderStore for headers
     private String messageBody; //Actual message content
+    private int messageNum; //The message number of the email in the inbox
 
     //Sending constructor
     public Message() {
@@ -28,28 +29,36 @@ public class Message {
         fillMessage(messageLines);
     }
 
+    //Receiving constructor + messagen number
+    public Message(ArrayList<String> messageLines, int msgNum) {
+        this(messageLines);
+        messageNum = msgNum;
+        messageHeaderStore.setMessageNum(messageNum);
+    }
+
     //Fill messageHeaderStore and messageBody from trimmed output of RETR call
     public void fillMessage(ArrayList<String> messageLines) {
         int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
         for (int i = firstLine; i < messageLines.size(); i++) {
             messageBody += messageLines.get(i) + "\n"; //Add lines from ArrayList, appending \n
         }
-        ArrayList<String> headerLines = (ArrayList<String>) messageLines.subList(0, firstLine - 1);
+        ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
         messageHeaderStore = new HeaderStore(headerLines); //Create HeaderStore from headers in ArrayList
     }
 
     //Find the first blank like between the email headers and the body
     private int findBlankLine(ArrayList<String> messageLines) {
         for (int i = 0; i < messageLines.size(); i++) {
-            if (messageLines.get(i).equals("\n") || messageLines.get(i).equals("\r\n")) { //Blank line is \n or \r\n
+            if (messageLines.get(i).equals("")) { //Blank line
                 return i;
             }
         }
+        System.out.println(-1);
         return -1; //If blank line not found
     }
 
     //Get the message's HeaderStore
-    public static HeaderStore getHeaderStore() {
+    public HeaderStore getHeaderStore() {
         return messageHeaderStore;
     }
 
@@ -59,12 +68,22 @@ public class Message {
     }
 
     //Return the message body (no headers)
-    public static String getMessageBody() {
+    public String getMessageBody() {
         return messageBody;
     }
 
     //Set the message body
     public void setMessageBody(String newBody) {
         messageBody = newBody;
+    }
+
+    //-----Message Number-----
+
+    public int getMessageNum() {
+        return messageNum;
+    }
+
+    public void setMessageNum(int newMsgNum) {
+        messageNum = newMsgNum;
     }
 }
