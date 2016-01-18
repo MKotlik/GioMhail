@@ -49,7 +49,7 @@ public class Message {
     }
 
     //Get the message's HeaderStore
-    public HeaderStore getHeaderStore() {
+    public static HeaderStore getHeaderStore() {
         return messageHeaderStore;
     }
 
@@ -59,7 +59,7 @@ public class Message {
     }
 
     //Return the message body (no headers)
-    public String getMessageBody() {
+    public static String getMessageBody() {
         return messageBody;
     }
 
