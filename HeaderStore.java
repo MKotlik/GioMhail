@@ -105,6 +105,18 @@ public class HeaderStore {
         }
     }
 
+    //Get HashSet of all headerKeys
+    public HashSet getKeyHashSet() {
+        return (HashSet) headerMap.keySet();
+    }
+
+    //Get array of all headerKeys
+    public String[] getKeyArray() {
+        return (String[]) headerMap.keySet().toArray();
+    }
+
+    //-----GET SHORTCUTS-----
+
     //Get value of To header
     public String getTo() {
         return getHeaderValue("To").get(0);
