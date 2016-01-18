@@ -42,14 +42,16 @@ public class Session {
     private SSLSocket secureSocket = null;
     private BufferedReader serverReader = null; //Read from server
     private BufferedWriter serverWriter = null; //Write to server
+    private String protocol; //Protocol type
 
     //Debug Setting
     private boolean debugP = true; //print client updates to console
 
     //Session constructor
-    public Session(String host, int port) {
+    public Session(String host, int port, String prot) {
         this.host = host;
         this.port = port;
+        protocol = prot;
         user = "";
         pass = "";
         mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
@@ -62,10 +64,13 @@ public class Session {
         if ((port == 465) || (port == 995)) {
             // SSL/TLS port for SMTP or POP
             return secureConnect();
-        } else if ((port == 587) || (port == 2525) || (port == 25) || (port == 110)) {
-            //Unsec. SMTP (587, 2525, 25), POP (110)
-            return plainConnect();
-        } else { //Unsupported port
+        } else if ((port == 587) || (port == 2525) || (port == 25)) {
+            //Unsec. SMTP (587, 2525, 25)
+            return plainSMTPConnect();
+        } else if (port == 110){
+            //Unsec. POP (110)
+            return plainPOPConnect();
+        } else{ //Unsupported port
             return false;
         }
     }
@@ -77,6 +82,48 @@ public class Session {
             serverWriter = new BufferedWriter(new OutputStreamWriter(secureSocket.getOutputStream()));
             serverReader = new BufferedReader(new InputStreamReader(secureSocket.getInputStream()));
             ArrayList<String> serverInput = read(false);
+            if (protocol.equals("POP")) { //Connected to POP server
+                return checkOK(serverInput.get(0));
+            } else { //Connected to SMTP server
+                return checkResponseCode(serverInput.get(0), "220");
+            }
+        } catch (IOException e) {
+            System.err.println(e.toString());
+            return false;
+        }
+    }
+
+    private boolean plainPOPConnect() {
+        //Attempt to make plain socket & start TLS negotiation
+        try {
+            Socket plainSocket = new Socket(host, port);
+            serverReader = new BufferedReader(new InputStreamReader(plainSocket.getInputStream()));
+            serverWriter = new BufferedWriter(new OutputStreamWriter(plainSocket.getOutputStream()));
+            //Check for server greeting
+            ArrayList<String> serverInput = read(false);
+            if (!checkOK(serverInput.get(0))) { //If server didn't greet
+                return false;
+            }
+
+            //Send STARTTLS to server
+            writeServer("STARTTLS");
+            //Check for STARTTLS response
+            serverInput = read(false);
+            if (!checkOK(serverInput.get(0))) { //If server didn't accept STARTTLS
+                return false;
+            }
+
+            //Upgrade connection
+            secureSocket = (SSLSocket) mainFactory.createSocket(
+                    plainSocket,
+                    plainSocket.getInetAddress().getHostAddress(),
+                    plainSocket.getPort(),
+                    true);
+            serverReader = new BufferedReader(new InputStreamReader(secureSocket.getInputStream()));
+            serverWriter = new BufferedWriter(new OutputStreamWriter(secureSocket.getOutputStream()));
+
+            //Check if connected to server correctly
+            serverInput = read(false);
             return checkOK(serverInput.get(0));
         } catch (IOException e) {
             System.err.println(e.toString());
@@ -84,8 +131,8 @@ public class Session {
         }
     }
 
-    //Make an unsecured connection and attempt upgrade
-    private boolean plainConnect() {
+    //Make an unsecured SMTP connection and attempt upgrade
+    private boolean plainSMTPConnect() {
         //Attempt to make plain socket & start TLS negotiation
         try {
             Socket plainSocket = new Socket(host, port);
@@ -125,7 +172,7 @@ public class Session {
             //Send EHLO to server over upgraded connection
             writeServer("EHLO " + host);
             serverInput = read(false);
-            return checkResponseCode(serverInput.get(0), "220"); //Output whether connection success
+            return checkResponseCode(serverInput.get(0), "250"); //Output whether connection success
         } catch (IOException e) {
             System.err.println(e.toString());
             return false;

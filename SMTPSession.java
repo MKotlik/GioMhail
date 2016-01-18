@@ -10,7 +10,7 @@ public class SMTPSession extends Session {
 
     //SMTPSession constructor
     public SMTPSession(String host, int port) {
-        super(host, port);
+        super(host, port, "SMTP");
     }
 
 

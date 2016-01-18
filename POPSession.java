@@ -41,7 +41,7 @@ public class POPSession extends Session{
 
     //POPSession constructor
     public POPSession(String host, int port) {
-        super(host, port);
+        super(host, port, "POP");
     }
 
     //-----Getting Header-----
