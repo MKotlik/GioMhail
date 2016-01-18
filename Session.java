@@ -171,7 +171,7 @@ public class Session {
 
             //Send EHLO to server over upgraded connection
             writeServer("EHLO " + host);
-            serverInput = read(false);
+            serverInput = read(true); //EHLO has multiline capa output
             return checkResponseCode(serverInput.get(0), "250"); //Output whether connection success
         } catch (IOException e) {
             System.err.println(e.toString());
@@ -243,18 +243,27 @@ public class Session {
         }
     }
 
-    //Logs in using AUTH PLAIN
+    //Logs in using AUTH PLAIN (POP & SMTP)
+    //Returns true if AUTH PLAIN supported and user/pass correct
+    //Returns false if AUTH PLAIN unsupported or user/pass wrong
     private boolean AuthPlain(String user, String pass) {
         String encodedPlain = encodeBase64("\0" + user + "\0" + pass);
+        //DEBUG NOTE, I confirmed that this is encoding correctly, compared output to known Yahoo pass.
         if (encodedPlain.equals("ENCODING_ERROR")) {
             return false;
         }
         writeServer("AUTH PLAIN " + encodedPlain);
         ArrayList<String> serverInput = read(false);
-        return checkOK(serverInput.get(0)); //Simplify as checkOK(read(false));
+        if (protocol.equals("POP")) {
+            return checkOK(serverInput.get(0));
+        } else { //SMTP
+            return checkResponseCode(serverInput.get(0), "235"); //SMTP auth acceptance code is 235
+        }
     }
 
-    //Logs in using AUTH LOGIN
+    //Logs in using AUTH LOGIN (POP & SMTP)
+    //Returns true if AUTH LOGIN supported and user/pass correct
+    //Returns false if AUTH LOGIN unsupported or user/pass wrong
     private boolean AuthLogin(String user, String pass) {
         String encodedLogin = encodeBase64(user);
         String encodedPass = encodeBase64(pass);
@@ -264,21 +273,37 @@ public class Session {
         }
         writeServer("AUTH LOGIN"); //Confirm AUTH LOGIN capa, start login
         ArrayList<String> serverInput = read(false);
-        if (checkERR(serverInput.get(0))) { //ERR if unsupported
-            return false;
+        if (protocol.equals("POP")) {
+            if (checkERR(serverInput.get(0))) { //ERR if unsupported
+                return false;
+            }
+        } else { //SMTP
+            if (! checkResponseCode(serverInput.get(0), "334")) { //If not code 334, auth login unsupported
+                return false;
+            }
         }
         writeServer(encodedLogin); //Send username
         serverInput = read(false);
-        if (checkERR(serverInput.get(0))) { //ERR if username in bad format
-            return false;
+        if (protocol.equals("POP")) {
+            if (checkERR(serverInput.get(0))) { //ERR if username bad format
+                return false;
+            }
+        } else { //SMTP
+            if (! checkResponseCode(serverInput.get(0), "334")) { //If not code 334, username bad format
+                return false;
+            }
         }
         writeServer(encodedPass); //Send password
         serverInput = read(false);
         //Simplify as checkOK(read(false));
-        return checkOK(serverInput.get(0)); //ERR if password in bad format or incorrect user/pass
+        if (protocol.equals("POP")) {
+            return checkOK(serverInput.get(0));
+        } else { //SMTP
+            return checkResponseCode(serverInput.get(0), "235"); //SMTP auth acceptance code is 235
+        }
     }
 
-    //Logs in using unencrypted USER & PASS cmds
+    //Logs in using unencrypted USER & PASS cmds (POP)
     private boolean loginUserPass(String user, String pass) {
         writeServer("USER " + user);
         ArrayList<String> serverInput = read(false);
@@ -365,7 +390,12 @@ public class Session {
                     }
                     response.add(serverInput);
                     //Check if multiline or if error
-                    tryRead = !(serverInput.equals(".") || checkERR(serverInput));
+                    if (protocol.equals("POP")) {
+                        tryRead = !(serverInput.equals(".") || checkERR(serverInput));
+                    } else { //SMTP
+                        tryRead = serverInput.length() > 3 &&
+                                serverInput.substring(3, 4).equals("-"); //SMTP multiline responses have - after code
+                    }
                 }
             } else {
                 response.add(serverReader.readLine());

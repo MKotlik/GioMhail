@@ -44,7 +44,7 @@ public class Client {
         int viewMsgNum = 0; //Number of message to view
 
         POPSession POP = null;
-	SMTPSession SMTP = null;
+        SMTPSession SMTP = null;
         try {
             while (!quitUser) {
                 //Clear the screen
@@ -99,7 +99,9 @@ public class Client {
                     } else {
                         statusMsg = "Please enter a valid command!";
                     }
-                } else if (mode.equals("SMTP_SETUP")) { sysOut.println("GioMhail");
+                } else if (mode.equals("SMTP_SETUP")) {
+                    //--Print menu header
+                    sysOut.println("GioMhail");
                     sysOut.println("Menu Map: Welcome > Choose Read\\View > Send: Setup");
                     System.out.println("Send: Setup");
                     sysOut.println("");
@@ -136,7 +138,7 @@ public class Client {
                     } else {
                         statusMsg = "Please enter server address and port correctly (without brackets, with space).";
                     }
-		} else if (mode.equals("POP_SETUP")) {
+                } else if (mode.equals("POP_SETUP")) {
                     //--Print menu header
                     sysOut.println("GioMhail");
                     sysOut.println("Menu Map: Welcome > Choose Read\\View > Read: Setup");
@@ -175,7 +177,7 @@ public class Client {
                     } else {
                         statusMsg = "Please enter server address and port correctly (without brackets, with space).";
                     }
-		} else if (mode.equals("SMTP_LOGIN")) {
+                } else if (mode.equals("SMTP_LOGIN")) {
                     //--Print menu header
                     sysOut.println("GioMhail");
                     sysOut.println("Menu Map: Welcome > Choose Read\\View > Send: > Setup > Login");
@@ -189,7 +191,7 @@ public class Client {
                         System.out.println(statusMsg);
                         statusMsg = "";
                     }
-                    sysOut.print("|>"); //Prompt
+                    sysOut.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     //--Check user input
                     if (userInput.equalsIgnoreCase("back")) {
@@ -205,7 +207,7 @@ public class Client {
                             String pass = userInput.substring(spaceInd + 1, userInput.length());
                             SMTP.setUser(user);
                             SMTP.setPass(pass);
-                            if (SMTP.SMTPLogin()) { //Use login method spec. for POP, successful
+                            if (SMTP.SMTPLogin()) { //Use login method spec. for SMTP, successful
                                 mode = "SMTP_MAIN";
                             } else {
                                 statusMsg = "Login failed. Ensure correct username and password, then try again.";
@@ -263,6 +265,18 @@ public class Client {
                     } else { //Unrecognized format/cmd
                         statusMsg = "Please enter username and password correctly (without brackets, with space).";
                     }
+                } else if (mode.equals("SMTP_MAIN")) {
+                    //--Print menu header
+                    sysOut.println("GioMhail");
+                    sysOut.println("Menu Map: Welcome > Choose Read\\View > Send: > Setup > Login > Main");
+                    System.out.println("Send: Main Menu");
+                    sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
+                    sysOut.println(SMTP.getUser());
+                    sysOut.println("");
+                    String waitMsg = "Please Wait! Communicating with server...";
+                    sysOut.print(waitMsg);
+                    quitUser = true;
+                    //UNFINISHED CODE!!!!!!!!!!!!!!
                 } else if (mode.equals("POP_MAIN")) {
                     boolean connFailed = false; //Used to check for [y] after failed connection
                     //--Print menu header
