@@ -213,14 +213,6 @@ public class Session {
         pass = newPass;
     }
 
-    public String getHost(){
-	return host;
-    }
-
-    public int getPort(){
-	return port;
-    }
-    
     //-----RESPONSE CHECKING-----
 
     //Checks server response code
