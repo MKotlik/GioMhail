@@ -5,9 +5,9 @@
 */
 
 /* TODO
-   - Improve/finalize menu formats
+   - [DONE] Improve/finalize menu formats
    - [DONE] Add temporary Please Wait! messages
-   - Improve position of wait msgs (some are currently after prompt)
+   - [DONE] Improve position of wait msgs (some are currently after prompt)
    - [DONE] Fix list 2 arg reading
    - [DONE] Sanitize inputs with more than allowed # of args!!! (currently exception)
    - [DONE] Fix view cmd
