@@ -44,6 +44,7 @@ public class Client {
         int viewMsgNum = 0; //Number of message to view
 
         POPSession POP = null;
+	SMTPSession SMTP = null;
         try {
             while (!quitUser) {
                 //Clear the screen
@@ -98,9 +99,44 @@ public class Client {
                     } else {
                         statusMsg = "Please enter a valid command!";
                     }
-                } else if (mode.equals("SMTP_SETUP")) {
-                    //SMTP Setup Here
-                } else if (mode.equals("POP_SETUP")) {
+                } else if (mode.equals("SMTP_SETUP")) { sysOut.println("GioMhail");
+                    sysOut.println("Menu Map: Welcome > Choose Read\\View > Send: Setup");
+                    System.out.println("Send: Setup");
+                    sysOut.println("");
+                    System.out.println("Please enter the address and port of your SMTP server.");
+                    System.out.println("Cmds: <address port>, [back], [exit]");
+                    //NOTE: server info format should be address, then port (Misha)
+                    System.out.println("");
+                    if (!statusMsg.equals("")) { //Print statusMsg
+                        System.out.println(statusMsg);
+                        statusMsg = "";
+                    }
+                    sysOut.print("|> "); //Prompt
+                    String userInput = sysIn.readLine();
+                    //--Check user input
+                    if (userInput.equalsIgnoreCase("back")) {
+                        mode = "PROT_CHOOSE";
+                    } else if (userInput.equalsIgnoreCase("exit")) {
+                        quitUser = true;
+                    } else if (checkSpaces(1, userInput)) { //1 space, matches <address port> format
+                        int space = findSpace(userInput);
+                        String SMTPhost = userInput.substring(0, space); //address
+                        int SMTPPort = Integer.parseInt(userInput.substring(space + 1, userInput.length())); //port
+                        String waitMsg = "Please Wait! Communicating with server...";
+                        sysOut.print(waitMsg);
+                        SMTP = new SMTPSession(SMTPhost, SMTPPort); //New format is host then port
+                        if (SMTP.connect()) {
+                            mode = "SMTP_LOGIN";
+                            SMTP.disconnect(); //Disconnect (QUIT) successful connection
+                        } else {
+                            statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
+                            SMTP.close(); //Server resources might be open, so close()
+                        }
+                        eraseFromConsole(waitMsg);
+                    } else {
+                        statusMsg = "Please enter server address and port correctly (without brackets, with space).";
+                    }
+		} else if (mode.equals("POP_SETUP")) {
                     //--Print menu header
                     sysOut.println("GioMhail");
                     sysOut.println("Menu Map: Welcome > Choose Read\\View > Read: Setup");
@@ -138,6 +174,50 @@ public class Client {
                         eraseFromConsole(waitMsg);
                     } else {
                         statusMsg = "Please enter server address and port correctly (without brackets, with space).";
+                    }
+		} else if (mode.equals("SMTP_LOGIN")) {
+                    //--Print menu header
+                    sysOut.println("GioMhail");
+                    sysOut.println("Menu Map: Welcome > Choose Read\\View > Send: > Setup > Login");
+                    System.out.println("Send: Login");
+                    sysOut.println("Server: " + SMTP.getHost() + " | " + SMTP.getPort());
+                    sysOut.println("");
+                    System.out.println("Please enter username and password.");
+                    System.out.println("<user pass>, [back], [exit]");
+                    System.out.println("");
+                    if (!statusMsg.equals("")) { //print statusMsg
+                        System.out.println(statusMsg);
+                        statusMsg = "";
+                    }
+                    sysOut.print("|>"); //Prompt
+                    String userInput = sysIn.readLine();
+                    //--Check user input
+                    if (userInput.equalsIgnoreCase("back")) {
+                        mode = "SMTP_SETUP";
+                    } else if (userInput.equalsIgnoreCase("exit")) {
+                        quitUser = true;
+                    } else if (checkSpaces(1, userInput)) { //1 space, matches <user pass> format
+                        int spaceInd = findSpace(userInput);
+                        String waitMsg = "Please Wait! Communicating with server...";
+                        sysOut.print(waitMsg);
+                        if (SMTP.connect()) { //Successfully connected to server
+                            String user = userInput.substring(0, spaceInd);
+                            String pass = userInput.substring(spaceInd + 1, userInput.length());
+                            SMTP.setUser(user);
+                            SMTP.setPass(pass);
+                            if (SMTP.SMTPLogin()) { //Use login method spec. for POP, successful
+                                mode = "SMTP_MAIN";
+                            } else {
+                                statusMsg = "Login failed. Ensure correct username and password, then try again.";
+                            }
+                            SMTP.disconnect();
+                        } else {
+                            SMTP.close(); //Close just in case, but stay in this mode.
+                            statusMsg = "Connection failed. Please try again.";
+                        }
+                        eraseFromConsole(waitMsg);
+                    } else { //Unrecognized format/cmd
+                        statusMsg = "Please enter username and password correctly (without brackets, with space).";
                     }
                 } else if (mode.equals("POP_LOGIN")) {
                     //--Print menu header
