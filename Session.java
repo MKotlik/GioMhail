@@ -10,6 +10,7 @@
  - [DONE] Modify login
  - [DONE] Store user and pass
  - [DONE] Add user and pass methods
+ - Change API methods to return known String statuses based on errors/successes
  */
 
 /* CODE STRUCTURE
@@ -56,14 +57,75 @@ public class Session {
 
     //-----CONNECTION-----
 
-    //Secure connect and start handshake
+    //Connect to POP/SMTP server based on port
     public boolean connect() {
+        if ((port == 465) || (port == 995)) {
+            // SSL/TLS port for SMTP or POP
+            return secureConnect();
+        } else if ((port == 587) || (port == 2525) || (port == 25) || (port == 110)) {
+            //Unsec. SMTP (587, 2525, 25), POP (110)
+            return plainConnect();
+        } else { //Unsupported port
+            return false;
+        }
+    }
+
+    //Attempt to make secure SSL/TLS connection
+    private boolean secureConnect() {
         try {
             secureSocket = (SSLSocket) mainFactory.createSocket(host, port);
             serverWriter = new BufferedWriter(new OutputStreamWriter(secureSocket.getOutputStream()));
             serverReader = new BufferedReader(new InputStreamReader(secureSocket.getInputStream()));
             ArrayList<String> serverInput = read(false);
             return checkOK(serverInput.get(0));
+        } catch (IOException e) {
+            System.err.println(e.toString());
+            return false;
+        }
+    }
+
+    //Make an unsecured connection and attempt upgrade
+    private boolean plainConnect() {
+        //Attempt to make plain socket & start TLS negotiation
+        try {
+            Socket plainSocket = new Socket(host, port);
+            serverReader = new BufferedReader(new InputStreamReader(plainSocket.getInputStream()));
+            serverWriter = new BufferedWriter(new OutputStreamWriter(plainSocket.getOutputStream()));
+            //Check for server greeting
+            ArrayList<String> serverInput = read(false);
+            if (!checkResponseCode(serverInput.get(0), "220")) { //If server didn't greet
+                return false;
+            }
+
+            //Send HELO to server
+            writeServer("HELO " + host);
+            //Check for HELO response
+            serverInput = read(false);
+            if (!checkResponseCode(serverInput.get(0), "250")) { //Server didn't answer HELO correctly
+                return false;
+            }
+
+            //Send STARTTLS to server
+            writeServer("STARTTLS");
+            //Check for STARTTLS response
+            serverInput = read(false);
+            if (!checkResponseCode(serverInput.get(0), "220")) { //If server didn't accept STARTTLS
+                return false;
+            }
+
+            //Upgrade connection
+            secureSocket = (SSLSocket) mainFactory.createSocket(
+                    plainSocket,
+                    plainSocket.getInetAddress().getHostAddress(),
+                    plainSocket.getPort(),
+                    true);
+            serverReader = new BufferedReader(new InputStreamReader(secureSocket.getInputStream()));
+            serverWriter = new BufferedWriter(new OutputStreamWriter(secureSocket.getOutputStream()));
+
+            //Send EHLO to server over upgraded connection
+            writeServer("EHLO " + host);
+            serverInput = read(false);
+            return checkResponseCode(serverInput.get(0), "220"); //Output whether connection success
         } catch (IOException e) {
             System.err.println(e.toString());
             return false;
@@ -213,14 +275,14 @@ public class Session {
         pass = newPass;
     }
 
-    public String getHost(){
-	return host;
+    public String getHost() {
+        return host;
     }
 
-    public int getPort(){
-	return port;
+    public int getPort() {
+        return port;
     }
-    
+
     //-----RESPONSE CHECKING-----
 
     //Checks server response code

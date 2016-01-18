@@ -13,14 +13,19 @@
    - [DONE] Add menu map to top of all screens
    - [DONE] Make server info + username persistent on all relevant screens
    - [DONE] Add space after prompt
+
    - Fixed integer parsing attempts on non-integer args (bad input)
+   - Catch errors that are thrown in session methods.
+
    - Improve position of wait msgs (some are currently after prompt)
    - Make GioMhail logo persistent on all screens
    - Line up field separators in inbox (field separators should all be in pos after longest field content)
    - Have better, graphical dividers of menu parts
+
    - Turn client into an object based thing, instantiating the client and running methods in main
    - ^Make the variables instance or static variables
-   - Catch errors that are thrown in session methods.
+
+   - Change Client to read known String statuses based on errors/successes from Session API methods
 */
 
 import java.io.*;

@@ -51,7 +51,6 @@ public class SMTPConsole {
         } else {
             sysOut.println("Client ERROR: Incompatible port. Please use only 465 or 587.");
         }
-
         //Run main connection loop
     }
 
