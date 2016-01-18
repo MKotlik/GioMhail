@@ -8,12 +8,12 @@
    - Improve/finalize menu formats
    - [DONE] Add temporary Please Wait! messages
    - Improve position of wait msgs (some are currently after prompt)
-   - Fix list 2 arg reading
+   - [DONE] Fix list 2 arg reading
    - Sanitize inputs with more than allowed # of args!!! (currently exception)
    - [DONE] Fix view cmd
    - [DONE] Add menu map to top of all screens
    - Make GioMhail logo persistent on all screens
-   - Make server info + username persistent on all relevant screens
+   - [DONE] Make server info + username persistent on all relevant screens
    - [DONE] Add space after prompt
    - Line up field separators in inbox (field separators should all be in pos after longest field content)
 */
@@ -132,6 +132,7 @@ public class Client {
                     sysOut.println("GioMhail");
                     sysOut.println("Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login");
                     System.out.println("Read: Login");
+		    sysOut.println(POP.getHost()+" | "+POP.getPort());
                     sysOut.println("");
                     System.out.println("Please enter username and password.");
                     System.out.println("<user pass>, [back], [exit]");
@@ -140,7 +141,7 @@ public class Client {
                         System.out.println(statusMsg);
                         statusMsg = "";
                     }
-                    sysOut.print(">");
+                    sysOut.print("|>");
                     String userInput = sysIn.readLine();
                     if (userInput.equalsIgnoreCase("back")) {
                         mode = "POP_SETUP";
@@ -177,14 +178,16 @@ public class Client {
                     sysOut.println("GioMhail");
                     sysOut.println("Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login > Main");
                     System.out.println("Read: Main Menu");
+		    sysOut.println(POP.getHost()+" | "+POP.getPort());
+		    sysOut.println(POP.getUser());
                     sysOut.println("");
                     String waitMsg = "Please Wait! Communicating with server...";
                     sysOut.print(waitMsg);
                     if (POP.connect()) { //connection success
                         if (POP.POPLogin()) { //login success
                             msgCount = POP.getMessageCount();
-                            POP.disconnect();
                             eraseFromConsole(waitMsg);
+                            POP.disconnect();
                             sysOut.println("You have " + msgCount + " messages.");
                             //Should print out latest message summary (Num, Date, From, Subject) here
                             sysOut.println("How many messages would you like listed? [list <num>]");
@@ -238,6 +241,8 @@ public class Client {
                     sysOut.println("GioMhail");
                     sysOut.println("Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login > Menu > Inbox");
                     System.out.println("Read: Inbox");
+		    sysOut.println(POP.getHost()+" | "+POP.getPort());
+		    sysOut.println(POP.getUser());
                     sysOut.println("");
                     String waitMsg = "Please Wait! Communicating with server...";
                     sysOut.print(waitMsg);
@@ -290,9 +295,11 @@ public class Client {
                                     "Separate list and all numbers with spaces, and do not write brackets.";
                         } else { //Correct format
                             if (findSpace(userInput.substring(spaceInd1 + 1, userInput.length())) != -1) { //if two args
-                                int spaceInd2 = findSpace(userInput.substring(spaceInd1 + 1, userInput.length()));
+                                int spaceInd2 = findSpace(userInput.substring(spaceInd1 + 1, userInput.length()))+spaceInd1+1;
+				sysOut.println(spaceInd1);
+				sysOut.println(spaceInd2);
                                 minMsg = Integer.parseInt(userInput.substring(spaceInd1 + 1, spaceInd2)); //first arg
-                                maxMsg = Integer.parseInt(userInput.substring(spaceInd2, userInput.length())); //2nd arg
+                                maxMsg = Integer.parseInt(userInput.substring(spaceInd2 + 1, userInput.length())); //2nd arg
                                 //Sanitize minMsg and maxMsg, don't allow user to break with stupid things
                                 if (minMsg < 1) {
                                     minMsg = 1;
@@ -312,7 +319,7 @@ public class Client {
                                 if (maxMsg < minMsg) {
                                     maxMsg = msgCount;
                                 }
-                                mode = "POP_Inbox";
+                                mode = "POP_INBOX";
                             } else { //if 1 arg (list numMsgs)
                                 int numMsgs = Integer.parseInt(userInput.substring(spaceInd1 + 1, userInput.length()));
                                 //Sanitize numMsgs
@@ -347,6 +354,8 @@ public class Client {
                     sysOut.println("GioMhail");
                     sysOut.println("Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login > Menu > Inbox > View");
                     System.out.println("Read: View Message");
+		    sysOut.println(POP.getHost()+" | "+POP.getPort());
+		    sysOut.println(POP.getUser());
                     sysOut.println("");
                     String waitMsg = "Please Wait! Communicating with server...";
                     sysOut.print(waitMsg);
@@ -446,9 +455,13 @@ public class Client {
 
     public static void eraseFromConsole(String waitMsg) {
         String eraser = "";
+	String clearer = "";
         for (int i = 0; i < waitMsg.length(); i++) {
             eraser += "\b"; //Add backspace character
+	    clearer += " ";
         }
+        System.out.print(eraser);
+        System.out.print(clearer);
         System.out.print(eraser);
     }
 }

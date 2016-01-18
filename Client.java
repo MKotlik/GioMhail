@@ -9,10 +9,10 @@
    - [DONE] Add temporary Please Wait! messages
    - Improve position of wait msgs (some are currently after prompt)
    - [DONE] Fix list 2 arg reading
-   - Sanitize inputs with more than allowed # of args!!! (currently exception)
+   - [DONE] Sanitize inputs with more than allowed # of args!!! (currently exception)
    - [DONE] Fix view cmd
    - [DONE] Add menu map to top of all screens
-   - [DONE] Make GioMhail logo persistent on all screens
+   - Make GioMhail logo persistent on all screens
    - [DONE] Make server info + username persistent on all relevant screens
    - [DONE] Add space after prompt
    - Line up field separators in inbox (field separators should all be in pos after longest field content)
@@ -104,30 +104,34 @@ public class Client {
                     }
                     sysOut.print("|> ");
                     String userInput = sysIn.readLine();
-                    if (userInput.equalsIgnoreCase("back")) {
-                        mode = "PROT_CHOOSE";
-                    } else if (userInput.equalsIgnoreCase("exit")) {
-                        quitUser = true;
-                    } else {
-                        int space = findSpace(userInput);
-                        if (space == -1) { //Address and port unseparated
-                            statusMsg = "Please enter server address and port correctly (without brackets, with space).";
-                        } else {
-                            String POPhost = userInput.substring(0, space); //address
-                            int POPPort = Integer.parseInt(userInput.substring(space + 1, userInput.length())); //port
-                            String waitMsg = "Please Wait! Communicating with server...";
-                            sysOut.print(waitMsg);
-                            POP = new POPSession(POPhost, POPPort); //New format is host then port
-                            if (POP.connect()) {
-                                mode = "POP_LOGIN";
-                                POP.disconnect(); //Disconnect (QUIT) successful connection
-                            } else {
-                                statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
-                                POP.close(); //Server resources might be open, so close()
-                            }
-                            eraseFromConsole(waitMsg);
-                        }
-                    }
+		    if (checkInput(1, userInput)){
+			if (userInput.equalsIgnoreCase("back")) {
+			    mode = "PROT_CHOOSE";
+			} else if (userInput.equalsIgnoreCase("exit")) {
+			    quitUser = true;
+			} else {
+			    int space = findSpace(userInput);
+			    if (space == -1) { //Address and port unseparated
+				statusMsg = "Please enter server address and port correctly (without brackets, with space).";
+			    } else {
+				String POPhost = userInput.substring(0, space); //address
+				int POPPort = Integer.parseInt(userInput.substring(space + 1, userInput.length())); //port
+				String waitMsg = "Please Wait! Communicating with server...";
+				sysOut.print(waitMsg);
+				POP = new POPSession(POPhost, POPPort); //New format is host then port
+				if (POP.connect()) {
+				    mode = "POP_LOGIN";
+				    POP.disconnect(); //Disconnect (QUIT) successful connection
+				} else {
+				    statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
+				    POP.close(); //Server resources might be open, so close()
+				}
+				eraseFromConsole(waitMsg);
+			    }
+			}
+		    }else{
+			statusMsg = "Please enter a valid command!";
+		    }
                 } else if (mode.equals("POP_LOGIN")) {
                     sysOut.println("GioMhail");
                     sysOut.println("Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login");
@@ -143,36 +147,40 @@ public class Client {
                     }
                     sysOut.print("|>");
                     String userInput = sysIn.readLine();
-                    if (userInput.equalsIgnoreCase("back")) {
-                        mode = "POP_SETUP";
-                    } else if (userInput.equalsIgnoreCase("exit")) {
-                        quitUser = true;
-                    } else {
-                        int spaceInd = findSpace(userInput);
-                        if (spaceInd == -1) { //Address and port unseparated
-                            statusMsg = "Please enter username and password correctly (without brackets, with space).";
-                        } else {
-                            String waitMsg = "Please Wait! Communicating with server...";
-                            sysOut.print(waitMsg);
-                            if (POP.connect()) { //Successfully connected to server
-                                String user = userInput.substring(0, spaceInd);
-                                String pass = userInput.substring(spaceInd + 1, userInput.length());
-                                POP.setUser(user);
-                                POP.setPass(pass);
-                                if (POP.POPLogin()) { //Use login method spec. for POP, successful
-                                    mode = "POP_MAIN";
-                                } else {
-                                    statusMsg = "Login failed. Ensure correct username and password, then try again.";
-                                }
-                                POP.disconnect();
-                            } else {
-                                POP.close();
-                                statusMsg = "Connection failed. Please try again.";
-                                POP.close(); //Close just in case, but stay in this mode.
-                            }
-                            eraseFromConsole(waitMsg);
-                        }
-                    }
+		    if (checkInput(1, userInput)){
+			if (userInput.equalsIgnoreCase("back")) {
+			    mode = "POP_SETUP";
+			} else if (userInput.equalsIgnoreCase("exit")) {
+			    quitUser = true;
+			} else {
+			    int spaceInd = findSpace(userInput);
+			    if (spaceInd == -1) { //Address and port unseparated
+				statusMsg = "Please enter username and password correctly (without brackets, with space).";
+			    } else {
+				String waitMsg = "Please Wait! Communicating with server...";
+				sysOut.print(waitMsg);
+				if (POP.connect()) { //Successfully connected to server
+				    String user = userInput.substring(0, spaceInd);
+				    String pass = userInput.substring(spaceInd + 1, userInput.length());
+				    POP.setUser(user);
+				    POP.setPass(pass);
+				    if (POP.POPLogin()) { //Use login method spec. for POP, successful
+					mode = "POP_MAIN";
+				    } else {
+					statusMsg = "Login failed. Ensure correct username and password, then try again.";
+				    }
+				    POP.disconnect();
+				} else {
+				    POP.close();
+				    statusMsg = "Connection failed. Please try again.";
+				    POP.close(); //Close just in case, but stay in this mode.
+				}
+				eraseFromConsole(waitMsg);
+			    }
+			}
+		    }else{
+			statusMsg = "Please enter a valid command!";
+		    }
                 } else if (mode.equals("POP_MAIN")) {
                     msgCount = 0; //Needed for displaying messages in INBOX
                     sysOut.println("GioMhail");
@@ -215,28 +223,32 @@ public class Client {
                     }
                     sysOut.print("|> ");
                     String userInput = sysIn.readLine();
-                    if (userInput.equalsIgnoreCase("y")) {
-                        mode = "POP_MAIN";
-                    } else if (userInput.equalsIgnoreCase("back")) {
-                        mode = "POP_LOGIN";
-                    } else if (userInput.equalsIgnoreCase("exit")) {
-                        quitUser = true;
-                    } else if (userInput.length() > 3 && userInput.substring(0, 4).equalsIgnoreCase("list")) { //list cmd
-                        int spaceInd = findSpace(userInput);
-                        if (spaceInd == -1) { //List and number unseparated
-                            statusMsg = "Please enter list, followed by space, followed by number of messages to list.";
-                        } else { //Correct format
-                            int numMsgs = Integer.parseInt(userInput.substring(spaceInd + 1, userInput.length()));
-                            if (numMsgs > msgCount) {
-                                numMsgs = msgCount;
-                            }
-                            minMsg = msgCount - numMsgs + 1;
-                            maxMsg = msgCount;
-                            mode = "POP_INBOX";
-                        }
-                    } else {
-                        statusMsg = "Please enter a valid command!";
-                    }
+		    if (checkInput(1, userInput)){
+			if (userInput.equalsIgnoreCase("y")) {
+			    mode = "POP_MAIN";
+			} else if (userInput.equalsIgnoreCase("back")) {
+			    mode = "POP_LOGIN";
+			} else if (userInput.equalsIgnoreCase("exit")) {
+			    quitUser = true;
+			} else if (userInput.length() > 3 && userInput.substring(0, 4).equalsIgnoreCase("list")) { //list cmd
+			    int spaceInd = findSpace(userInput);
+			    if (spaceInd == -1) { //List and number unseparated
+				statusMsg = "Please enter list, followed by space, followed by number of messages to list.";
+			    } else { //Correct format
+				int numMsgs = Integer.parseInt(userInput.substring(spaceInd + 1, userInput.length()));
+				if (numMsgs > msgCount) {
+				    numMsgs = msgCount;
+				}
+				minMsg = msgCount - numMsgs + 1;
+				maxMsg = msgCount;
+				mode = "POP_INBOX";
+			    }
+			} else {
+			    statusMsg = "Please enter a valid command!";
+			}
+		    }else{
+			statusMsg = "Please enter a valid command!";
+		    }
                 } else if (mode.equals("POP_INBOX")) {
                     sysOut.println("GioMhail");
                     sysOut.println("Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login > Menu > Inbox");
@@ -289,67 +301,73 @@ public class Client {
                     } else if (userInput.equalsIgnoreCase("exit")) {
                         quitUser = true;
                     } else if (userInput.length() > 3 && userInput.substring(0, 4).equalsIgnoreCase("list")) { //list cmd
-                        int spaceInd1 = findSpace(userInput);
-                        if (spaceInd1 == -1) { //List and number unseparated
-                            statusMsg = "Please enter list command as: list <numMsgs> or list <minMsg> <maxMsg>.\n" +
+			if (checkInput(2, userInput)){
+			    int spaceInd1 = findSpace(userInput);
+			    if (spaceInd1 == -1) { //List and number unseparated
+				statusMsg = "Please enter list command as: list <numMsgs> or list <minMsg> <maxMsg>.\n" +
                                     "Separate list and all numbers with spaces, and do not write brackets.";
-                        } else { //Correct format
-                            if (findSpace(userInput.substring(spaceInd1 + 1, userInput.length())) != -1) { //if two args
-                                int spaceInd2 = findSpace(userInput.substring(spaceInd1 + 1, userInput.length()))+spaceInd1+1;
-				sysOut.println(spaceInd1);
-				sysOut.println(spaceInd2);
-                                minMsg = Integer.parseInt(userInput.substring(spaceInd1 + 1, spaceInd2)); //first arg
-                                maxMsg = Integer.parseInt(userInput.substring(spaceInd2 + 1, userInput.length())); //2nd arg
-                                //Sanitize minMsg and maxMsg, don't allow user to break with stupid things
-                                if (minMsg < 1) {
-                                    minMsg = 1;
-                                }
-                                if (minMsg > msgCount) {
-                                    minMsg = msgCount;
-                                }
-                                if (minMsg > maxMsg) {
-                                    minMsg = 1;
-                                }
-                                if (maxMsg < 1) {
-                                    maxMsg = 1;
-                                }
-                                if (maxMsg > msgCount) {
-                                    maxMsg = msgCount;
-                                }
-                                if (maxMsg < minMsg) {
-                                    maxMsg = msgCount;
-                                }
-                                mode = "POP_INBOX";
-                            } else { //if 1 arg (list numMsgs)
-                                int numMsgs = Integer.parseInt(userInput.substring(spaceInd1 + 1, userInput.length()));
-                                //Sanitize numMsgs
-                                if (numMsgs < 0) {
-                                    numMsgs = 0;
-                                }
-                                if (numMsgs > msgCount) {
-                                    numMsgs = msgCount;
-                                }
-                                minMsg = msgCount - numMsgs + 1;
-                                maxMsg = msgCount;
-                                mode = "POP_INBOX";
-                            }
-                        }
+			    } else { //Correct format
+				if (findSpace(userInput.substring(spaceInd1 + 1, userInput.length())) != -1) { //if two args
+				    int spaceInd2 = findSpace(userInput.substring(spaceInd1 + 1, userInput.length()))+spaceInd1+1;
+				    sysOut.println(spaceInd1);
+				    sysOut.println(spaceInd2);
+				    minMsg = Integer.parseInt(userInput.substring(spaceInd1 + 1, spaceInd2)); //first arg
+				    maxMsg = Integer.parseInt(userInput.substring(spaceInd2 + 1, userInput.length())); //2nd arg
+				    //Sanitize minMsg and maxMsg, don't allow user to break with stupid things
+				    if (minMsg < 1) {
+					minMsg = 1;
+				    }
+				    if (minMsg > msgCount) {
+					minMsg = msgCount;
+				    }
+				    if (minMsg > maxMsg) {
+					minMsg = 1;
+				    }
+				    if (maxMsg < 1) {
+					maxMsg = 1;
+				    }
+				    if (maxMsg > msgCount) {
+					maxMsg = msgCount;
+				    }
+				    if (maxMsg < minMsg) {
+					maxMsg = msgCount;
+				    }
+				    mode = "POP_INBOX";
+				} else { //if 1 arg (list numMsgs)
+				    int numMsgs = Integer.parseInt(userInput.substring(spaceInd1 + 1, userInput.length()));
+				    //Sanitize numMsgs
+				    if (numMsgs < 0) {
+					numMsgs = 0;
+				    }
+				    if (numMsgs > msgCount) {
+					numMsgs = msgCount;
+				    }
+				    minMsg = msgCount - numMsgs + 1;
+				    maxMsg = msgCount;
+				    mode = "POP_INBOX";
+				}
+			    }
+			}else{
+			    statusMsg = "Please enter a valid command!";
+			}			    
                     } else if (userInput.length() > 3 && userInput.substring(0, 4).equalsIgnoreCase("view")) {
-                        int spaceInd = findSpace(userInput);
-                        if (spaceInd == -1) { //View and number unseparated
-                            statusMsg = "Please enter view, followed by space, followed by the number of the message to view.";
-                        } else { //Proper format
-                            viewMsgNum = Integer.parseInt(userInput.substring(spaceInd + 1, userInput.length()));
-                            //Check that viewMsgNum is within range
-                            if (viewMsgNum < 1 || viewMsgNum > msgCount) { //If chosen msg is out of range
-                                statusMsg = "Please choose a message that is between 1 and " + msgCount + ", inclusive.";
-                            } else { //Number is in range
-                                mode = "POP_VIEW";
-                            }
-                        }
-                    } else { //unrecognized cmd
-                        statusMsg = "Please enter a valid command!";
-                    }
+			if (checkInput(1, userInput)){
+			    int spaceInd = findSpace(userInput);
+			    if (spaceInd == -1) { //View and number unseparated
+				statusMsg = "Please enter view, followed by space, followed by the number of the message to view.";
+			    } else { //Proper format
+				viewMsgNum = Integer.parseInt(userInput.substring(spaceInd + 1, userInput.length()));
+				//Check that viewMsgNum is within range
+				if (viewMsgNum < 1 || viewMsgNum > msgCount) { //If chosen msg is out of range
+				    statusMsg = "Please choose a message that is between 1 and " + msgCount + ", inclusive.";
+				} else { //Number is in range
+				    mode = "POP_VIEW";
+				}
+			    }
+			} else { //unrecognized cmd
+			    statusMsg = "Please enter a valid command!";
+			}
+		    }
                 } else if (mode.equals("POP_VIEW")) {
                     sysOut.println("GioMhail");
                     sysOut.println("Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login > Menu > Inbox > View");
@@ -408,18 +426,22 @@ public class Client {
                     } else if (userInput.equalsIgnoreCase("exit")) {
                         quitUser = true;
                     } else if (userInput.length() > 3 && userInput.substring(0, 4).equalsIgnoreCase("view")) {
-                        int spaceInd = findSpace(userInput);
-                        if (spaceInd == -1) { //View and number unseparated
-                            statusMsg = "Please enter view, followed by space, followed by the number of the message to view.";
-                        } else { //Proper format
-                            viewMsgNum = Integer.parseInt(userInput.substring(spaceInd + 1, userInput.length()));
-                            //Check that viewMsgNum is within range
-                            if (viewMsgNum < 1 || viewMsgNum > msgCount) { //If chosen msg is out of range
-                                statusMsg = "Please choose a message that is between 1 and " + msgCount + ", inclusive.";
-                            } else { //Number is in range
-                                mode = "POP_VIEW";
-                            }
-                        }
+			if (checkInput(1, userInput)){
+			    int spaceInd = findSpace(userInput);
+			    if (spaceInd == -1) { //View and number unseparated
+				statusMsg = "Please enter view, followed by space, followed by the number of the message to view.";
+			    } else { //Proper format
+				viewMsgNum = Integer.parseInt(userInput.substring(spaceInd + 1, userInput.length()));
+				//Check that viewMsgNum is within range
+				if (viewMsgNum < 1 || viewMsgNum > msgCount) { //If chosen msg is out of range
+				    statusMsg = "Please choose a message that is between 1 and " + msgCount + ", inclusive.";
+				} else { //Number is in range
+				    mode = "POP_VIEW";
+				}
+			    }
+			}else{
+			    statusMsg = "Please enter a valid command!";
+			}
                     } else { //unrecognized cmd
                         statusMsg = "Please enter a valid command!";
                     }
@@ -463,6 +485,15 @@ public class Client {
         System.out.print(eraser);
         System.out.print(clearer);
         System.out.print(eraser);
+    }
+    public static boolean checkInput(int maxSpaces, String input){
+	int numSpaces=0;
+	for (int i=0;i<input.length();i++){
+	    if (input.substring(i,i+1).equals(" ")){
+		numSpaces+=1;
+	    }
+	}
+	return numSpaces<=maxSpaces;
     }
 }
 
