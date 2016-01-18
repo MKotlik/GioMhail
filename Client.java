@@ -5,17 +5,22 @@
 */
 
 /* TODO
-   - [DONE] Improve/finalize menu formats
+   - Improve/finalize menu formats
    - [DONE] Add temporary Please Wait! messages
-   - [DONE] Improve position of wait msgs (some are currently after prompt)
    - [DONE] Fix list 2 arg reading
    - [DONE] Sanitize inputs with more than allowed # of args!!! (currently exception)
    - [DONE] Fix view cmd
    - [DONE] Add menu map to top of all screens
-   - Make GioMhail logo persistent on all screens
    - [DONE] Make server info + username persistent on all relevant screens
    - [DONE] Add space after prompt
+   - Fixed integer parsing attempts on non-integer args (bad input)
+   - Improve position of wait msgs (some are currently after prompt)
+   - Make GioMhail logo persistent on all screens
    - Line up field separators in inbox (field separators should all be in pos after longest field content)
+   - Have better, graphical dividers of menu parts
+   - Turn client into an object based thing, instantiating the client and running methods in main
+   - ^Make the variables instance or static variables
+   - Catch errors that are thrown in session methods.
 */
 
 import java.io.*;
@@ -134,7 +139,7 @@ public class Client {
                     sysOut.println("GioMhail");
                     sysOut.println("Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login");
                     System.out.println("Read: Login");
-                    sysOut.println(POP.getHost() + " | " + POP.getPort());
+                    sysOut.println("Server: " + POP.getHost() + " | " + POP.getPort());
                     sysOut.println("");
                     System.out.println("Please enter username and password.");
                     System.out.println("<user pass>, [back], [exit]");
@@ -432,6 +437,7 @@ public class Client {
                     }
                 } //Close pop_view
             } //Close while (!quitUser)
+            System.out.println(">>Goodbye!<<");
         } catch (IOException e) { //Close try
             System.out.println("ERROR: Houston, we have a broken console.");
         }
