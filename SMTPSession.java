@@ -27,7 +27,12 @@ public class SMTPSession extends Session {
 			writeServer("DATA");
 			serverInput=read(false).get(0);
 			if(checkResponseCode(serverInput, "354")){
-			    writeServer("Subject: "+header.getSubject()+"\n"+newMsg.getMessageBody());
+			    String head="";
+			    String[] headersAvailable=header.getKeyArray();
+			    for (int i=0;i<headerAvailable.length;i++){
+				head+=headerAvailable[i]+": "+header.getHeaderValue(headerAvailable[i])+"\n";
+			    }
+			    writeServer(head+newMsg.getMessageBody()+"\n.");
 			    serverInput=read(true).get(0);
 			    if(checkResponseCode(serverInput, "250")){
 				return "Mail sent";
