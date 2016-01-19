@@ -14,10 +14,8 @@
    - [DONE] Make server info + username persistent on all relevant screens
    - [DONE] Add space after prompt
 
-   - Fix integer parsing attempts on non-integer args (bad input)
+   - Fixed integer parsing attempts on non-integer args (bad input)
    - Catch errors that are thrown in session methods.
-
-   - Change all uses of sysOut to System.out, remove sysOut, and remove the try-catch
 
    - Improve position of wait msgs (some are currently after prompt)
    - Make GioMhail logo persistent on all screens
@@ -555,10 +553,19 @@ public class Client {
     }
 
     public static String getMessageSummary(HeaderStore msgHeader) {
-        int msgNum = msgHeader.getMessageNum();
-        String date = msgHeader.getDate();
-        String from = msgHeader.getFrom();
-        String subject = msgHeader.getSubject();
+        int msgNum = msgHeader.getMessageNum(); //this is alsways present
+        String date = msgHeader.getDate(); //may be null
+        if (date == null) {
+            date = "NO DATE";
+        }
+        String from = msgHeader.getFrom(); //may be null
+        if (from == null) {
+            from = "NO FROM ADDRESS";
+        }
+        String subject = msgHeader.getSubject(); //may be null
+        if (subject == null) {
+            subject = "NO SUBJECT";
+        }
         return msgNum + " | " + date + " | " + from + " | " + subject;
     }
 

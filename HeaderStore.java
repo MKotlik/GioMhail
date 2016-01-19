@@ -126,32 +126,50 @@ public class HeaderStore {
 
     //Get value of To header
     public String getTo() {
-        return getHeaderValue("To").get(0);
+        if (getHeaderValue("To") != null) {
+            return getHeaderValue("To").get(0);
+        }
+        return null;
     }
 
     //Get value of From header
     public String getFrom() {
-        return getHeaderValue("From").get(0);
+        if (getHeaderValue("From") != null) {
+            return getHeaderValue("From").get(0);
+        }
+        return null;
     }
 
     //Get value of Subject header
     public String getSubject() {
-        return getHeaderValue("Subject").get(0);
+        if (getHeaderValue("Subject") != null) {
+            return getHeaderValue("Subject").get(0);
+        }
+        return null;
     }
 
     //Get value of Date header
     public String getDate() {
-        return getHeaderValue("Date").get(0);
+        if (getHeaderValue("Date") != null) {
+            return getHeaderValue("Date").get(0);
+        }
+        return null;
     }
 
     //Get value of CC header
     public String getCC() {
-        return getHeaderValue("CC").get(0);
+        if (getHeaderValue("CC") != null) {
+            return getHeaderValue("CC").get(0);
+        }
+        return null;
     }
 
     //Get value of BCC header
     public String getBCC() {
-        return getHeaderValue("BCC").get(0);
+        if (getHeaderValue("BCC") != null) {
+            return getHeaderValue("BCC").get(0);
+        }
+        return null;
     }
 
     //-----Message Number-----
