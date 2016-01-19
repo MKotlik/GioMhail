@@ -9,6 +9,7 @@ import java.util.*;
  - [DONE] public HeaderStore getHeaderStore()
  - [DONE] public void setHeaderStore()
  - [DONE] Make variables private
+ - [DONE] Technically, the \n in the messageBody should be \r\n (CRLF)?
 */
 
 public class Message {
@@ -40,7 +41,7 @@ public class Message {
     public void fillMessage(ArrayList<String> messageLines) {
         int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
         for (int i = firstLine; i < messageLines.size(); i++) {
-            messageBody += messageLines.get(i) + "\n"; //Add lines from ArrayList, appending \n
+            messageBody += messageLines.get(i) + "\r\n"; //Add lines from ArrayList, appending \n
         }
         ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
         messageHeaderStore = new HeaderStore(headerLines); //Create HeaderStore from headers in ArrayList

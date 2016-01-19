@@ -5,9 +5,10 @@
 */
 
 /* TODO
+ - Complete all helper methods
  - Technically, the \n in the messageBody should be \r\n (CRLF)?
  - If a . is found in the messageBody, prepend it with ">", so that it doesn't break DATA
- - Also, techically in all classes that send to server, we should check afterwards that we don't get a 420 or 421
+ - Also, techically in all methods that send to server, we should check afterwards that we don't get a 420 or 421
     connection error. As in, we check the response code from the server, expecting a confirmation, but if we get one
     of those codes, we know we have a connection error and return as such.
  */

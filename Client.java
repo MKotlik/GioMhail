@@ -14,8 +14,10 @@
    - [DONE] Make server info + username persistent on all relevant screens
    - [DONE] Add space after prompt
 
-   - Fixed integer parsing attempts on non-integer args (bad input)
+   - Fix integer parsing attempts on non-integer args (bad input)
    - Catch errors that are thrown in session methods.
+
+   - Change all uses of sysOut to System.out, remove sysOut, and remove the try-catch
 
    - Improve position of wait msgs (some are currently after prompt)
    - Make GioMhail logo persistent on all screens
