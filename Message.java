@@ -10,6 +10,7 @@ import java.util.*;
  - [DONE] public void setHeaderStore()
  - [DONE] Make variables private
  - [DONE] Technically, the \n in the messageBody should be \r\n (CRLF)?
+ - Check messageBody for \r\n.\r\n, which will break DATA, and prepend with >
 */
 
 public class Message {
@@ -43,6 +44,7 @@ public class Message {
         for (int i = firstLine; i < messageLines.size(); i++) {
             messageBody += messageLines.get(i) + "\r\n"; //Add lines from ArrayList, appending \n
         }
+        cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
         ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
         messageHeaderStore = new HeaderStore(headerLines); //Create HeaderStore from headers in ArrayList
     }
@@ -76,7 +78,19 @@ public class Message {
     //Set the message body
     public void setMessageBody(String newBody) {
         messageBody = newBody;
+        cleanMsgBody();
     }
+
+    //Prevent DATA breaking on \r\n.\r\n
+    private void cleanMsgBody() {
+        int badPeriod = 0;
+        while ((badPeriod = messageBody.indexOf("\r\n.\r\n")) != -1) {
+            messageBody = messageBody.substring(0, badPeriod + 4) + ">" +
+                    messageBody.substring(badPeriod + 4, messageBody.length());
+        }
+    }
+
+    //
 
     //-----Message Number-----
 

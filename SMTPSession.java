@@ -5,8 +5,8 @@
 */
 
 /* TODO
- - Complete all helper methods
- - Technically, the \n in the messageBody should be \r\n (CRLF)?
+ - [DONE] Complete all helper methods
+ - [DONE] Technically, the \n in the messageBody should be \r\n (CRLF)?
  - If a . is found in the messageBody, prepend it with ">", so that it doesn't break DATA
  - Also, techically in all methods that send to server, we should check afterwards that we don't get a 420 or 421
     connection error. As in, we check the response code from the server, expecting a confirmation, but if we get one
@@ -27,6 +27,13 @@ public class SMTPSession extends Session {
     //Returns a String indicated an error or success
     //Possible error Strings: "NO FROM", "NO TO", "BAD FROM", "BAD TO", "MISMATCHED FROM", "DATA REFUSED", "BAD DATA"
     //On success, returns "SUCCESS"
+    //"NO FROM" or "NO TO" - headers missing. Client should ALWAYS prevent this from happening.
+    //"BAD FROM" - if brackets are not in <...> format
+    //"BAD TO" - if addresses are not in pairs of <...> brackets,
+    //"MISMATCHED FROM" - if header From address doesn't match the user/server combo
+    //^NOTE, when asking user for From Address, tell them it must match the address of their account on the server
+    //"DATA REFUSED" or "BAD DATA" - Server error?
+
     public String sendMessage(Message newMsg) {
         HeaderStore msgHeaders = newMsg.getHeaderStore();
         //Check presence of From and To headers
@@ -41,8 +48,8 @@ public class SMTPSession extends Session {
         if (from.equals("BAD FROM")) {
             return "BAD FROM";
         }
-        ArrayList<String> to = parseTo(msgHeaders.getTo());
-        if (to.get(0).equals("BAD TO")) {
+        ArrayList<String> toList = parseTo(msgHeaders.getTo());
+        if (toList.get(0).equals("BAD TO")) {
             return "BAD TO";
         }
 
@@ -60,8 +67,8 @@ public class SMTPSession extends Session {
         } //Otherwise, MAIL FROM accepted
 
         //Send RCPT TO(s)
-        for (int i = 0; i < to.size(); i++) {
-            writeServer("RCPT TO: " + to.get(i));
+        for (int i = 0; i < toList.size(); i++) {
+            writeServer("RCPT TO: " + toList.get(i));
             serverInput = read(false);
             if (!checkResponseCode(serverInput.get(0), "250")) { //If address not accepted
                 return "BAD TO"; //Bad To format (most likely error 501)
@@ -102,16 +109,34 @@ public class SMTPSession extends Session {
         return fromHeader.substring(bracket1Ind, bracket2Ind + 1);
     }
 
+    //This method parses the toHeader
+    //The header normally looks like: "Gio Topa <giotopa@gmail.com>, Gio Kotlik <giokotlik@yahoo.com>"
+    //Returns "BAD TO" as first element
+    //If the above condition isn't met, return "BAD TO" as first element of ArrayList
+    //Otherwise, add the addresses with the brackets to an ArrayList and return it
     private ArrayList<String> parseTo(String toHeader) {
-        //This method parses the toHeader
-        //The header normally looks like: "Gio Topa <giotopa@gmail.com>, Gio Kotlik <giokotlik@yahoo.com>"
-        //This function has to count the number of brackets. It has to be at least 2, and even.
-        //If the above condition isn't met, return "BAD TO" as first element of ArrayList or String[]
-        //Otherwise, add the addresses with the brackets to an ArrayList and return it
-        //Alternatively, could use a String[]
         ArrayList<String> toAddresses = new ArrayList<String>();
-        toAddresses.add("<aToAdress>");
-        toAddresses.add("<anotherToAdress>");
+        int LBrCount = countChar(toHeader, '<');
+        int RBrCount = countChar(toHeader, '>');
+        if ((LBrCount < 1) || (RBrCount < 1) || (LBrCount != RBrCount)) {
+            toAddresses.add("BAD TO");
+            return toAddresses;
+        }
+        String addressLine = toHeader;
+        for (int i = 0; i < LBrCount; i++) {
+            int bracket1Ind = addressLine.indexOf('<');
+            int bracket2Ind = addressLine.indexOf('>');
+            if (bracket2Ind <= bracket1Ind) {
+                toAddresses.add("BAD TO"); //Need this to insure always has 0 index
+                toAddresses.set(0, "BAD TO");
+                return toAddresses;
+            }
+            //Technically could check that there are at least 3 chars within all chars, and that there is a @
+            toAddresses.add(addressLine.substring(bracket1Ind, bracket2Ind + 1));
+            if (bracket2Ind != addressLine.length() - 1) { //If > isn't at the end
+                addressLine = addressLine.substring(bracket2Ind + 1, addressLine.length()); //Get string after >
+            }
+        }
         return toAddresses;
     }
 
@@ -119,7 +144,7 @@ public class SMTPSession extends Session {
     //0 if none
     private int countChar(String text, char target) {
         int count = 0;
-        for (int i = 0; i < text.length (); i++){
+        for (int i = 0; i < text.length(); i++) {
             if (text.charAt(i) == target) {
                 count++;
             }
