@@ -54,7 +54,8 @@ public class HeaderStore {
                 headerKey = findHeaderKey(HeaderLines.get(i));
                 headerValue = findHeaderValue(HeaderLines.get(i));
             } else if (i == HeaderLines.size() - 1) { //Spec. case, always put prev. and/or new header key/value pair
-                if (HeaderLines.get(i).startsWith(" ")) { //If continuation of multi-line headerValue
+                if (HeaderLines.get(i).startsWith(" ") ||
+                        HeaderLines.get(i).startsWith("\t")) { //If continuation of multi-line headerValue
                     headerValue += HeaderLines.get(i).substring(1, HeaderLines.get(i).length()); //append to cur. value
                     setHeader(headerKey, headerValue); //Add pair to headerMap, or append to existing pair
                 } else { //If new header attribute
@@ -64,7 +65,8 @@ public class HeaderStore {
                     setHeader(headerKey, headerValue); //Put new header key/value pair in headerMap
                 }
             } else { //Any line but first and last
-                if (HeaderLines.get(i).startsWith(" ")) { //If continuation of multi-line headerValue
+                if (HeaderLines.get(i).startsWith(" ") ||
+                        HeaderLines.get(i).startsWith("\t")) { //If continuation of multi-line headerValue
                     headerValue += HeaderLines.get(i).substring(1, HeaderLines.get(i).length()); //append to cur. value
                 } else { //If new header attribute
                     setHeader(headerKey, headerValue); //Put old header key/value pair in store

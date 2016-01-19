@@ -86,12 +86,20 @@ public class SMTPSession extends Session {
         }
     }
 
+    //This method parses the fromHeader
+    //The header normally looks like: "Misha Kotlik <mikekotlik@gmail.com>"
+    //This function has to count the number of brackets. If it doesn't match 2, return "BAD FROM"
+    //Otherwise,  the address with the brackets
     private String parseFrom(String fromHeader) {
-        //This method parses the fromHeader
-        //The header normally looks like: "Misha Kotlik <mikekotlik@gmail.com>"
-        //This function has to count the number of brackets. If it doesn't match 2, return "BAD FROM"
-        //Otherwise,  the address with the brackets
-        return "<fromAdress>";
+        if (countChar(fromHeader, '<') != 1 || countChar(fromHeader, '>') != 1) {
+            return "BAD FROM";
+        }
+        int bracket1Ind = fromHeader.indexOf('<');
+        int bracket2Ind = fromHeader.indexOf('>');
+        if (bracket2Ind <= bracket1Ind) {
+            return "BAD FROM";
+        }
+        return fromHeader.substring(bracket1Ind, bracket2Ind + 1);
     }
 
     private ArrayList<String> parseTo(String toHeader) {
@@ -105,6 +113,18 @@ public class SMTPSession extends Session {
         toAddresses.add("<aToAdress>");
         toAddresses.add("<anotherToAdress>");
         return toAddresses;
+    }
+
+    //Counts the number of target chars in given input string
+    //0 if none
+    private int countChar(String text, char target) {
+        int count = 0;
+        for (int i = 0; i < text.length (); i++){
+            if (text.charAt(i) == target) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private void sendHeaders(HeaderStore msgHeaders) {
