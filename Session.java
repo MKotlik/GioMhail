@@ -190,7 +190,8 @@ public class Session {
     public boolean disconnect() {
         writeServer("QUIT");
         ArrayList<String> serverInput = read(false);
-        if (checkOK(serverInput.get(0))) {
+        if ((protocol.equals("POP") && checkOK(serverInput.get(0))) ||
+                (protocol.equals("SMTP") && checkResponseCode(serverInput.get(0), "221"))) {
             close();
             return true;
         } else {
@@ -413,7 +414,8 @@ public class Session {
     protected boolean writeServer(String userLine) {
         try {
             serverWriter.write(userLine, 0, userLine.length()); //Writing to server
-            serverWriter.newLine();
+            //serverWriter.newLine();
+            serverWriter.write("\r\n"); //Always writes a <CRLF>
             serverWriter.flush();
             return true;
         } catch (IOException e) {
