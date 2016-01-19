@@ -14,33 +14,40 @@ public class SMTPSession extends Session {
         super(host, port, "SMTP");
     }
     
-    public boolean sendMail(Message newMsg){
+    public String sendMail(Message newMsg){
 	header=newMsg.getHeaderStore();
-	writeServer("MAIL From: " + header.getFrom());
-	String serverInput=read(false).get(0);
-	if(checkResponseCode(serverInput, "250")){
-	    writeServer("RCPT To: " + header.getTo());
-	    serverInput=read(false).get(0);
+	if(! header.getTo()=null){
+	    writeServer("MAIL From: " + header.getFrom());
+	    String serverInput=read(false).get(0);
 	    if(checkResponseCode(serverInput, "250")){
-		writeServer("DATA");
-		serverInput=read(false).get(0);
-		if(checkResponseCode(serverInput, "354")){
-		    writeServer(newMsg.getMessageBody());
-		    serverInput=read(true).get(0);
+		if(! header.getTo()=null){
+		    writeServer("RCPT To: " + header.getTo());
+		    serverInput=read(false).get(0);
 		    if(checkResponseCode(serverInput, "250")){
-			return true;
+			writeServer("DATA");
+			serverInput=read(false).get(0);
+			if(checkResponseCode(serverInput, "354")){
+			    writeServer("Subject: "+header.getSubject()+"\n"+newMsg.getMessageBody());
+			    serverInput=read(true).get(0);
+			    if(checkResponseCode(serverInput, "250")){
+				return "Mail sent";
+			    }else{
+				return "Please enter valid message body";
+			    }
+			}else{
+			    return "Connection issues";
+			}
 		    }else{
-			return false;
+			return "Please enter valid recipient";
 		    }
 		}else{
-		    return false;
+		    return "Please enter a recpipient";
 		}
 	    }else{
-		return false;
+		return "Please enter valid sender information";
 	    }
 	}else{
-	    return false;
+	    return "Please enter sender info";
 	}
     }
-
 }
