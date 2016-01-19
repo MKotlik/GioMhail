@@ -77,22 +77,22 @@ public class HeaderStore {
 
     //Returns header key from a header response line
     private String findHeaderKey(String line) {
-        for (int i = 0; i < line.length(); i++) {
-            if (line.charAt(i) == ':') { //Find colon at end of header key
-                return line.substring(0, i); //Return header key up to colon
-            }
+        int colonPos = line.indexOf(':');
+        if (colonPos == -1) { //No colon found
+            return null; //or ""?
+        } else {
+            return line.substring(0, colonPos);
         }
-        return null; //or ""?
     }
 
     //Returns header value from a header response line
     private String findHeaderValue(String line) {
-        for (int i = 0; i < line.length(); i++) {
-            if (line.charAt(i) == ' ') { //Find space before first char of header value
-                return line.substring(i + 1, line.length()); //Return header value from 1st char to end
-            }
+        int colonPos = line.indexOf(':');
+        if (colonPos == -1) { //No colon found
+            return null; //or ""?
+        } else {
+            return line.substring(colonPos + 2, line.length()); //Start from 1st char after : and space
         }
-        return null; //or ""?
     }
 
     //Get ArrayList<String> containing header attributes for specified key

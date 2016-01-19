@@ -543,12 +543,7 @@ public class Client {
     } //Close main
 
     public static int findSpace(String input) {
-        for (int i = 0; i < input.length(); i++) {
-            if (input.substring(i, i + 1).equals(" ")) {
-                return i;
-            }
-        }
-        return -1;
+        return input.indexOf(' ');
     }
 
     public static void printMessageSummaries(ArrayList<HeaderStore> HeaderStoreList) {
@@ -576,16 +571,6 @@ public class Client {
         System.out.print(eraser);
         System.out.print(clearer);
         System.out.print(eraser);
-    }
-
-    public static boolean checkInput(int maxSpaces, String input) {
-        int numSpaces = 0;
-        for (int i = 0; i < input.length(); i++) {
-            if (input.substring(i, i + 1).equals(" ")) {
-                numSpaces += 1;
-            }
-        }
-        return numSpaces <= maxSpaces;
     }
 
     public static boolean checkSpaces(int reqSpaces, String input) {
