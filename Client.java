@@ -542,16 +542,75 @@ public class Client {
         }
     } //Close main
 
-    public static int findSpace(String input) {
-        return input.indexOf(' ');
+    //Helper methods
+
+    //ParseFrom, returns String msg signifying/error or success in From address
+    //Currently only returns "GOOD FROM", and "BAD FROM"
+    //Later expand to support different error msgs
+    public static String parseFrom(String fromHeader) {
+        if (countChar(fromHeader, '<') != 1 || countChar(fromHeader, '>') != 1) {
+            return "BAD FROM";
+        }
+        int bracket1Ind = fromHeader.indexOf('<');
+        int bracket2Ind = fromHeader.indexOf('>');
+        if (bracket2Ind <= bracket1Ind) {
+            return "BAD FROM";
+        }
+        if (!(bracket1Ind + 4 <= bracket2Ind)) { //At least three chars between brackets <...>
+            return "BAD FROM";
+        }
+        if (countChar(fromHeader.substring(bracket1Ind, bracket2Ind + 1), '@') != 1) { //Must be 1 @
+            return "BAD FROM";
+        }
+        return "GOOD FROM";
     }
 
+    //ParseTo, returns String msg signifying/error or success in To address list
+    //Currently only returns "GOOD TO", and "BAD TO"
+    //Later expand to support different error msgs
+    public static String parseTo(String toHeader) {
+        int LBrCount = countChar(toHeader, '<');
+        int RBrCount = countChar(toHeader, '>');
+        if ((LBrCount < 1) || (RBrCount < 1) || (LBrCount != RBrCount)) {
+            return "BAD TO";
+        }
+        String addressLine = toHeader;
+        for (int i = 0; i < LBrCount; i++) {
+            int bracket1Ind = addressLine.indexOf('<');
+            int bracket2Ind = addressLine.indexOf('>');
+            if (!(bracket1Ind + 4 <= bracket2Ind)) { //At least three chars between brackets <...>
+                return "BAD TO";
+            }
+            if (countChar(addressLine.substring(bracket1Ind, bracket2Ind + 1), '@') != 1) { //Must be a @
+                return "BAD TO";
+            }
+            if (bracket2Ind != addressLine.length() - 1) { //If > isn't at the end
+                addressLine = addressLine.substring(bracket2Ind + 1, addressLine.length()); //Get string after >
+            }
+        }
+        return "GOOD TO";
+    }
+
+    //Counts the number of target chars in given input string
+    //0 if none
+    public static int countChar(String text, char target) {
+        int count = 0;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == target) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    //Prints summary lines from an ArrayList of HeaderStores
     public static void printMessageSummaries(ArrayList<HeaderStore> HeaderStoreList) {
         for (int i = HeaderStoreList.size() - 1; i >= 0; i--) {
             System.out.println(getMessageSummary(HeaderStoreList.get(i)));
         }
     }
 
+    //Builds a summary line from a HeaderStore
     public static String getMessageSummary(HeaderStore msgHeader) {
         int msgNum = msgHeader.getMessageNum(); //this is alsways present
         String date = msgHeader.getDate(); //may be null
@@ -570,10 +629,11 @@ public class Client {
     }
 
     //NOTE: Use to erase waitMsg ONLY after disconnected/closed
-    public static void eraseFromConsole(String waitMsg) {
+    //Erases a line of text from the console (had to be printed as S.o.print(...))
+    public static void eraseFromConsole(String text) {
         String eraser = "";
         String clearer = "";
-        for (int i = 0; i < waitMsg.length(); i++) {
+        for (int i = 0; i < text.length(); i++) {
             eraser += "\b"; //Add backspace character
             clearer += " ";
         }
@@ -582,6 +642,13 @@ public class Client {
         System.out.print(eraser);
     }
 
+    //Returns location of space char in String
+    //-1 if not found
+    public static int findSpace(String input) {
+        return input.indexOf(' ');
+    }
+
+    //Returns boolean, true if # of spaces found in input String matches # reqSpaces
     public static boolean checkSpaces(int reqSpaces, String input) {
         int numSpaces = 0;
         for (int i = 0; i < input.length(); i++) {

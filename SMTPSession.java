@@ -7,7 +7,7 @@
 /* TODO
  - [DONE] Complete all helper methods
  - [DONE] Technically, the \n in the messageBody should be \r\n (CRLF)?
- - If a . is found in the messageBody, prepend it with ">", so that it doesn't break DATA
+ - [DONE] If a . is found in the messageBody, prepend it with ">", so that it doesn't break DATA
  - Also, techically in all methods that send to server, we should check afterwards that we don't get a 420 or 421
     connection error. As in, we check the response code from the server, expecting a confirmation, but if we get one
     of those codes, we know we have a connection error and return as such.
@@ -93,6 +93,16 @@ public class SMTPSession extends Session {
         }
     }
 
+    //Sends header lines during DATA session
+    private void sendHeaders(HeaderStore msgHeaders) {
+        String[] headerKeys = msgHeaders.getKeyArray();
+        for (int i = 0; i < headerKeys.length; i++) {
+            String line = headerKeys[i] + ": " + msgHeaders.getHeaderValue(headerKeys[i]);
+            writeServer(line);
+        }
+    }
+
+
     //This method parses the fromHeader
     //The header normally looks like: "Misha Kotlik <mikekotlik@gmail.com>"
     //This function has to count the number of brackets. If it doesn't match 2, return "BAD FROM"
@@ -106,12 +116,18 @@ public class SMTPSession extends Session {
         if (bracket2Ind <= bracket1Ind) {
             return "BAD FROM";
         }
+        if (!(bracket1Ind + 4 <= bracket2Ind)) { //At least three chars between brackets <...>
+            return "BAD FROM";
+        }
+        if (countChar(fromHeader.substring(bracket1Ind, bracket2Ind + 1), '@') != 1) { //Must be 1 @
+            return "BAD FROM";
+        }
         return fromHeader.substring(bracket1Ind, bracket2Ind + 1);
     }
 
     //This method parses the toHeader
     //The header normally looks like: "Gio Topa <giotopa@gmail.com>, Gio Kotlik <giokotlik@yahoo.com>"
-    //Returns "BAD TO" as first element
+    //Header must have addresses as <...>, with at least three characters within <...> and one @
     //If the above condition isn't met, return "BAD TO" as first element of ArrayList
     //Otherwise, add the addresses with the brackets to an ArrayList and return it
     private ArrayList<String> parseTo(String toHeader) {
@@ -126,12 +142,16 @@ public class SMTPSession extends Session {
         for (int i = 0; i < LBrCount; i++) {
             int bracket1Ind = addressLine.indexOf('<');
             int bracket2Ind = addressLine.indexOf('>');
-            if (bracket2Ind <= bracket1Ind) {
+            if (!(bracket1Ind + 4 <= bracket2Ind)) { //At least three chars between brackets <...>
                 toAddresses.add("BAD TO"); //Need this to insure always has 0 index
                 toAddresses.set(0, "BAD TO");
                 return toAddresses;
             }
-            //Technically could check that there are at least 3 chars within all chars, and that there is a @
+            if (countChar(addressLine.substring(bracket1Ind, bracket2Ind + 1), '@') != 1) { //Must be a @
+                toAddresses.add("BAD TO"); //Need this to insure always has 0 index
+                toAddresses.set(0, "BAD TO");
+                return toAddresses;
+            }
             toAddresses.add(addressLine.substring(bracket1Ind, bracket2Ind + 1));
             if (bracket2Ind != addressLine.length() - 1) { //If > isn't at the end
                 addressLine = addressLine.substring(bracket2Ind + 1, addressLine.length()); //Get string after >
@@ -152,13 +172,6 @@ public class SMTPSession extends Session {
         return count;
     }
 
-    private void sendHeaders(HeaderStore msgHeaders) {
-        String[] headerKeys = msgHeaders.getKeyArray();
-        for (int i = 0; i < headerKeys.length; i++) {
-            String line = headerKeys[i] + ": " + msgHeaders.getHeaderValue(headerKeys[i]);
-            writeServer(line);
-        }
-    }
 }
 
 /* Deprecated sendMail code
