@@ -121,7 +121,9 @@ public class HeaderStore {
 
     //Get array of all headerKeys
     public String[] getKeyArray() {
-        return (String[]) headerMap.keySet().toArray();
+        Set<String> keys = headerMap.keySet();
+        String[] keyArray = keys.toArray(new String[keys.size()]);
+        return keyArray;
     }
 
     //-----GET SHORTCUTS-----
@@ -131,7 +133,7 @@ public class HeaderStore {
         if (getHeaderValue("To") != null) {
             return getHeaderValue("To").get(0);
         }
-        return null;
+        return "";
     }
 
     //Get value of From header
@@ -139,7 +141,7 @@ public class HeaderStore {
         if (getHeaderValue("From") != null) {
             return getHeaderValue("From").get(0);
         }
-        return null;
+        return "";
     }
 
     //Get value of Subject header
@@ -147,7 +149,7 @@ public class HeaderStore {
         if (getHeaderValue("Subject") != null) {
             return getHeaderValue("Subject").get(0);
         }
-        return null;
+        return "";
     }
 
     //Get value of Date header
@@ -155,7 +157,7 @@ public class HeaderStore {
         if (getHeaderValue("Date") != null) {
             return getHeaderValue("Date").get(0);
         }
-        return null;
+        return "";
     }
 
     //Get value of CC header
@@ -163,7 +165,7 @@ public class HeaderStore {
         if (getHeaderValue("CC") != null) {
             return getHeaderValue("CC").get(0);
         }
-        return null;
+        return "";
     }
 
     //Get value of BCC header
@@ -171,7 +173,7 @@ public class HeaderStore {
         if (getHeaderValue("BCC") != null) {
             return getHeaderValue("BCC").get(0);
         }
-        return null;
+        return "";
     }
 
     //-----Message Number-----

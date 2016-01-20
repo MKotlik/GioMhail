@@ -100,7 +100,7 @@ public class Client {
         int minMsg = 0; //Oldest message being listed in inbox
         int maxMsg = 0; //Newest message being listed in inbox
         int viewMsgNum = 0; //Number of message to view
-	ArrayList<String> msg = new ArrayList<String>();
+        ArrayList<String> msgBodyArray = new ArrayList<String>();
         POPSession POP = null;
         SMTPSession SMTP = null;
         Message newMsg = null; //This shall be a new message to send
@@ -362,15 +362,18 @@ public class Client {
                     sysOut.println("");
                     System.out.println("---New Email---");
                     System.out.println("");
-                    System.out.println("Subject: ");
-                    System.out.println("From: ");
-                    System.out.println("To: ");
-                    System.out.println("CC: ");
-                    System.out.println("BCC: ");
+                    System.out.println("Subject: " + newMsg.getHeaderStore().getSubject());
+                    System.out.println("From: " + newMsg.getHeaderStore().getFrom());
+                    System.out.println("To: " + newMsg.getHeaderStore().getTo());
+                    System.out.println("CC: " + newMsg.getHeaderStore().getCC());
+                    System.out.println("BCC: " + newMsg.getHeaderStore().getBCC());
                     System.out.println("");
                     System.out.println("Body: ");
                     System.out.println("---------------------------------------------------------------------");
-                    System.out.println("");
+                    for (int i = 0; i < msgBodyArray.size(); i++) {
+                        System.out.println(msgBodyArray.get(i));
+                    }
+                    System.out.println(""); //blank line as cushion
                     System.out.println("=====================================================================");
                     System.out.println("Please enter a subject");
                     System.out.println("Cmds: <subject>, [back], [exit]");
@@ -401,14 +404,17 @@ public class Client {
                     System.out.println("---New Email---");
                     System.out.println("");
                     System.out.println("Subject: " + newMsg.getHeaderStore().getSubject());
-                    System.out.println("From: ");
-                    System.out.println("To: ");
-                    System.out.println("CC: ");
-                    System.out.println("BCC: ");
+                    System.out.println("From: " + newMsg.getHeaderStore().getFrom());
+                    System.out.println("To: " + newMsg.getHeaderStore().getTo());
+                    System.out.println("CC: " + newMsg.getHeaderStore().getCC());
+                    System.out.println("BCC: " + newMsg.getHeaderStore().getBCC());
                     System.out.println("");
                     System.out.println("Body: ");
                     System.out.println("---------------------------------------------------------------------");
-                    System.out.println("");
+                    for (int i = 0; i < msgBodyArray.size(); i++) {
+                        System.out.println(msgBodyArray.get(i));
+                    }
+                    System.out.println(""); //blank line as cushion
                     System.out.println("=====================================================================");
                     System.out.println("Please enter your From name & address in the format " +
                             "First Last <user@server.com>, with brackets.");
@@ -447,13 +453,16 @@ public class Client {
                     System.out.println("");
                     System.out.println("Subject: " + newMsg.getHeaderStore().getSubject());
                     System.out.println("From: " + newMsg.getHeaderStore().getFrom());
-                    System.out.println("To: ");
-                    System.out.println("CC: ");
-                    System.out.println("BCC: ");
+                    System.out.println("To: " + newMsg.getHeaderStore().getTo());
+                    System.out.println("CC: " + newMsg.getHeaderStore().getCC());
+                    System.out.println("BCC: " + newMsg.getHeaderStore().getBCC());
                     System.out.println("");
                     System.out.println("Body: ");
                     System.out.println("---------------------------------------------------------------------");
-                    System.out.println("");
+                    for (int i = 0; i < msgBodyArray.size(); i++) {
+                        System.out.println(msgBodyArray.get(i));
+                    }
+                    System.out.println(""); //blank line as cushion
                     System.out.println("=====================================================================");
                     System.out.println("Please enter a list of 'to' names & addresses.");
                     System.out.println("Follow the format: First Last <user@server.com>, " +
@@ -493,12 +502,15 @@ public class Client {
                     System.out.println("Subject: " + newMsg.getHeaderStore().getSubject());
                     System.out.println("From: " + newMsg.getHeaderStore().getFrom());
                     System.out.println("To: " + newMsg.getHeaderStore().getTo());
-                    System.out.println("CC: ");
-                    System.out.println("BCC: ");
+                    System.out.println("CC: " + newMsg.getHeaderStore().getCC());
+                    System.out.println("BCC: " + newMsg.getHeaderStore().getBCC());
                     System.out.println("");
                     System.out.println("Body: ");
                     System.out.println("---------------------------------------------------------------------");
-                    System.out.println("");
+                    for (int i = 0; i < msgBodyArray.size(); i++) {
+                        System.out.println(msgBodyArray.get(i));
+                    }
+                    System.out.println(""); //blank line as cushion
                     System.out.println("=====================================================================");
                     System.out.println("You may choose to enter a list of CC names & addresses, or enter [n] to skip.");
                     System.out.println("Follow the format: First Last <user@server.com>, " +
@@ -510,7 +522,7 @@ public class Client {
                     if (userInput.equalsIgnoreCase("n")) {
                         mode = "SMTP_BCC";
                     } else if (userInput.equalsIgnoreCase("back")) {
-                        mode = "SMTP_FROM";
+                        mode = "SMTP_TO";
                     } else if (userInput.equalsIgnoreCase("exit")) {
                         quitUser = true;
                     } else { //Assume that its the from address
@@ -537,26 +549,29 @@ public class Client {
                     System.out.println("From: " + newMsg.getHeaderStore().getFrom());
                     System.out.println("To: " + newMsg.getHeaderStore().getTo());
                     System.out.println("CC: " + newMsg.getHeaderStore().getCC());
-                    System.out.println("BCC: ");
+                    System.out.println("BCC: " + newMsg.getHeaderStore().getBCC());
                     System.out.println("");
                     System.out.println("Body: ");
-		    System.out.println("---------------------------------------------------------------------");
-		    System.out.println("");
+                    System.out.println("---------------------------------------------------------------------");
+                    for (int i = 0; i < msgBodyArray.size(); i++) {
+                        System.out.println(msgBodyArray.get(i));
+                    }
+                    System.out.println(""); //blank line as cushion
                     System.out.println("=====================================================================");
                     System.out.println("You may choose to enter a list of BCC names & addresses, or enter [n] to skip.");
                     System.out.println("Follow the format: First Last <user@server.com>, " +
                             "First Last <user@server.com>, ... Use brackets.");
                     System.out.println("Cmds: <list of (First Last <BCC address>)>, [n], [back], [exit]");
                     System.out.println("");
-		    System.out.print("|> "); //Prompt
+                    System.out.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     if (userInput.equalsIgnoreCase("n")) {
                         mode = "SMTP_BODY";
                     } else if (userInput.equalsIgnoreCase("back")) {
-                        mode = "SMTP_FROM";
+                        mode = "SMTP_CC";
                     } else if (userInput.equalsIgnoreCase("exit")) {
                         quitUser = true;
-		    }else { //Assume that its the from address
+                    } else { //Assume that its the from address
                         if (parseTo(userInput).equals("GOOD TO")) {
                             newMsg.getHeaderStore().setHeader("To", userInput);
                             mode = "SMTP_BODY";
@@ -565,11 +580,11 @@ public class Client {
                                     "Each set should be in the format: First Last <user@server.com>";
                         }
                     }
-		}else if(mode.equals("SMTP_BODY")){
-		    //--Print menu header
+                } else if (mode.equals("SMTP_BODY")) {
+                    //--Print menu header
                     sysOut.println("GioMhail");
-                    sysOut.println("Menu Map: ... > Setup > Login > Main > Subject > From > To > CC > BCC > BODY");
-                    System.out.println("Send: BODY");
+                    sysOut.println("Menu Map: ... > Setup > Login > Main > Subject > From > To > CC > BCC > Body");
+                    System.out.println("Send: Message Body");
                     sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
                     sysOut.println(SMTP.getUser());
                     System.out.println("=====================================================================");
@@ -580,56 +595,129 @@ public class Client {
                     System.out.println("From: " + newMsg.getHeaderStore().getFrom());
                     System.out.println("To: " + newMsg.getHeaderStore().getTo());
                     System.out.println("CC: " + newMsg.getHeaderStore().getCC());
-                    System.out.println("BCC: "+newMsg.getHeaderStore().getBCC());
+                    System.out.println("BCC: " + newMsg.getHeaderStore().getBCC());
                     System.out.println("");
                     System.out.println("Body: ");
                     System.out.println("---------------------------------------------------------------------");
-		    for (int i=0;i<msg.size();i++){
-			System.out.println(msg.get(i));
-		    }
-		    System.out.println("=====================================================================");
+                    for (int i = 0; i < msgBodyArray.size(); i++) {
+                        System.out.println(msgBodyArray.get(i));
+                    }
+                    System.out.println(""); //blank line as cushion
+                    System.out.println("=====================================================================");
                     System.out.println("");
-                    System.out.println("You must enter the body of your message line by line.");
-		    System.out.println("Cmds: <line text>, [$prevLine], [$back], [$exit], [$send]");
+                    System.out.println("Enter the body of your message line by line.\n" +
+                            "Use [$del] to jump back and delete the previous line.\n");
+                    System.out.println("Cmds: <line text>, [$del], [$back], [$exit], [$send]");
                     System.out.println("");
-		    System.out.print("|> "); //Prompt
+                    System.out.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
-                    if (userInput.equalsIgnoreCase("$prevLine")) {
-			if(msg.size()>0){
-			    eraseFromConsole(msg.get(msg.size()-1));
-			    msg.remove(msg.size()-1);
-			}else{
-			    statusMsg="Cannot go back to previous line if first line of message";
-			}
+                    if (userInput.equalsIgnoreCase("$del")) {
+                        if (msgBodyArray.size() > 0) {
+                            eraseFromConsole(msgBodyArray.get(msgBodyArray.size() - 1));
+                            msgBodyArray.remove(msgBodyArray.size() - 1);
+                        } else {
+                            statusMsg = "Cannot delete a line. No lines remaining.";
+                        }
                     } else if (userInput.equalsIgnoreCase("$back")) {
                         mode = "SMTP_BCC";
                     } else if (userInput.equalsIgnoreCase("$exit")) {
                         quitUser = true;
-		    }else if (userInput.equalsIgnoreCase("$send")){
-			String msgBody="";
-			for (int i=0;i<msg.size();i++){
-			    msgBody+=msg.get(i)+"\n";
-			}
-			newMsg.setMessageBody(msgBody);
-			if(SMTP.connect()){
-			    if(SMTP.SMTPLogin()){
-				String sendMsg=SMTP.sendMessage(newMsg);
-				if (sendMsg.equals("SUCCESS")){
-				    mode="SMTP_MAIN";
-				    statusMsg=sendMsg;
-				}else{
-				    statusMsg=sendMsg;
-				}
-			    }else{
-				statusMsg="Login failed";
-			    }
-			    SMTP.disconnect();
-			}else{
-			    statusMsg="Connection error";
-			}
-		    }else { //Assume that its the line of text
-                        msg.add(userInput);
+                    } else if (userInput.equalsIgnoreCase("$send")) {
+                        String msgBodyStr = "";
+                        for (int i = 0; i < msgBodyArray.size(); i++) {
+                            msgBodyStr += msgBodyArray.get(i) + "\r\n";
+                        }
+                        newMsg.setMessageBody(msgBodyStr);
+                        mode = "SMTP_CONFIRM";
+                    } else { //Assume that its the line of text
+                        msgBodyArray.add(userInput);
                     }
+                } else if (mode.equals("SMTP_CONFIRM")) {
+                    //--Print menu header
+                    sysOut.println("GioMhail");
+                    sysOut.println("Menu Map: ... > Login > Main > Subject > From > To > CC > BCC > Body > Confirm");
+                    System.out.println("Send: Confirm");
+                    sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
+                    sysOut.println(SMTP.getUser());
+                    System.out.println("=====================================================================");
+                    sysOut.println("");
+                    System.out.println("---New Email---");
+                    System.out.println("");
+                    System.out.println("Subject: " + newMsg.getHeaderStore().getSubject());
+                    System.out.println("From: " + newMsg.getHeaderStore().getFrom());
+                    System.out.println("To: " + newMsg.getHeaderStore().getTo());
+                    System.out.println("CC: " + newMsg.getHeaderStore().getCC());
+                    System.out.println("BCC: " + newMsg.getHeaderStore().getBCC());
+                    System.out.println("");
+                    System.out.println("Body: ");
+                    System.out.println("---------------------------------------------------------------------");
+                    for (int i = 0; i < msgBodyArray.size(); i++) {
+                        System.out.println(msgBodyArray.get(i));
+                    }
+                    System.out.println(""); //blank line as cushion
+                    System.out.println("=====================================================================");
+                    System.out.println("");
+                    System.out.println("Are you ready to send this email?");
+                    System.out.println("Cmds: [y], [back], [exit]");
+                    System.out.println("");
+                    if (!statusMsg.equals("")) { //print statusMsg
+                        System.out.println(statusMsg);
+                        statusMsg = "";
+                    }
+                    System.out.print("|> "); //Prompt
+                    String userInput = sysIn.readLine();
+                    if (userInput.equalsIgnoreCase("y")) {
+                        mode = "SMTP_RESULT";
+                    } else if (userInput.equalsIgnoreCase("back")) {
+                        mode = "SMTP_BODY";
+                    } else if (userInput.equalsIgnoreCase("exit")) {
+                        quitUser = true;
+                    } else {
+                        statusMsg = "Please enter a valid command!";
+                    }
+                }else if (mode.equals("SMTP_RESULT")) {
+                    boolean connFailed = false; //Used to check for [y] after failed connection
+                    //--Print menu header
+                    sysOut.println("GioMhail");
+                    sysOut.println("Menu Map: ... > Main > Subject > From > To > CC > BCC > Body > Confirm > Result");
+                    System.out.println("Send: Result");
+                    sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
+                    sysOut.println(SMTP.getUser());
+                    sysOut.println("");
+                    String waitMsg = "Please Wait! Communicating with server...";
+                    sysOut.print(waitMsg);
+                    if (SMTP.connect()) { //connection success
+                        if (SMTP.SMTPLogin()) { //login success
+                            System.out.println("");
+                            System.out.println(SMTP.sendMessage(newMsg));
+                        } else { //login failed
+                            SMTP.disconnect();
+                            eraseFromConsole(waitMsg);
+                            connFailed = true;
+                            sysOut.println("Would you like to retry connection?");
+                            sysOut.println("Cmds: [y], [back], [exit]");
+                            sysOut.println("");
+                            statusMsg = "Connection issue (login failure). Please try again.";
+                        }
+                    } else { //connection failed
+                        SMTP.close();
+                        eraseFromConsole(waitMsg);
+                        connFailed = true;
+                        sysOut.println("Would you like to retry connection?");
+                        sysOut.println("Cmds: [y], [back], [exit]");
+                        sysOut.println("");
+                        statusMsg = "Connection issue (server not connected). Please try again.";
+                    }
+                    if (!statusMsg.equals("")) { //Print statusMsg
+                        sysOut.println(statusMsg);
+                        statusMsg = "";
+                    }
+                    //Optional line below. Not needed if sending user to SMTP_MAIN to send another message
+                    newMsg = new Message(); //This clears the message cache after its sent.
+                    quitUser = true;
+                    //All the usual checking stuff goes here
+                    //sysOut.print("|> "); //Prompt
+                    //String userInput = sysIn.readLine();
                 }else if (mode.equals("POP_MAIN")) {
                     boolean connFailed = false; //Used to check for [y] after failed connection
                     //--Print menu header
@@ -967,15 +1055,15 @@ public class Client {
     public static String getMessageSummary(HeaderStore msgHeader) {
         int msgNum = msgHeader.getMessageNum(); //this is alsways present
         String date = msgHeader.getDate(); //may be null
-        if (date == null) {
+        if (date.equals("")) {
             date = "NO DATE";
         }
         String from = msgHeader.getFrom(); //may be null
-        if (from == null) {
+        if (from.equals("")) {
             from = "NO FROM ADDRESS";
         }
         String subject = msgHeader.getSubject(); //may be null
-        if (subject == null) {
+        if (subject.equals("")) {
             subject = "NO SUBJECT";
         }
         return msgNum + " | " + date + " | " + from + " | " + subject;
