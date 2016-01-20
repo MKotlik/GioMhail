@@ -688,8 +688,11 @@ public class Client {
                     sysOut.print(waitMsg);
                     if (SMTP.connect()) { //connection success
                         if (SMTP.SMTPLogin()) { //login success
+                            String result = SMTP.sendMessage(newMsg);
+                            SMTP.disconnect();
+                            eraseFromConsole(waitMsg);
                             System.out.println("");
-                            System.out.println(SMTP.sendMessage(newMsg));
+                            System.out.println(result);
                         } else { //login failed
                             SMTP.disconnect();
                             eraseFromConsole(waitMsg);
