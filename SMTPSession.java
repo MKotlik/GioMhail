@@ -97,8 +97,11 @@ public class SMTPSession extends Session {
     private void sendHeaders(HeaderStore msgHeaders) {
         String[] headerKeys = msgHeaders.getKeyArray();
         for (int i = 0; i < headerKeys.length; i++) {
-            String line = headerKeys[i] + ": " + msgHeaders.getHeaderValue(headerKeys[i]);
-            writeServer(line);
+            ArrayList<String> headerValueList = msgHeaders.getHeaderValue(headerKeys[i]);
+            for (int j = 0; j < headerValueList.size(); j++) {
+                String line = headerKeys[i] + ": " + headerValueList.get(j);
+                writeServer(line);
+            }
         }
     }
 
