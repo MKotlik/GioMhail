@@ -100,7 +100,7 @@ public class Client {
         int minMsg = 0; //Oldest message being listed in inbox
         int maxMsg = 0; //Newest message being listed in inbox
         int viewMsgNum = 0; //Number of message to view
-
+	ArrayList<String> msg = new ArrayList<String>();
         POPSession POP = null;
         SMTPSession SMTP = null;
         Message newMsg = null; //This shall be a new message to send
@@ -543,7 +543,88 @@ public class Client {
                             "First Last <user@server.com>, ... Use brackets.");
                     System.out.println("Cmds: <list of (First Last <BCC address>)>, [n], [back], [exit]");
                     System.out.println("");
-                    quitUser = true;
+		    System.out.print("|> "); //Prompt
+                    String userInput = sysIn.readLine();
+                    if (userInput.equalsIgnoreCase("n")) {
+                        mode = "SMTP_BODY";
+                    } else if (userInput.equalsIgnoreCase("back")) {
+                        mode = "SMTP_FROM";
+                    } else if (userInput.equalsIgnoreCase("exit")) {
+                        quitUser = true;
+		    }else { //Assume that its the from address
+                        if (parseTo(userInput).equals("GOOD TO")) {
+                            newMsg.getHeaderStore().setHeader("To", userInput);
+                            mode = "SMTP_BODY";
+                        } else {
+                            statusMsg = "Please enter a comma-separated list of names & email address with brackets.\n" +
+                                    "Each set should be in the format: First Last <user@server.com>";
+                        }
+                    }
+		}else if(mode.equals("SMTP_BODY")){
+		    //--Print menu header
+                    sysOut.println("GioMhail");
+                    sysOut.println("Menu Map: ... > Setup > Login > Main > Subject > From > To > CC > BCC > BODY");
+                    System.out.println("Send: BODY");
+                    sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
+                    sysOut.println(SMTP.getUser());
+                    System.out.println("=====================================================================");
+                    sysOut.println("");
+                    System.out.println("---New Email---");
+                    System.out.println("");
+                    System.out.println("Subject: " + newMsg.getHeaderStore().getSubject());
+                    System.out.println("From: " + newMsg.getHeaderStore().getFrom());
+                    System.out.println("To: " + newMsg.getHeaderStore().getTo());
+                    System.out.println("CC: " + newMsg.getHeaderStore().getCC());
+                    System.out.println("BCC: "+newMsg.getHeaderStore().getBCC());
+                    System.out.println("");
+                    System.out.println("Body: ");
+                    System.out.println("---------------------------------------------------------------------");
+		    for (int i=0;i<msg.size();i++){
+			System.out.println(msg.get(i));
+		    }
+		    System.out.println("=====================================================================");
+                    System.out.println("");
+                    System.out.println("You must enter the body of your message line by line.");
+		    System.out.println("Cmds: <line text>, [$prevLine], [$back], [$exit], [$send]");
+                    System.out.println("");
+		    System.out.print("|> "); //Prompt
+                    String userInput = sysIn.readLine();
+                    if (userInput.equalsIgnoreCase("$prevLine")) {
+			if(msg.size()>0){
+			    eraseFromConsole(msg.get(msg.size()-1));
+			    msg.remove(msg.size()-1);
+			}else{
+			    statusMsg="Cannot go back to previous line if first line of message";
+			}
+                    } else if (userInput.equalsIgnoreCase("$back")) {
+                        mode = "SMTP_BCC";
+                    } else if (userInput.equalsIgnoreCase("$exit")) {
+                        quitUser = true;
+		    }else if (userInput.equalsIgnoreCase("$send")){
+			String msgBody="";
+			for (int i=0;i<msg.size();i++){
+			    msgBody+=msg.get(i)+"\n";
+			}
+			newMsg.setMessageBody(msgBody);
+			if(SMTP.connect()){
+			    if(SMTP.SMTPLogin()){
+				String sendMsg=SMTP.sendMessage(newMsg);
+				if (sendMsg.equals("SUCCESS")){
+				    mode="SMTP_MAIN";
+				    statusMsg=sendMsg;
+				}else{
+				    statusMsg=sendMsg;
+				}
+			    }else{
+				statusMsg="Login failed";
+			    }
+			    SMTP.disconnect();
+			}else{
+			    statusMsg="Connection error";
+			}
+		    }else { //Assume that its the line of text
+                        msg.add(userInput);
+                    }
                 }else if (mode.equals("POP_MAIN")) {
                     boolean connFailed = false; //Used to check for [y] after failed connection
                     //--Print menu header
