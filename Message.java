@@ -90,7 +90,7 @@ public class Message {
         }
     }
 
-    //
+    //private void cleanText(String text)
 
     //-----Message Number-----
 

@@ -13,9 +13,15 @@
    - [DONE] Add menu map to top of all screens
    - [DONE] Make server info + username persistent on all relevant screens
    - [DONE] Add space after prompt
+   - Make HeaderStore shortcuts return "" on non-existant headers
+   - Make getMessageSummary check for "" instead of null
 
    - Fixed integer parsing attempts on non-integer args (bad input)
    - Catch errors that are thrown in session methods.
+
+   - parseFrom and parseTo: Check that no stray characters after last '>'
+   - parseFrom and parseTo: Check that no spaces within brackets
+   - parseTo: Check that list is properly separated by commas
 
    - Improve position of wait msgs (some are currently after prompt)
    - Make GioMhail logo persistent on all screens
@@ -45,6 +51,7 @@ public class Client {
 
         POPSession POP = null;
         SMTPSession SMTP = null;
+        Message newMsg = null; //This shall be a new message to send
         try {
             while (!quitUser) {
                 //Clear the screen
@@ -185,7 +192,7 @@ public class Client {
                     sysOut.println("Server: " + SMTP.getHost() + " | " + SMTP.getPort());
                     sysOut.println("");
                     System.out.println("Please enter username and password.");
-                    System.out.println("<user pass>, [back], [exit]");
+                    System.out.println("Cmds: <user pass>, [back], [exit]");
                     System.out.println("");
                     if (!statusMsg.equals("")) { //print statusMsg
                         System.out.println(statusMsg);
@@ -229,13 +236,13 @@ public class Client {
                     sysOut.println("Server: " + POP.getHost() + " | " + POP.getPort());
                     sysOut.println("");
                     System.out.println("Please enter username and password.");
-                    System.out.println("<user pass>, [back], [exit]");
+                    System.out.println("Cmds: <user pass>, [back], [exit]");
                     System.out.println("");
                     if (!statusMsg.equals("")) { //print statusMsg
                         System.out.println(statusMsg);
                         statusMsg = "";
                     }
-                    sysOut.print("|>"); //Prompt
+                    sysOut.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     //--Check user input
                     if (userInput.equalsIgnoreCase("back")) {
@@ -273,11 +280,219 @@ public class Client {
                     sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
                     sysOut.println(SMTP.getUser());
                     sysOut.println("");
-                    String waitMsg = "Please Wait! Communicating with server...";
-                    sysOut.print(waitMsg);
+                    System.out.println("Would you like to send an email?");
+                    System.out.println("Cmds: [y], [back], [exit]");
+                    System.out.println("");
+                    if (!statusMsg.equals("")) { //print statusMsg
+                        System.out.println(statusMsg);
+                        statusMsg = "";
+                    }
+                    System.out.print("|> "); //Prompt
+                    String userInput = sysIn.readLine();
+                    if (userInput.equalsIgnoreCase("y")) {
+                        newMsg = new Message();
+                        mode = "SMTP_SUBJECT";
+                    } else if (userInput.equalsIgnoreCase("back")) {
+                        mode = "SMTP_LOGIN";
+                    } else if (userInput.equalsIgnoreCase("exit")) {
+                        quitUser = true;
+                    } else {
+                        statusMsg = "Please enter a valid command!";
+                    }
+                } else if (mode.equals("SMTP_SUBJECT")) {
+                    //--Print menu header
+                    sysOut.println("GioMhail");
+                    sysOut.println("Menu Map: Welcome > Choose Read\\View > Send: > Setup > Login > Main > Subject");
+                    System.out.println("Send: Subject");
+                    sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
+                    sysOut.println(SMTP.getUser());
+                    System.out.println("=====================================================================");
+                    sysOut.println("");
+                    System.out.println("---New Email---");
+                    System.out.println("");
+                    System.out.println("Subject: ");
+                    System.out.println("From: ");
+                    System.out.println("To: ");
+                    System.out.println("CC: ");
+                    System.out.println("BCC: ");
+                    System.out.println("");
+                    System.out.println("Body: ");
+                    System.out.println("");
+                    System.out.println("=====================================================================");
+                    System.out.println("Please enter a subject");
+                    System.out.println("Cmds: <subject>, [back], [exit]");
+                    System.out.println("");
+                    if (!statusMsg.equals("")) { //print statusMsg
+                        System.out.println(statusMsg);
+                        statusMsg = "";
+                    }
+                    System.out.print("|> "); //Prompt
+                    String userInput = sysIn.readLine();
+                    if (userInput.equalsIgnoreCase("back")) {
+                        mode = "SMTP_MAIN";
+                    } else if (userInput.equalsIgnoreCase("exit")) {
+                        quitUser = true;
+                    } else { //Assume that its subject
+                        newMsg.getHeaderStore().setHeader("Subject", userInput);
+                        mode = "SMTP_FROM";
+                    }
+                } else if (mode.equals("SMTP_FROM")) {
+                    //--Print menu header
+                    sysOut.println("GioMhail");
+                    sysOut.println("Menu Map: Welcome > Choose Read\\View > Send: > Setup > Login > Main > Subject > From");
+                    System.out.println("Send: From");
+                    sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
+                    sysOut.println(SMTP.getUser());
+                    System.out.println("=====================================================================");
+                    sysOut.println("");
+                    System.out.println("---New Email---");
+                    System.out.println("");
+                    System.out.println("Subject: " + newMsg.getHeaderStore().getSubject());
+                    System.out.println("From: ");
+                    System.out.println("To: ");
+                    System.out.println("CC: ");
+                    System.out.println("BCC: ");
+                    System.out.println("");
+                    System.out.println("Body: ");
+                    System.out.println("");
+                    System.out.println("=====================================================================");
+                    System.out.println("Please enter your From name & address in the format " +
+                            "First Last <user@server.com>, with brackets.");
+                    System.out.println("Note, the address should correspond to your account on this server.");
+                    System.out.println("Cmds: <First Last <from address>>, [back], [exit]");
+                    System.out.println("");
+                    if (!statusMsg.equals("")) { //print statusMsg
+                        System.out.println(statusMsg);
+                        statusMsg = "";
+                    }
+                    System.out.print("|> "); //Prompt
+                    String userInput = sysIn.readLine();
+                    if (userInput.equalsIgnoreCase("back")) {
+                        mode = "SMTP_SUBJECT";
+                    } else if (userInput.equalsIgnoreCase("exit")) {
+                        quitUser = true;
+                    } else { //Assume that its the from address
+                        if (parseFrom(userInput).equals("GOOD FROM")) {
+                            newMsg.getHeaderStore().setHeader("From", userInput);
+                            mode = "SMTP_TO";
+                        } else {
+                            statusMsg = "Please enter 1 name & 1 email address with brackets in the format " +
+                                    "First Last <user@server.com>.";
+                        }
+                    }
+                } else if (mode.equals("SMTP_TO")) {
+                    //--Print menu header
+                    sysOut.println("GioMhail");
+                    sysOut.println("Menu Map: Welcome > ... > Send: > Setup > Login > Main > Subject > From > To");
+                    System.out.println("Send: To");
+                    sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
+                    sysOut.println(SMTP.getUser());
+                    System.out.println("=====================================================================");
+                    sysOut.println("");
+                    System.out.println("---New Email---");
+                    System.out.println("");
+                    System.out.println("Subject: " + newMsg.getHeaderStore().getSubject());
+                    System.out.println("From: " + newMsg.getHeaderStore().getFrom());
+                    System.out.println("To: ");
+                    System.out.println("CC: ");
+                    System.out.println("BCC: ");
+                    System.out.println("");
+                    System.out.println("Body: ");
+                    System.out.println("");
+                    System.out.println("=====================================================================");
+                    System.out.println("Please enter a list of 'to' names & addresses.");
+                    System.out.println("Follow the format: First Last <user@server.com>, " +
+                            "First Last <user@server.com>, ... Use brackets.");
+                    System.out.println("Cmds: <list of (First Last <to address>)>, [back], [exit]");
+                    System.out.println("");
+                    if (!statusMsg.equals("")) { //print statusMsg
+                        System.out.println(statusMsg);
+                        statusMsg = "";
+                    }
+                    System.out.print("|> "); //Prompt
+                    String userInput = sysIn.readLine();
+                    if (userInput.equalsIgnoreCase("back")) {
+                        mode = "SMTP_FROM";
+                    } else if (userInput.equalsIgnoreCase("exit")) {
+                        quitUser = true;
+                    } else { //Assume that its the from address
+                        if (parseTo(userInput).equals("GOOD TO")) {
+                            newMsg.getHeaderStore().setHeader("To", userInput);
+                            mode = "SMTP_CC";
+                        } else {
+                            statusMsg = "Please enter a comma-separated list of names & email address with brackets.\n" +
+                                    "Each set should be in the format: First Last <user@server.com>";
+                        }
+                    }
+                } else if (mode.equals("SMTP_CC")) {
+                    //--Print menu header
+                    sysOut.println("GioMhail");
+                    sysOut.println("Menu Map: ... > Send: > Setup > Login > Main > Subject > From > To > CC");
+                    System.out.println("Send: CC");
+                    sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
+                    sysOut.println(SMTP.getUser());
+                    System.out.println("=====================================================================");
+                    sysOut.println("");
+                    System.out.println("---New Email---");
+                    System.out.println("");
+                    System.out.println("Subject: " + newMsg.getHeaderStore().getSubject());
+                    System.out.println("From: " + newMsg.getHeaderStore().getFrom());
+                    System.out.println("To: " + newMsg.getHeaderStore().getTo());
+                    System.out.println("CC: ");
+                    System.out.println("BCC: ");
+                    System.out.println("");
+                    System.out.println("Body: ");
+                    System.out.println("");
+                    System.out.println("=====================================================================");
+                    System.out.println("You may choose to enter a list of CC names & addresses, or enter [n] to skip.");
+                    System.out.println("Follow the format: First Last <user@server.com>, " +
+                            "First Last <user@server.com>, ... Use brackets.");
+                    System.out.println("Cmds: <list of (First Last <CC address>)>, [n], [back], [exit]");
+                    System.out.println("");
+                    System.out.print("|> "); //Prompt
+                    String userInput = sysIn.readLine();
+                    if (userInput.equalsIgnoreCase("n")) {
+                        mode = "SMTP_BCC";
+                    } else if (userInput.equalsIgnoreCase("back")) {
+                        mode = "SMTP_FROM";
+                    } else if (userInput.equalsIgnoreCase("exit")) {
+                        quitUser = true;
+                    } else { //Assume that its the from address
+                        if (parseTo(userInput).equals("GOOD TO")) {
+                            newMsg.getHeaderStore().setHeader("To", userInput);
+                            mode = "SMTP_BCC";
+                        } else {
+                            statusMsg = "Please enter a comma-separated list of names & email address with brackets.\n" +
+                                    "Each set should be in the format: First Last <user@server.com>";
+                        }
+                    }
+                } else if (mode.equals("SMTP_BCC")) {
+                    //--Print menu header
+                    sysOut.println("GioMhail");
+                    sysOut.println("Menu Map: ... > Setup > Login > Main > Subject > From > To > CC > BCC");
+                    System.out.println("Send: BCC");
+                    sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
+                    sysOut.println(SMTP.getUser());
+                    System.out.println("=====================================================================");
+                    sysOut.println("");
+                    System.out.println("---New Email---");
+                    System.out.println("");
+                    System.out.println("Subject: " + newMsg.getHeaderStore().getSubject());
+                    System.out.println("From: " + newMsg.getHeaderStore().getFrom());
+                    System.out.println("To: " + newMsg.getHeaderStore().getTo());
+                    System.out.println("CC: " + newMsg.getHeaderStore().getCC());
+                    System.out.println("BCC: ");
+                    System.out.println("");
+                    System.out.println("Body: ");
+                    System.out.println("");
+                    System.out.println("=====================================================================");
+                    System.out.println("You may choose to enter a list of BCC names & addresses, or enter [n] to skip.");
+                    System.out.println("Follow the format: First Last <user@server.com>, " +
+                            "First Last <user@server.com>, ... Use brackets.");
+                    System.out.println("Cmds: <list of (First Last <BCC address>)>, [n], [back], [exit]");
+                    System.out.println("");
                     quitUser = true;
-                    //UNFINISHED CODE!!!!!!!!!!!!!!
-                } else if (mode.equals("POP_MAIN")) {
+                }else if (mode.equals("POP_MAIN")) {
                     boolean connFailed = false; //Used to check for [y] after failed connection
                     //--Print menu header
                     sysOut.println("GioMhail");
@@ -296,7 +511,7 @@ public class Client {
                             sysOut.println("You have " + msgCount + " messages.");
                             //Should print out latest message summary (Num, Date, From, Subject) here
                             sysOut.println("How many messages would you like listed? [list <num>]");
-                            sysOut.println("[list <num>], [back], [exit]");
+                            sysOut.println("Cmds: [list <num>], [back], [exit]");
                             sysOut.println("");
                         } else { //login failed
                             POP.disconnect();
