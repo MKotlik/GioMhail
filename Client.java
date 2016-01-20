@@ -13,10 +13,10 @@
    - [DONE] Add menu map to top of all screens
    - [DONE] Make server info + username persistent on all relevant screens
    - [DONE] Add space after prompt
-   - Add BCC in same fashion as CC
-   - Add a short (matches === line) dashed line below Body: on all SMTP screens
+   - [DONE] Add BCC in same fashion as CC
+   - [DONE] Add a short (matches === line) dashed line below Body: on all SMTP screens
 
-   - Add BODY menu, which after every enter takes a userInput line and adds it to a local variables ArrayList<String>
+   - [DONE] Add BODY menu, which after every enter takes a userInput line and adds it to a local variables ArrayList<String>
      of the main method. There should also be an int var linePos that signifies which index of
      the ArrayList is currently getting filled. Every time BODY is looped, where the screen says Body:,
      there should be a for loop that prints out all the lines that are in the ArrayList.  There should be a carrot '>'
@@ -369,6 +369,7 @@ public class Client {
                     System.out.println("BCC: ");
                     System.out.println("");
                     System.out.println("Body: ");
+                    System.out.println("---------------------------------------------------------------------");
                     System.out.println("");
                     System.out.println("=====================================================================");
                     System.out.println("Please enter a subject");
@@ -406,6 +407,7 @@ public class Client {
                     System.out.println("BCC: ");
                     System.out.println("");
                     System.out.println("Body: ");
+                    System.out.println("---------------------------------------------------------------------");
                     System.out.println("");
                     System.out.println("=====================================================================");
                     System.out.println("Please enter your From name & address in the format " +
@@ -450,6 +452,7 @@ public class Client {
                     System.out.println("BCC: ");
                     System.out.println("");
                     System.out.println("Body: ");
+                    System.out.println("---------------------------------------------------------------------");
                     System.out.println("");
                     System.out.println("=====================================================================");
                     System.out.println("Please enter a list of 'to' names & addresses.");
@@ -494,6 +497,7 @@ public class Client {
                     System.out.println("BCC: ");
                     System.out.println("");
                     System.out.println("Body: ");
+                    System.out.println("---------------------------------------------------------------------");
                     System.out.println("");
                     System.out.println("=====================================================================");
                     System.out.println("You may choose to enter a list of CC names & addresses, or enter [n] to skip.");
@@ -536,7 +540,8 @@ public class Client {
                     System.out.println("BCC: ");
                     System.out.println("");
                     System.out.println("Body: ");
-                    System.out.println("");
+		    System.out.println("---------------------------------------------------------------------");
+		    System.out.println("");
                     System.out.println("=====================================================================");
                     System.out.println("You may choose to enter a list of BCC names & addresses, or enter [n] to skip.");
                     System.out.println("Follow the format: First Last <user@server.com>, " +
