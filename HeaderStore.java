@@ -114,6 +114,13 @@ public class HeaderStore {
         }
     }
 
+    //Force set header value for specified key, deleting old
+    public void setHeaderForce(String headerKey, String headerValue) {
+        ArrayList<String> headerValueList = new ArrayList<String>();
+        headerValueList.add(headerValue);
+        headerMap.put(headerKey, headerValueList);
+    }
+
     //Get HashSet of all headerKeys
     public HashSet getKeyHashSet() {
         return (HashSet) headerMap.keySet();

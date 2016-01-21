@@ -389,7 +389,7 @@ public class Client {
                     } else if (userInput.equalsIgnoreCase("exit")) {
                         quitUser = true;
                     } else { //Assume that its subject
-                        newMsg.getHeaderStore().setHeader("Subject", userInput);
+                        newMsg.getHeaderStore().setHeaderForce("Subject", userInput);
                         mode = "SMTP_FROM";
                     }
                 } else if (mode.equals("SMTP_FROM")) {
@@ -433,7 +433,7 @@ public class Client {
                         quitUser = true;
                     } else { //Assume that its the from address
                         if (parseFrom(userInput).equals("GOOD FROM")) {
-                            newMsg.getHeaderStore().setHeader("From", userInput);
+                            newMsg.getHeaderStore().setHeaderForce("From", userInput);
                             mode = "SMTP_TO";
                         } else {
                             statusMsg = "Please enter 1 name & 1 email address with brackets in the format " +
@@ -481,7 +481,7 @@ public class Client {
                         quitUser = true;
                     } else { //Assume that its the from address
                         if (parseTo(userInput).equals("GOOD TO")) {
-                            newMsg.getHeaderStore().setHeader("To", userInput);
+                            newMsg.getHeaderStore().setHeaderForce("To", userInput);
                             mode = "SMTP_CC";
                         } else {
                             statusMsg = "Please enter a comma-separated list of names & email address with brackets.\n" +
@@ -527,7 +527,7 @@ public class Client {
                         quitUser = true;
                     } else { //Assume that its the from address
                         if (parseTo(userInput).equals("GOOD TO")) {
-                            newMsg.getHeaderStore().setHeader("To", userInput);
+                            newMsg.getHeaderStore().setHeaderForce("To", userInput);
                             mode = "SMTP_BCC";
                         } else {
                             statusMsg = "Please enter a comma-separated list of names & email address with brackets.\n" +
@@ -573,7 +573,7 @@ public class Client {
                         quitUser = true;
                     } else { //Assume that its the from address
                         if (parseTo(userInput).equals("GOOD TO")) {
-                            newMsg.getHeaderStore().setHeader("To", userInput);
+                            newMsg.getHeaderStore().setHeaderForce("To", userInput);
                             mode = "SMTP_BODY";
                         } else {
                             statusMsg = "Please enter a comma-separated list of names & email address with brackets.\n" +
@@ -677,6 +677,8 @@ public class Client {
                     }
                 }else if (mode.equals("SMTP_RESULT")) {
                     boolean connFailed = false; //Used to check for [y] after failed connection
+                    String sendResult = ""; //Store result of sending msg here
+                    boolean unknownStatus = false; //Use in case we add a sendMessage status and forget to update Client
                     //--Print menu header
                     sysOut.println("GioMhail");
                     sysOut.println("Menu Map: ... > Main > Subject > From > To > CC > BCC > Body > Confirm > Result");
@@ -688,11 +690,38 @@ public class Client {
                     sysOut.print(waitMsg);
                     if (SMTP.connect()) { //connection success
                         if (SMTP.SMTPLogin()) { //login success
-                            String result = SMTP.sendMessage(newMsg);
+                            sendResult = SMTP.sendMessage(newMsg);
                             SMTP.disconnect();
                             eraseFromConsole(waitMsg);
-                            System.out.println("");
-                            System.out.println(result);
+                            //Display different prompts based on result
+                            if (sendResult.equals("SUCCESS")) {
+                                System.out.println("Message sent!\n" +
+                                        "Would you liked to send another email?\n" +
+                                        "Cmds: [y], [back], [exit]");
+                            } else if (sendResult.equals("NO FROM") || sendResult.equals("BAD FROM")) {
+                                System.out.println("Message not sent due to bad 'From' formatting.\n" +
+                                        "Would you like to edit your 'From' address?\n" +
+                                        "Cmds: [y], [back], [exit]");
+                            } else if (sendResult.equals("NO TO") || sendResult.equals("BAD TO")) {
+                                System.out.println("Message not sent due to bad formatting of 'To' addresses.\n" +
+                                        "Would you like to edit your 'To' addresses?\n" +
+                                        "Cmds: [y], [back], [exit]");
+                            } else if (sendResult.equals("MISMATCHED FROM")) {
+                                System.out.println("Message not sent.\n" +
+                                        "Your 'From' address doesn't match your account on this server.\n" +
+                                        "Would you like to edit your 'From' address?\n" +
+                                        "Cmds: [y], [back], [exit]");
+                            } else if (sendResult.equals("BAD DATA") || sendResult.equals("DATA REFUSED")) {
+                                System.out.println("Message not sent due to server error. (" + sendResult + ")\n" +
+                                        "Would you like to retry sending this message?\n" +
+                                        "Cmds: [y], [back], [exit]");
+                            } else { //sendResult doesn't match a known code
+                                unknownStatus = true;
+                                System.out.println("Unknown status message: " + sendResult + "\n" +
+                                        "Would you like to retry sending this message?\n" +
+                                        "Cmds: [y], [back], [exit]");
+                            }
+                            System.out.println(""); //Blank line as cushion
                         } else { //login failed
                             SMTP.disconnect();
                             eraseFromConsole(waitMsg);
@@ -715,12 +744,34 @@ public class Client {
                         sysOut.println(statusMsg);
                         statusMsg = "";
                     }
-                    //Optional line below. Not needed if sending user to SMTP_MAIN to send another message
-                    newMsg = new Message(); //This clears the message cache after its sent.
-                    quitUser = true;
-                    //All the usual checking stuff goes here
-                    //sysOut.print("|> "); //Prompt
-                    //String userInput = sysIn.readLine();
+                    System.out.print("|> "); //Prompt
+                    String userInput = sysIn.readLine();
+                    //--Check user input
+                    if (userInput.equalsIgnoreCase("y")) {
+                        if (connFailed || unknownStatus) { //Connection failed or unknown status from sendMessage
+                            mode = "SMTP_RESULT"; //Retry sending
+                        } else if (sendResult.equals("NO FROM") || sendResult.equals("BAD FROM") ||
+                                sendResult.equals("MISMATCHED FROM")) {
+                            mode = "SMTP_FROM";
+                        } else if (sendResult.equals("NO TO") || sendResult.equals("BAD TO")) {
+                            mode = "SMTP_TO";
+                        } else if (sendResult.equals("BAD DATA") || sendResult.equals("DATA REFUSED")) { //server error
+                            mode = "SMTP_RESULT"; //Retry sending
+                        } else if (sendResult.equals("SUCCESS")) { //user wants to send another msg
+                            mode = "SMTP_FROM"; //Alternatively use SMTP_MAIN
+                            newMsg = new Message(); //Reset message cache
+                            msgBodyArray = new ArrayList<String>(); //Reset message body
+                        } else {
+                            mode = "SMTP_RESULT";
+                            statusMsg = "Uncaught status msg from sendMessage. This shouldn't be happening...";
+                        }
+                    } else if (userInput.equalsIgnoreCase("back")) {
+                        mode = "SMTP_CONFIRM";
+                    } else if (userInput.equalsIgnoreCase("exit")) {
+                        quitUser = true;
+                    } else {
+                        statusMsg = "Please enter a valid command!";
+                    }
                 }else if (mode.equals("POP_MAIN")) {
                     boolean connFailed = false; //Used to check for [y] after failed connection
                     //--Print menu header
