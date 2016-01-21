@@ -1,0 +1,21 @@
+Remake/restructure the Client:
+In order for the client to be shorter, more robust, and more expandable,
+we need to remake it into an object-class structure, with modular reusable functions.
+The main purpose of client is to provide a TUI front end for the program, taking
+user input, processing it, and communicating with POPSession & SMTPSession to send
+and receive emails according to user instructions. Client is also responsible for
+displaying the result of POP and SMTP actions to the user. There are certain operations
+that are repeated multiple times throughout the flow of the client and should thus be modular.
+Client, in general, displays separate pieces of information in separate modes/screens/frames.
+Each different action, be it input or output, has a separate mode. The job of the client is to 
+switch between the modes until the user quits the program.
+
+- Class Client
+- Has instance vars, necessary for interacting with POP and SMTP. Defined at top of class,
+initialized in constructor or in later method.
+- Has default constructor, takes no args. Initializes user I/O, quitUser, and mode.
+- Has a main function, with a while loop that runs as long as quitUser == false, and which
+runs different mode functions depending on current mode.
+- Has a separate function for each mode.
+- Has functions for certain common operations, ex. displaying the email in SMTP, prompting user for input, etc.
+- Has validation, helper methods that are used in various modes.	
