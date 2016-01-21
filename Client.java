@@ -68,7 +68,7 @@
    - Make getMessageSummary check for "" instead of null
    - Make all message displays (top of SMTP menus) pull respective headers
 
-   - Fixed integer parsing attempts on non-integer args (bad input)
+   - Fix integer parsing attempts on non-integer args (bad input)
    - Catch errors that are thrown in session methods.
 
    - parseFrom and parseTo: Check that no stray characters after last '>'
@@ -173,18 +173,22 @@ public class Client {
                     } else if (checkSpaces(1, userInput)) { //1 space, matches <address port> format
                         int space = findSpace(userInput);
                         String SMTPhost = userInput.substring(0, space); //address
-                        int SMTPPort = Integer.parseInt(userInput.substring(space + 1, userInput.length())); //port
-                        String waitMsg = "Please Wait! Communicating with server...";
-                        sysOut.print(waitMsg);
-                        SMTP = new SMTPSession(SMTPhost, SMTPPort); //New format is host then port
-                        if (SMTP.connect()) {
-                            mode = "SMTP_LOGIN";
-                            SMTP.disconnect(); //Disconnect (QUIT) successful connection
-                        } else {
-                            statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
-                            SMTP.close(); //Server resources might be open, so close()
-                        }
-                        eraseFromConsole(waitMsg);
+                        try{
+			    int SMTPPort = Integer.parseInt(userInput.substring(space + 1, userInput.length())); //port
+			    String waitMsg = "Please Wait! Communicating with server...";
+			    sysOut.print(waitMsg);
+			    SMTP = new SMTPSession(SMTPhost, SMTPPort); //New format is host then port
+			    if (SMTP.connect()) {
+				mode = "SMTP_LOGIN";
+				SMTP.disconnect(); //Disconnect (QUIT) successful connection
+			    } else {
+				statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
+				SMTP.close(); //Server resources might be open, so close()
+			    }
+			    eraseFromConsole(waitMsg);
+			}catch(NumberFormatException e){
+			    statusMsg="Please enter a number as the second input (port)";
+			}
                     } else {
                         statusMsg = "Please enter server address and port correctly (without brackets, with space).";
                     }
@@ -209,18 +213,22 @@ public class Client {
                     } else if (checkSpaces(1, userInput)) { //1 space, matches <address port> format
                         int space = findSpace(userInput);
                         String POPhost = userInput.substring(0, space); //address
-                        int POPPort = Integer.parseInt(userInput.substring(space + 1, userInput.length())); //port
-                        String waitMsg = "Please Wait! Communicating with server...";
-                        sysOut.print(waitMsg);
-                        POP = new POPSession(POPhost, POPPort); //New format is host then port
-                        if (POP.connect()) {
-                            mode = "POP_LOGIN";
-                            POP.disconnect(); //Disconnect (QUIT) successful connection
-                        } else {
-                            statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
-                            POP.close(); //Server resources might be open, so close()
-                        }
-                        eraseFromConsole(waitMsg);
+                        try{
+			    int POPPort = Integer.parseInt(userInput.substring(space + 1, userInput.length())); //port
+			    String waitMsg = "Please Wait! Communicating with server...";
+			    sysOut.print(waitMsg);
+			    POP = new POPSession(POPhost, POPPort); //New format is host then port
+			    if (POP.connect()) {
+				mode = "POP_LOGIN";
+				POP.disconnect(); //Disconnect (QUIT) successful connection
+			    } else {
+				statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
+				POP.close(); //Server resources might be open, so close()
+			    }
+			    eraseFromConsole(waitMsg);
+			}catch(NumberFormatException e){
+			    statusMsg="Please enter a number as the second input (port)";
+			}
                     } else {
                         statusMsg = "Please enter server address and port correctly (without brackets, with space).";
                     }
