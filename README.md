@@ -9,6 +9,7 @@ Like a simpler Mozilla Thunderbird, it allows users to securely view and send em
 Open your favorite console and type: java Client. It's that simple!
 
 (Assuming you've installed the latest JVM, downloaded the repo, and navigated to the folder.)
+
 (If using source code, type javac *.java to compile all Java files in the source code folder, then run.)
 
 ## Instructions
