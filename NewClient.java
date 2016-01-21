@@ -64,8 +64,43 @@ public class NewClient {
         NewClient mailApp = NewClient(); //create a new NewClient object
 
         while (! mailApp.isQuitUser()) { //Until user quits
+            mailApp.clearScreen(); //Clear the screen
             if (mailApp.getMode().equals("WELCOME")) {
                 mailApp.modeWelcome();
+            } else if (mailApp.getMode().equals("PROT_CHOOSE")) {
+                mailApp.modeProtChoose();
+            } else if (mailApp.getMode().equals("SMTP_SETUP")) {
+                mailApp.modeSmtpSetup();
+            } else if (mailApp.getMode().equals("SMTP_LOGIN")) {
+                mailApp.modeSmtpLogin();
+            } else if (mailApp.getMode().equals("SMTP_MAIN")) {
+                mailApp.modeSmtpMain();
+            } else if (mailApp.getMode().equals("SMTP_FROM")) {
+                mailApp.modeSmtpFrom();
+            } else if (mailApp.getMode().equals("SMTP_TO")) {
+                mailApp.modeSmtpTo();
+            } else if (mailApp.getMode().equals("SMTP_CC")) {
+                mailApp.modeSmtpCC();
+            } else if (mailApp.getMode().equals("SMTP_BCC")) {
+                mailApp.modeSmtpBCC();
+            } else if (mailApp.getMode().equals("SMTP_BODY")) {
+                mailApp.modeSmtpBody();
+            } else if (mailApp.getMode().equals("SMTP_CONFIRM")) {
+                mailApp.modeSmtpConfirm();
+            } else if (mailApp.getMode().equals("SMTP_RESULT")) {
+                mailApp.modeSmtpResult();
+            } else if (mailApp.getMode().equals("POP_SETUP")) {
+                mailApp.modePopSetup();
+            } else if (mailApp.getMode().equals("POP_LOGIN")) {
+                mailApp.modePopLogin();
+            } else if (mailApp.getMode().equals("POP_MAIN")) {
+                mailApp.modePopMain();
+            } else if (mailApp.getMode().equals("POP_INBOX")) {
+                mailApp.modePopMain();
+            } else if (mailApp.getMode().equals("POP_VIEW")) {
+                mailApp.modePopView();
+            } else {
+                System.out.println("What have you done?!?!");
             }
         }
     }
@@ -150,6 +185,12 @@ public class NewClient {
 
     public void modePopView(){
         //
+    }
+
+    //-----TUI METHODS-----
+    public void clearScreen() {
+        System.out.println("\033[H\033[2J");
+        System.out.flush();
     }
 
 }
