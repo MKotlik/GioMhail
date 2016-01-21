@@ -66,9 +66,9 @@
 
    - [DONE] Make HeaderStore shortcuts return "" on non-existant headers
    - [DONE] Make getMessageSummary check for "" instead of null
-   - Make all message displays (top of SMTP menus) pull respective headers
+   - [DONE] Make all message displays (top of SMTP menus) pull respective headers
 
-   - [DONE] Fix integer parsing attempts on non-integer args (bad input)
+   - [NOT FULLY FIXED] Fix integer parsing attempts on non-integer args (bad input)
    - Catch errors that are thrown in session methods.
 
    - parseFrom and parseTo: Check that no stray characters after last '>'
