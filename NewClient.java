@@ -26,7 +26,9 @@ import java.util.*;
 public class NewClient {
     //User IO vars
     private BufferedReader sysIn; //Read from console
-    //private PrintStream sysOut; //leave out for now to test try/catch necessity
+    private PrintStream sysOut; //leave out for now to test try/catch necessity
+    private String userInput;
+    private boolean consoleError; //if IOException on console read
 
     //Loop/Mode vars
     private boolean quitUser; //Whether or not user has quit
@@ -50,25 +52,25 @@ public class NewClient {
     //Later, add vars for attachments, for localMsgID, for sending from text file
 
     //Default constructor
-
     public NewClient() {
         sysIn = new BufferedReader(new InputStreamReader(System.in));
-        //sysOut = System.out;
+        sysOut = System.out;
+        userInput = "";
+        consoleError = false;
         quitUser = false;
-        mode = "Wtf";
+        mode = "WELCOME";
         statusMsg = "";
     }
 
     //-----MAIN-----
-    public static void main(String[]args) {
+    public static void main(String[] args) {
         NewClient mailApp = new NewClient(); //create a new NewClient object
         mailApp.runLoop(); //Runs program loop
-        
     }
 
     //-----LOOP METHODS-----
-    private void runLoop(){
-        while (! quitUser) { //Until user quits
+    private void runLoop() {
+        while (!quitUser) { //Until user quits
             clearScreen(); //Clear the screen
             if (getMode().equals("WELCOME")) {
                 modeWelcome();
@@ -105,12 +107,13 @@ public class NewClient {
             } else if (getMode().equals("POP_VIEW")) {
                 modePopView();
             } else {
-                System.out.println("What have you done?!?!");
+                sysOut.println("What have you done?!?!");
                 quitUser = true;
             }
         }
+        System.out.println(">>GOODBYE<<");
     }
-    
+
     public boolean isQuitUser() {
         return quitUser;
     }
@@ -120,75 +123,121 @@ public class NewClient {
     }
 
     //-----MODE METHODS-----
-    public void modeWelcome(){
+    public void modeWelcome() {
+        //--Print menu header
+        System.out.println("GioMhail\n" +
+                "Menu Map: Welcome\n" +
+                "\n" +
+                "Welcome to GioMhail, your go-to email client!\n" +
+                "Would you like to continue [y] or exit [exit]?\n" +
+                "Cmds: [y] (y + <ENTER>), [exit] (exit + <ENTER>)");
+        System.out.println(""); //Blank line
+        printStatusMsg(); //Print statusMsg
+        promptGetUserInput(); //Print prompt, get input
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (userInput.equalsIgnoreCase("y")) {
+            mode = "PROT_CHOOSE";
+        } else if (userInput.equalsIgnoreCase("exit")) {
+            quitUser = true;
+        } else {
+            statusMsg = "Please enter a valid command!";
+        }
+    }
+
+    public void modeProtChoose() {
+        //--Print menu header
+        System.out.println("GioMhail\n" +
+                "Menu Map: Welcome > Choose Read\\Send\n" +
+                "Choose Read\\Send\n" +
+                "\n" +
+                "Would you like to read [read], send [send], or exit [exit]?\n" +
+                "Cmds: [read], [send], [exit]");
+        System.out.println(""); //Blank line
+        printStatusMsg(); //Print statusMsg
+        promptGetUserInput(); //Print prompt, get input
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (userInput.equalsIgnoreCase("read")) {
+            mode = "POP_SETUP";
+        } else if (userInput.equalsIgnoreCase("send")) {
+            mode = "SMTP_SETUP";
+        } else if (userInput.equalsIgnoreCase("exit")) {
+            quitUser = true;
+        } else {
+            statusMsg = "Please enter a valid command!";
+        }
+    }
+
+    public void modeSmtpSetup() {
         //
     }
 
-    public void modeProtChoose(){
+    public void modeSmtpLogin() {
         //
     }
 
-    public void modeSmtpSetup(){
+    public void modeSmtpMain() {
         //
     }
 
-    public void modeSmtpLogin(){
+    public void modeSmtpSubject() {
         //
     }
 
-    public void modeSmtpMain(){
+    public void modeSmtpFrom() {
         //
     }
 
-    public void modeSmtpSubject(){
+    public void modeSmtpTo() {
         //
     }
 
-    public void modeSmtpFrom(){
+    public void modeSmtpCC() {
         //
     }
 
-    public void modeSmtpTo(){
+    public void modeSmtpBCC() {
         //
     }
 
-    public void modeSmtpCC(){
+    public void modeSmtpBody() {
         //
     }
 
-    public void modeSmtpBCC(){
+    public void modeSmtpConfirm() {
         //
     }
 
-    public void modeSmtpBody(){
+    public void modeSmtpResult() {
         //
     }
 
-    public void modeSmtpConfirm(){
+    public void modePopSetup() {
         //
     }
 
-    public void modeSmtpResult(){
+    public void modePopLogin() {
         //
     }
 
-    public void modePopSetup(){
+    public void modePopMain() {
         //
     }
 
-    public void modePopLogin(){
+    public void modePopInbox() {
         //
     }
 
-    public void modePopMain(){
-        //
-    }
-
-    public void modePopInbox(){
-        //
-    }
-
-    public void modePopView(){
+    public void modePopView() {
         //
     }
 
@@ -198,4 +247,21 @@ public class NewClient {
         System.out.flush();
     }
 
+    //Prints the statusMsg and resets
+    private void printStatusMsg() {
+        if (!statusMsg.equals("")) {
+            System.out.println(statusMsg);
+        }
+        statusMsg = "";
+    }
+
+    //Prompt and read user input
+    private void promptGetUserInput() {
+        try {
+            System.out.print("|> ");
+            userInput = sysIn.readLine();
+        } catch (IOException e) {
+            consoleError = true;
+        }
+    }
 }

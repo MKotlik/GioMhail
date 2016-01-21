@@ -72,7 +72,7 @@ public class Client {
                             "Would you like to continue [y] or exit [exit]?\n" +
                             "Cmds: [y] (y + <ENTER>), [exit] (exit + <ENTER>)");
                     sysOut.println(""); //Blank line
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     sysOut.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     //--Check user input
@@ -92,7 +92,7 @@ public class Client {
                             "Would you like to read [read], send [send], or exit [exit]?\n" +
                             "Cmds: [read], [send], [exit]");
                     sysOut.println("");
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     System.out.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     //--Check User Input
@@ -115,7 +115,7 @@ public class Client {
                     System.out.println("Cmds: <address port>, [back], [exit]");
                     //NOTE: server info format should be address, then port (Misha)
                     System.out.println("");
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     sysOut.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     //--Check user input
@@ -126,22 +126,22 @@ public class Client {
                     } else if (checkSpaces(1, userInput)) { //1 space, matches <address port> format
                         int space = findSpace(userInput);
                         String SMTPhost = userInput.substring(0, space); //address
-                        try{
-			    int SMTPPort = Integer.parseInt(userInput.substring(space + 1, userInput.length())); //port
-			    String waitMsg = "Please Wait! Communicating with server...";
-			    sysOut.print(waitMsg);
-			    SMTP = new SMTPSession(SMTPhost, SMTPPort); //New format is host then port
-			    if (SMTP.connect()) {
-				mode = "SMTP_LOGIN";
-				SMTP.disconnect(); //Disconnect (QUIT) successful connection
-			    } else {
-				statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
-				SMTP.close(); //Server resources might be open, so close()
-			    }
-			    eraseFromConsole(waitMsg);
-			}catch(NumberFormatException e){
-			    statusMsg="Please enter a number as the second input (port)";
-			}
+                        try {
+                            int SMTPPort = Integer.parseInt(userInput.substring(space + 1, userInput.length())); //port
+                            String waitMsg = "Please Wait! Communicating with server...";
+                            sysOut.print(waitMsg);
+                            SMTP = new SMTPSession(SMTPhost, SMTPPort); //New format is host then port
+                            if (SMTP.connect()) {
+                                mode = "SMTP_LOGIN";
+                                SMTP.disconnect(); //Disconnect (QUIT) successful connection
+                            } else {
+                                statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
+                                SMTP.close(); //Server resources might be open, so close()
+                            }
+                            eraseFromConsole(waitMsg);
+                        } catch (NumberFormatException e) {
+                            statusMsg = "Please enter a number as the second input (port)";
+                        }
                     } else {
                         statusMsg = "Please enter server address and port correctly (without brackets, with space).";
                     }
@@ -155,7 +155,7 @@ public class Client {
                     System.out.println("Cmds: <address port>, [back], [exit]");
                     //NOTE: server info format should be address, then port (Misha)
                     System.out.println("");
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     sysOut.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     //--Check user input
@@ -166,22 +166,22 @@ public class Client {
                     } else if (checkSpaces(1, userInput)) { //1 space, matches <address port> format
                         int space = findSpace(userInput);
                         String POPhost = userInput.substring(0, space); //address
-                        try{
-			    int POPPort = Integer.parseInt(userInput.substring(space + 1, userInput.length())); //port
-			    String waitMsg = "Please Wait! Communicating with server...";
-			    sysOut.print(waitMsg);
-			    POP = new POPSession(POPhost, POPPort); //New format is host then port
-			    if (POP.connect()) {
-				mode = "POP_LOGIN";
-				POP.disconnect(); //Disconnect (QUIT) successful connection
-			    } else {
-				statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
-				POP.close(); //Server resources might be open, so close()
-			    }
-			    eraseFromConsole(waitMsg);
-			}catch(NumberFormatException e){
-			    statusMsg="Please enter a number as the second input (port)";
-			}
+                        try {
+                            int POPPort = Integer.parseInt(userInput.substring(space + 1, userInput.length())); //port
+                            String waitMsg = "Please Wait! Communicating with server...";
+                            sysOut.print(waitMsg);
+                            POP = new POPSession(POPhost, POPPort); //New format is host then port
+                            if (POP.connect()) {
+                                mode = "POP_LOGIN";
+                                POP.disconnect(); //Disconnect (QUIT) successful connection
+                            } else {
+                                statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
+                                POP.close(); //Server resources might be open, so close()
+                            }
+                            eraseFromConsole(waitMsg);
+                        } catch (NumberFormatException e) {
+                            statusMsg = "Please enter a number as the second input (port)";
+                        }
                     } else {
                         statusMsg = "Please enter server address and port correctly (without brackets, with space).";
                     }
@@ -195,7 +195,7 @@ public class Client {
                     System.out.println("Please enter username and password.");
                     System.out.println("Cmds: <user pass>, [back], [exit]");
                     System.out.println("");
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     sysOut.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     //--Check user input
@@ -236,7 +236,7 @@ public class Client {
                     System.out.println("Please enter username and password.");
                     System.out.println("Cmds: <user pass>, [back], [exit]");
                     System.out.println("");
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     sysOut.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     //--Check user input
@@ -278,7 +278,7 @@ public class Client {
                     System.out.println("Would you like to send an email?");
                     System.out.println("Cmds: [y], [back], [exit]");
                     System.out.println("");
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     System.out.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     if (userInput.equalsIgnoreCase("y")) {
@@ -298,11 +298,11 @@ public class Client {
                     System.out.println("Send: Subject");
                     sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
                     sysOut.println(SMTP.getUser());
-		    printMessage(newMsg, msgBodyArray);
+                    printMessage(newMsg, msgBodyArray);
                     System.out.println("Please enter a subject");
                     System.out.println("Cmds: <subject>, [back], [exit]");
                     System.out.println("");
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     System.out.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     if (userInput.equalsIgnoreCase("back")) {
@@ -320,13 +320,13 @@ public class Client {
                     System.out.println("Send: From");
                     sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
                     sysOut.println(SMTP.getUser());
-		    printMessage(newMsg, msgBodyArray);
+                    printMessage(newMsg, msgBodyArray);
                     System.out.println("Please enter your From name & address in the format " +
                             "First Last <user@server.com>, with brackets.");
                     System.out.println("Note, the address should correspond to your account on this server.");
                     System.out.println("Cmds: <First Last <from address>>, [back], [exit]");
                     System.out.println("");
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     System.out.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     if (userInput.equalsIgnoreCase("back")) {
@@ -349,13 +349,13 @@ public class Client {
                     System.out.println("Send: To");
                     sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
                     sysOut.println(SMTP.getUser());
-		    printMessage(newMsg, msgBodyArray);
+                    printMessage(newMsg, msgBodyArray);
                     System.out.println("Please enter a list of 'to' names & addresses.");
                     System.out.println("Follow the format: First Last <user@server.com>, " +
                             "First Last <user@server.com>, ... Use brackets.");
                     System.out.println("Cmds: <list of (First Last <to address>)>, [back], [exit]");
                     System.out.println("");
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     System.out.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     if (userInput.equalsIgnoreCase("back")) {
@@ -378,7 +378,7 @@ public class Client {
                     System.out.println("Send: CC");
                     sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
                     sysOut.println(SMTP.getUser());
-		    printMessage(newMsg, msgBodyArray);
+                    printMessage(newMsg, msgBodyArray);
                     System.out.println("You may choose to enter a list of CC names & addresses, or enter [n] to skip.");
                     System.out.println("Follow the format: First Last <user@server.com>, " +
                             "First Last <user@server.com>, ... Use brackets.");
@@ -408,7 +408,7 @@ public class Client {
                     System.out.println("Send: BCC");
                     sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
                     sysOut.println(SMTP.getUser());
-		    printMessage(newMsg, msgBodyArray);
+                    printMessage(newMsg, msgBodyArray);
                     System.out.println("You may choose to enter a list of BCC names & addresses, or enter [n] to skip.");
                     System.out.println("Follow the format: First Last <user@server.com>, " +
                             "First Last <user@server.com>, ... Use brackets.");
@@ -438,7 +438,7 @@ public class Client {
                     System.out.println("Send: Message Body");
                     sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
                     sysOut.println(SMTP.getUser());
-		    printMessage(newMsg, msgBodyArray);
+                    printMessage(newMsg, msgBodyArray);
                     System.out.println("");
                     System.out.println("Enter the body of your message line by line.\n" +
                             "Use [$del] to jump back and delete the previous line.\n");
@@ -474,12 +474,12 @@ public class Client {
                     System.out.println("Send: Confirm");
                     sysOut.println(SMTP.getHost() + " | " + SMTP.getPort());
                     sysOut.println(SMTP.getUser());
-		    printMessage(newMsg, msgBodyArray);
+                    printMessage(newMsg, msgBodyArray);
                     System.out.println("");
                     System.out.println("Are you ready to send this email?");
                     System.out.println("Cmds: [y], [back], [exit]");
                     System.out.println("");
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     System.out.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     if (userInput.equalsIgnoreCase("y")) {
@@ -491,7 +491,7 @@ public class Client {
                     } else {
                         statusMsg = "Please enter a valid command!";
                     }
-                }else if (mode.equals("SMTP_RESULT")) {
+                } else if (mode.equals("SMTP_RESULT")) {
                     boolean connFailed = false; //Used to check for [y] after failed connection
                     String sendResult = ""; //Store result of sending msg here
                     boolean unknownStatus = false; //Use in case we add a sendMessage status and forget to update Client
@@ -556,7 +556,7 @@ public class Client {
                         sysOut.println("");
                         statusMsg = "Connection issue (server not connected). Please try again.";
                     }
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     System.out.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     //--Check user input
@@ -585,7 +585,7 @@ public class Client {
                     } else {
                         statusMsg = "Please enter a valid command!";
                     }
-                }else if (mode.equals("POP_MAIN")) {
+                } else if (mode.equals("POP_MAIN")) {
                     boolean connFailed = false; //Used to check for [y] after failed connection
                     //--Print menu header
                     sysOut.println("GioMhail");
@@ -624,7 +624,7 @@ public class Client {
                         sysOut.println("");
                         statusMsg = "Connection issue (server not connected). Please try again.";
                     }
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     sysOut.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     //--Check user input
@@ -690,7 +690,7 @@ public class Client {
                         sysOut.println("");
                         statusMsg = "Connection issue (server not connected). Please try again.";
                     }
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     sysOut.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     //Check user input
@@ -809,7 +809,7 @@ public class Client {
                         sysOut.println("");
                         statusMsg = "Connection issue (server not connected). Please try again.";
                     }
-		    statusMsg=printStatusMsg(statusMsg);
+                    statusMsg = printStatusMsg(statusMsg);
                     sysOut.print("|> "); //Prompt
                     String userInput = sysIn.readLine();
                     //--Check user input
@@ -957,31 +957,33 @@ public class Client {
         }
         return numSpaces == reqSpaces;
     }
-    public static String printStatusMsg(String statusMsg){
-	if (!statusMsg.equals("")) { //Print statusMsg
-	    System.out.println(statusMsg);
-	    statusMsg = "";
-	}
-	return statusMsg;
+
+    public static String printStatusMsg(String statusMsg) {
+        if (!statusMsg.equals("")) { //Print statusMsg
+            System.out.println(statusMsg);
+            statusMsg = "";
+        }
+        return statusMsg;
     }
-    public static void printMessage(Message newMsg, ArrayList<String> msgBodyArray){
-	System.out.println("=====================================================================");
-	System.out.println("");
-	System.out.println("---New Email---");
-	System.out.println("");
-	System.out.println("Subject: " + newMsg.getHeaderStore().getSubject());
-	System.out.println("From: " + newMsg.getHeaderStore().getFrom());
-	System.out.println("To: " + newMsg.getHeaderStore().getTo());
-	System.out.println("CC: " + newMsg.getHeaderStore().getCC());
-	System.out.println("BCC: " + newMsg.getHeaderStore().getBCC());
-	System.out.println("");
-	System.out.println("Body: ");
-	System.out.println("---------------------------------------------------------------------");
-	for (int i = 0; i < msgBodyArray.size(); i++) {
-	    System.out.println(msgBodyArray.get(i));
-	}
-	System.out.println(""); //blank line as cushion
-	System.out.println("=====================================================================");
+
+    public static void printMessage(Message newMsg, ArrayList<String> msgBodyArray) {
+        System.out.println("=====================================================================");
+        System.out.println("");
+        System.out.println("---New Email---");
+        System.out.println("");
+        System.out.println("Subject: " + newMsg.getHeaderStore().getSubject());
+        System.out.println("From: " + newMsg.getHeaderStore().getFrom());
+        System.out.println("To: " + newMsg.getHeaderStore().getTo());
+        System.out.println("CC: " + newMsg.getHeaderStore().getCC());
+        System.out.println("BCC: " + newMsg.getHeaderStore().getBCC());
+        System.out.println("");
+        System.out.println("Body: ");
+        System.out.println("---------------------------------------------------------------------");
+        for (int i = 0; i < msgBodyArray.size(); i++) {
+            System.out.println(msgBodyArray.get(i));
+        }
+        System.out.println(""); //blank line as cushion
+        System.out.println("=====================================================================");
     }
 }
 
