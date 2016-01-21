@@ -55,57 +55,62 @@ public class NewClient {
         sysIn = new BufferedReader(new InputStreamReader(System.in));
         //sysOut = System.out;
         quitUser = false;
-        mode = "WELCOME";
+        mode = "Wtf";
         statusMsg = "";
     }
 
     //-----MAIN-----
-    private static void main(String[]args) {
-        NewClient mailApp = NewClient(); //create a new NewClient object
-
-        while (! mailApp.isQuitUser()) { //Until user quits
-            mailApp.clearScreen(); //Clear the screen
-            if (mailApp.getMode().equals("WELCOME")) {
-                mailApp.modeWelcome();
-            } else if (mailApp.getMode().equals("PROT_CHOOSE")) {
-                mailApp.modeProtChoose();
-            } else if (mailApp.getMode().equals("SMTP_SETUP")) {
-                mailApp.modeSmtpSetup();
-            } else if (mailApp.getMode().equals("SMTP_LOGIN")) {
-                mailApp.modeSmtpLogin();
-            } else if (mailApp.getMode().equals("SMTP_MAIN")) {
-                mailApp.modeSmtpMain();
-            } else if (mailApp.getMode().equals("SMTP_FROM")) {
-                mailApp.modeSmtpFrom();
-            } else if (mailApp.getMode().equals("SMTP_TO")) {
-                mailApp.modeSmtpTo();
-            } else if (mailApp.getMode().equals("SMTP_CC")) {
-                mailApp.modeSmtpCC();
-            } else if (mailApp.getMode().equals("SMTP_BCC")) {
-                mailApp.modeSmtpBCC();
-            } else if (mailApp.getMode().equals("SMTP_BODY")) {
-                mailApp.modeSmtpBody();
-            } else if (mailApp.getMode().equals("SMTP_CONFIRM")) {
-                mailApp.modeSmtpConfirm();
-            } else if (mailApp.getMode().equals("SMTP_RESULT")) {
-                mailApp.modeSmtpResult();
-            } else if (mailApp.getMode().equals("POP_SETUP")) {
-                mailApp.modePopSetup();
-            } else if (mailApp.getMode().equals("POP_LOGIN")) {
-                mailApp.modePopLogin();
-            } else if (mailApp.getMode().equals("POP_MAIN")) {
-                mailApp.modePopMain();
-            } else if (mailApp.getMode().equals("POP_INBOX")) {
-                mailApp.modePopMain();
-            } else if (mailApp.getMode().equals("POP_VIEW")) {
-                mailApp.modePopView();
-            } else {
-                System.out.println("What have you done?!?!");
-            }
-        }
+    public static void main(String[]args) {
+        NewClient mailApp = new NewClient(); //create a new NewClient object
+        mailApp.runLoop(); //Runs program loop
+        
     }
 
     //-----LOOP METHODS-----
+    private void runLoop(){
+        while (! quitUser) { //Until user quits
+            clearScreen(); //Clear the screen
+            if (getMode().equals("WELCOME")) {
+                modeWelcome();
+            } else if (getMode().equals("PROT_CHOOSE")) {
+                modeProtChoose();
+            } else if (getMode().equals("SMTP_SETUP")) {
+                modeSmtpSetup();
+            } else if (getMode().equals("SMTP_LOGIN")) {
+                modeSmtpLogin();
+            } else if (getMode().equals("SMTP_MAIN")) {
+                modeSmtpMain();
+            } else if (getMode().equals("SMTP_FROM")) {
+                modeSmtpFrom();
+            } else if (getMode().equals("SMTP_TO")) {
+                modeSmtpTo();
+            } else if (getMode().equals("SMTP_CC")) {
+                modeSmtpCC();
+            } else if (getMode().equals("SMTP_BCC")) {
+                modeSmtpBCC();
+            } else if (getMode().equals("SMTP_BODY")) {
+                modeSmtpBody();
+            } else if (getMode().equals("SMTP_CONFIRM")) {
+                modeSmtpConfirm();
+            } else if (getMode().equals("SMTP_RESULT")) {
+                modeSmtpResult();
+            } else if (getMode().equals("POP_SETUP")) {
+                modePopSetup();
+            } else if (getMode().equals("POP_LOGIN")) {
+                modePopLogin();
+            } else if (getMode().equals("POP_MAIN")) {
+                modePopMain();
+            } else if (getMode().equals("POP_INBOX")) {
+                modePopMain();
+            } else if (getMode().equals("POP_VIEW")) {
+                modePopView();
+            } else {
+                System.out.println("What have you done?!?!");
+                quitUser = true;
+            }
+        }
+    }
+    
     public boolean isQuitUser() {
         return quitUser;
     }
