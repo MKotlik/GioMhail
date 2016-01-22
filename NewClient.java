@@ -76,7 +76,7 @@ public class NewClient {
 
     //POP vars
     private POPSession POP = null;
-    private int msgCount = 0; //updated number of msgs in inbox
+    private int msgCount; //updated number of msgs in inbox
     private int minMsg = 0; //Oldest message being listed in inbox
     private int maxMsg = 0; //Newest message being listed in inbox
     private int viewMsgNum = 0; //msgNum (ID) of message to view
@@ -642,19 +642,192 @@ public class NewClient {
     }
 
     private void modePopSetup() {
-        //
+        //Change frame vars & print
+        menuMap = "Menu Map: Welcome > Choose Read\\Send > Read: > Setup";
+        menuTitle = "Read: Setup";
+        optField = "";
+        menuInstructions = "Please enter the address and port of your POP server.";
+        cmdList = "Cmds: <address port>, [back], [exit]";
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "PROT_CHOOSE";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else if (checkInputMatch("NONE", "STRING", "INT")) {
+            String POPHost = getStrElementUserInput(1);
+            int POPPort = getIntElementUserInput(2);
+            System.out.print(waitMsg); //Wait on server operations
+            POP = new POPSession(POPHost, POPPort);
+            if (POP.connect()) {
+                POP.disconnect(); //Disconnect (QUIT) successful connection
+                mode = "POP_LOGIN";
+            } else {
+                POP.close(); //Server resources might be open, so close()
+                statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
+            }
+        } else {
+            statusMsg = "Please enter a text server address followed by a port number (w/ space, w/o brackets).";
+        }
     }
 
     private void modePopLogin() {
-        //
+        //Change frame vars & print
+        menuMap = "Menu Map: Welcome > Choose Read\\Send > Read: > Setup > Login";
+        menuTitle = "Read: Login";
+        optField = "Server: " + POP.getHost() + " | " + POP.getPort();
+        menuInstructions = "Please enter your username and password.";
+        cmdList = "Cmds: <user pass>, [back], [exit]";
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "POP_SETUP";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else if (checkInputMatch("NONE", "STRING", "STRING") || checkInputMatch("NONE", "STRING", "INT")) {
+            String user = getStrElementUserInput(1);
+            String pass = getStrElementUserInput(2);
+            POP.setUser(user);
+            POP.setPass(pass);
+            System.out.print(waitMsg); //Wait on server operations
+            if (POP.connect()) {
+                if (POP.POPLogin()) {
+                    mode = "POP_MAIN";
+                } else {
+                    statusMsg = "Login failed. Ensure correct username and password, then try again.";
+                }
+                POP.disconnect(); //Disconnect (QUIT) successful connection
+            } else {
+                POP.close(); //Server resources might be open, so close()
+                statusMsg = "Connection failed. Please try again.";
+            }
+        } else {
+            statusMsg = "Please enter username and password correctly (w/ space, w/o brackets).";
+        }
     }
 
     private void modePopMain() {
-        //
+        //Result vars
+        boolean connFailed = false; //Used to check for [y] after failed connection
+        //Frame vars
+        menuMap = "Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login > Main";
+        menuTitle = "Read: Main";
+        optField = "Server: " + POP.getHost() + " | " + POP.getPort() + "\n" +
+                "User: " + POP.getUser();
+        printFrameHeader(); //Print just top of menu
+        //Server interaction begins
+        System.out.print(waitMsg);
+        if (POP.connect()) { //connection success
+            if (POP.POPLogin()) { //login success
+                msgCount = POP.getMessageCount(); //Update msgCount
+                //get HeaderStore of latest message here
+                POP.disconnect();
+                menuInstructions = "How many messages would you to list in Inbox? [list <num>]";
+                cmdList = "Cmds: [list <num>], [back], [exit]";
+            } else { //login failed
+                POP.disconnect();
+                eraseFromConsole(waitMsg);
+                connFailed = true;
+                optField = "You have " + msgCount + " messages.";
+                //Add summaryLine of newest message here.
+                menuInstructions = "Connection issue (login failure).\n" +
+                        "Would you like to retry connection?";
+                cmdList = "Cmds: [y], [back], [exit]"; //cmdList stays same
+            }
+        } else { //connection failed
+            POP.close();
+            eraseFromConsole(waitMsg);
+            connFailed = true;
+            menuInstructions = "Connection issue (server not connected).\n" +
+                    "Would you like to retry connection?";
+            cmdList = "Cmds: [y], [back], [exit]"; //cmdList stays same
+        }
+        //Server enteraction ended
+        clearScreen(); //Clear screen from before results got processed (header + waitMsg)
+        printFrame(); //Display result
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("y", "NONE", "NONE") && connFailed) {
+            mode = "POP_MAIN"; //retry access
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "POP_LOGIN";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else if (checkInputMatch("LIST", "INT", "NONE")) {
+            int numMsgs = getIntElementUserInput(2);
+            if (numMsgs > msgCount) {
+                numMsgs = msgCount;
+            }
+            minMsg = msgCount - numMsgs + 1;
+            maxMsg = msgCount;
+            mode = "POP_INBOX";
+        } else {
+            statusMsg = "Please enter a valid command!";
+        }
     }
 
     private void modePopInbox() {
-        //
+        //Result vars
+        boolean connFailed = false; //Used to check for [y] after failed connection
+        //Frame vars
+        menuMap = "Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login > Main > Inbox";
+        menuTitle = "Read: Inbox";
+        optField = "Server: " + POP.getHost() + " | " + POP.getPort() + "\n" +
+                "User: " + POP.getUser();
+        printFrameHeader(); //Print just top of menu
+        //Server interaction begins
+        System.out.print(waitMsg);
+        if (POP.connect()) { //connection success
+            if (POP.POPLogin()) { //login success
+                msgCount = POP.getMessageCount(); //Update msgCount
+                ArrayList<HeaderStore> HeaderStoreList = POP.getHeaderStoreList(minMsg, maxMsg);
+                POP.disconnect();
+                outField = "=====================================================================\n";
+                outField += "Msg # |      Date & Time Sent       |    From     |      Subject\n";
+                outField = getMessageSummaries();
+
+
+                menuInstructions = "How many messages would you to list in Inbox? [list <num>]";
+                cmdList = "Cmds: [list <num>], [back], [exit]";
+            } else { //login failed
+                POP.disconnect();
+                eraseFromConsole(waitMsg);
+                connFailed = true;
+                optField = "You have " + msgCount + " messages.";
+                //Add summaryLine of newest message here.
+                menuInstructions = "Connection issue (login failure).\n" +
+                        "Would you like to retry connection?";
+                cmdList = "Cmds: [y], [back], [exit]"; //cmdList stays same
+            }
+        } else { //connection failed
+            POP.close();
+            eraseFromConsole(waitMsg);
+            connFailed = true;
+            menuInstructions = "Connection issue (server not connected).\n" +
+                    "Would you like to retry connection?";
+            cmdList = "Cmds: [y], [back], [exit]"; //cmdList stays same
+        }
+        //Server enteraction ended
+        clearScreen(); //Clear screen from before results got processed (header + waitMsg)
+        printFrame(); //Display result
+        getUserInput();
     }
 
     private void modePopView() {
@@ -828,9 +1001,9 @@ public class NewClient {
         } else if (reqSpaces == 1 && (argType2.equals("NONE"))) { //cmd arg1
             intScan.next(); //skip cmd
             if (intScan.hasNextInt(10)) { //second element is int
-                return argType1.equals("INT");
+                return userInput.toUpperCase().startsWith(cmd) && argType1.equals("INT");
             } else {
-                return argType1.equals("STRING");
+                return userInput.toUpperCase().startsWith(cmd) && argType1.equals("STRING");
             }
         } else if (reqSpaces == 2) { //cmd arg1 arg2
             boolean match1 = false;
@@ -842,9 +1015,9 @@ public class NewClient {
             }
             intScan.next(); //move to 3rd element
             if (intScan.hasNextInt(10)) { //third element is int
-                return match1 && argType2.equals("INT");
+                return userInput.toUpperCase().startsWith(cmd) && match1 && argType2.equals("INT");
             } else {
-                return match1 && argType2.equals("STRING");
+                return userInput.toUpperCase().startsWith(cmd) && match1 && argType2.equals("STRING");
             }
         }
         return false; //something strange has happened
@@ -907,5 +1080,34 @@ public class NewClient {
             }
         }
         return count;
+    }
+
+    //-----MESSAGE METHODS-----
+
+    //Prints summary lines from an ArrayList of HeaderStores
+    private String getMessageSummaries(ArrayList<HeaderStore> HeaderStoreList) {
+        String retStr = "";
+        for (int i = HeaderStoreList.size() - 1; i >= 0; i--) {
+            retStr += getMessageSummary(HeaderStoreList.get(i)) + "\n";
+        }
+        return retStr;
+    }
+
+    //Builds a summary line from a HeaderStore
+    private String getMessageSummary(HeaderStore msgHeader) {
+        int msgNum = msgHeader.getMessageNum(); //this is alsways present
+        String date = msgHeader.getDate(); //may be null
+        if (date.equals("")) {
+            date = "NO DATE";
+        }
+        String from = msgHeader.getFrom(); //may be null
+        if (from.equals("")) {
+            from = "NO FROM ADDRESS";
+        }
+        String subject = msgHeader.getSubject(); //may be null
+        if (subject.equals("")) {
+            subject = "NO SUBJECT";
+        }
+        return msgNum + " | " + date + " | " + from + " | " + subject;
     }
 }
