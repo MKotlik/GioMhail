@@ -1,14 +1,22 @@
+import java.util.*;
+import java.io.*;
+
 public class Storage{
     private PrintWriter out;
 
     public String saveMessage(Message newMsg){
-	out=new PrintWriter("file.txt");
-	writeHeader(newMsg);
-	writeMessage(newMsg);
+	try{
+	    out=new PrintWriter("file.txt");
+	    writeHeader(newMsg, newMsg.getHeaderStore());
+	    writeMessage(newMsg);
+	    out.close();
+	    return "SUCCESS";
+	}catch(FileNotFoundException e){
+	    return "ERROR";
+	}
     }
 
-    private boolean writeHeader(Message newMsg){
-	HeaderStore msgHeaders=newMsg.getHeaderStore();
+    private void writeHeader(Message newMsg, HeaderStore msgHeaders){
         String[] headerKeys = msgHeaders.getKeyArray();
         for (int i = 0; i < headerKeys.length; i++) {
             ArrayList<String> headerValueList = msgHeaders.getHeaderValue(headerKeys[i]);
@@ -18,4 +26,18 @@ public class Storage{
             }
         }
     }
+
+    private void writeMessage(Message newMsg){
+	out.print(newMsg.getMessageBody());
+    }
+
+    private int createFileName(HeaderStore msgHeaders){
+	String unHashed = "";
+	String To = msgHeaders.getTo();
+	String From = msgHeaders.getFrom();
+	String Date = msgHeaders.getDate();
+	unHashed = To+":"+From+":"+Date;
+	return unHashed.hashCode();
+    }
+
 }

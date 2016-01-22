@@ -36,7 +36,8 @@ public class Storage{
 	String To = msgHeaders.getTo();
 	String From = msgHeaders.getFrom();
 	String Date = msgHeaders.getDate();
-	unHashed = To+":"+From+":"+Date;
+	String Subject = msgHeaders.getSubject();
+	unHashed = To+":"+From+":"+Date+":"+Subject;
 	return unHashed.hashCode();
     }
 
