@@ -394,7 +394,7 @@ public class Client {
                         quitUser = true;
                     } else { //Assume that its the from address
                         if (parseTo(userInput).equals("GOOD TO")) {
-                            newMsg.getHeaderStore().setHeaderForce("To", userInput);
+                            newMsg.getHeaderStore().setHeaderForce("CC", userInput);
                             mode = "SMTP_BCC";
                         } else {
                             statusMsg = "Please enter a comma-separated list of names & email address with brackets.\n" +
@@ -424,7 +424,7 @@ public class Client {
                         quitUser = true;
                     } else { //Assume that its the from address
                         if (parseTo(userInput).equals("GOOD TO")) {
-                            newMsg.getHeaderStore().setHeaderForce("To", userInput);
+                            newMsg.getHeaderStore().setHeaderForce("BCC", userInput);
                             mode = "SMTP_BODY";
                         } else {
                             statusMsg = "Please enter a comma-separated list of names & email address with brackets.\n" +

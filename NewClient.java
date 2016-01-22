@@ -69,6 +69,7 @@ public class NewClient {
     private String menuInstructions;
     private String cmdList;
     private String statusMsg; //Any error or help messages
+    private String waitMsg; //Displayed during server operations
 
     //POP vars
     private POPSession POP = null;
@@ -104,6 +105,7 @@ public class NewClient {
         menuInstructions = "";
         cmdList = "";
         statusMsg = "";
+        waitMsg = "Please wait! Communicating with server...";
     }
 
     //-----MAIN-----
@@ -126,6 +128,8 @@ public class NewClient {
                 modeSmtpLogin();
             } else if (mode.equals("SMTP_MAIN")) {
                 modeSmtpMain();
+            } else if (mode.equals("SMTP_SUBJECT")) {
+                modeSmtpSubject();
             } else if (mode.equals("SMTP_FROM")) {
                 modeSmtpFrom();
             } else if (mode.equals("SMTP_TO")) {
@@ -159,7 +163,7 @@ public class NewClient {
     }
 
     //-----MODE METHODS-----
-    public void modeWelcome() {
+    private void modeWelcome() {
         //Change frame vars & print
         menuMap = "Welcome";
         menuTitle = "Welcome";
@@ -183,7 +187,7 @@ public class NewClient {
         }
     }
 
-    public void modeProtChoose() {
+    private void modeProtChoose() {
         //Change frame vars & print
         menuMap = "Menu Map: Welcome > Choose Read\\Send";
         menuTitle = "Choose Read\\Send";
@@ -209,7 +213,7 @@ public class NewClient {
         }
     }
 
-    public void modeSmtpSetup() {
+    private void modeSmtpSetup() {
         //Change frame vars & print
         menuMap = "Menu Map: Welcome > Choose Read\\Send > Send: > Setup";
         menuTitle = "Send: Setup";
@@ -224,10 +228,90 @@ public class NewClient {
             System.out.println("Unknown console error detected (Unable to read input).\n" +
                     "Program exiting.");
             quitUser = true;
-        } else if (checkInputMatch("read", "NONE", "NONE")) {
-            mode = "POP_SETUP";
-        } else if (checkInputMatch("send", "NONE", "NONE")) {
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "PROT_CHOOSE";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else if (checkInputMatch("NONE", "STRING", "INT")) {
+            String SMTPHost = getStrElementUserInput(1);
+            int SMTPPort = getIntElementUserInput(2);
+            System.out.print(waitMsg); //Wait on server operations
+            SMTP = new SMTPSession(SMTPHost, SMTPPort);
+            if (SMTP.connect()) {
+                SMTP.disconnect(); //Disconnect (QUIT) successful connection
+                mode = "SMTP_LOGIN";
+            } else {
+                SMTP.close(); //Server resources might be open, so close()
+                statusMsg = "Connection failed. Ensure correct server address and port, then try again.";
+            }
+        } else {
+            statusMsg = "Please enter a text server address followed by a port number (w/ space, w/o brackets).";
+        }
+    }
+
+    private void modeSmtpLogin() {
+        //Change frame vars & print
+        menuMap = "Menu Map: Welcome > Choose Read\\Send > Send: > Setup > Login";
+        menuTitle = "Send: Login";
+        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort();
+        menuInstructions = "Please enter your username and password.";
+        cmdList = "Cmds: <user pass>, [back], [exit]";
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
             mode = "SMTP_SETUP";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else if (checkInputMatch("NONE", "STRING", "STRING") || checkInputMatch("NONE", "STRING", "INT")) {
+            String user = getStrElementUserInput(1);
+            String pass = getStrElementUserInput(2);
+            SMTP.setUser(user);
+            SMTP.setPass(pass);
+            System.out.print(waitMsg); //Wait on server operations
+            if (SMTP.connect()) {
+                if (SMTP.SMTPLogin()) {
+                    mode = "SMTP_MAIN";
+                } else {
+                    statusMsg = "Login failed. Ensure correct username and password, then try again.";
+                }
+                SMTP.disconnect(); //Disconnect (QUIT) successful connection
+            } else {
+                SMTP.close(); //Server resources might be open, so close()
+                statusMsg = "Connection failed. Please try again.";
+            }
+        } else {
+            statusMsg = "Please enter username and password correctly (w/ space, w/o brackets).";
+        }
+    }
+
+    private void modeSmtpMain() {
+        //Change frame vars & print
+        menuMap = "Menu Map: Welcome > Choose Read\\Send > Send: > Setup > Login > Main";
+        menuTitle = "Send: Main Menu";
+        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
+                "User: " + SMTP.getUser();
+        menuInstructions = "Would you like to send an email?";
+        cmdList = "Cmds: [y], [back], [exit]";
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("y", "NONE", "NONE")) {
+            mode = "SMTP_SUBJECT";
+            newMsg = new Message();
+            msgBodyArray = new ArrayList<String>();
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "SMTP_LOGIN";
         } else if (checkInputMatch("exit", "NONE", "NONE")) {
             quitUser = true;
         } else {
@@ -235,68 +319,347 @@ public class NewClient {
         }
     }
 
-    public void modeSmtpLogin() {
+    private void modeSmtpSubject() {
+        //Change frame vars & print
+        menuMap = "Menu Map: Welcome > Choose Read\\Send > Send: > Setup > Login > Main > Subject";
+        menuTitle = "Send: Subject";
+        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
+                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        menuInstructions = "Please enter a subject";
+        cmdList = "Cmds: <subject>, [back], [exit]";
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "SMTP_MAIN";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else { //Assume that its subject
+            newMsg.getHeaderStore().setHeaderForce("Subject", userInput);
+            mode = "SMTP_FROM";
+        }
+    }
+
+    private void modeSmtpFrom() {
+        //Change frame vars & print
+        menuMap = "Menu Map: ... > Choose Read\\Send > Send: > Setup > Login > Main > Subject > From";
+        menuTitle = "Send: From";
+        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
+                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        menuInstructions = "Please enter your From name & address in the format: " +
+                "First Last <user@server.com>, with brackets.\n" +
+                "Note, the address should correspond to your account on this server.";
+        cmdList = "Cmds: <First Last <from address>>, [back], [exit]";
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "SMTP_SUBJECT";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else { //Assume that its from address
+            if (parseFrom(userInput).equals("GOOD FROM")) {
+                newMsg.getHeaderStore().setHeaderForce("From", userInput);
+                mode = "SMTP_TO";
+            } else {
+                statusMsg = "Please enter 1 name & 1 email address with brackets in the format: " +
+                        "First Last <user@server.com>.";
+            }
+        }
+    }
+
+    private void modeSmtpTo() {
+        //Change frame vars & print
+        menuMap = "Menu Map: ... > Send: > Setup > Login > Main > Subject > From > To";
+        menuTitle = "Send: To";
+        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
+                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        menuInstructions = "Please enter a list of 'to' names & addresses.\n" +
+                "Follow the format: First Last <user@server.com>, " +
+                "First Last <user@server.com>, ... Use brackets.";
+        cmdList = "Cmds: <list of (First Last <to address>)>, [back], [exit]";
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "SMTP_FROM";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else { //Assume that its the to addresses
+            if (parseTo(userInput).equals("GOOD TO")) {
+                newMsg.getHeaderStore().setHeaderForce("To", userInput);
+                mode = "SMTP_CC";
+            } else {
+                statusMsg = "Please enter a comma-separated list of names & email address with brackets.\n" +
+                        "Each set should be in the format: First Last <user@server.com>";
+            }
+        }
+    }
+
+    private void modeSmtpCC() {
+        //Change frame vars & print
+        menuMap = "Menu Map: ... > Setup > Login > Main > Subject > From > To > CC";
+        menuTitle = "Send: CC";
+        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
+                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        menuInstructions = "You may choose to enter a list of CC names & addresses, or enter [n] to skip.\n" +
+                "Follow the format: First Last <user@server.com>, " +
+                "First Last <user@server.com>, ... Use brackets.";
+        cmdList = "Cmds: <list of (First Last <CC address>)>, [n], [back], [exit]";
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("n", "NONE", "NONE")) {
+            mode = "SMTP_BCC";
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "SMTP_TO";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else { //Assume that its the CC addresses
+            if (parseTo(userInput).equals("GOOD TO")) {
+                newMsg.getHeaderStore().setHeaderForce("CC", userInput);
+                mode = "SMTP_BCC";
+            } else {
+                statusMsg = "Please enter a comma-separated list of names & email address with brackets.\n" +
+                        "Each set should be in the format: First Last <user@server.com>";
+            }
+        }
+    }
+
+    private void modeSmtpBCC() {
+        //Change frame vars & print
+        menuMap = "Menu Map: ... > Login > Main > Subject > From > To > CC > BCC";
+        menuTitle = "Send: BCC";
+        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
+                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        menuInstructions = "You may choose to enter a list of BCC names & addresses, or enter [n] to skip.\n" +
+                "Follow the format: First Last <user@server.com>, " +
+                "First Last <user@server.com>, ... Use brackets.";
+        cmdList = "Cmds: <list of (First Last <BCC address>)>, [n], [back], [exit]";
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("n", "NONE", "NONE")) {
+            mode = "SMTP_BODY";
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "SMTP_CC";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else { //Assume that its the BCC addresses
+            if (parseTo(userInput).equals("GOOD TO")) {
+                newMsg.getHeaderStore().setHeaderForce("BCC", userInput);
+                mode = "SMTP_BODY";
+            } else {
+                statusMsg = "Please enter a comma-separated list of names & email address with brackets.\n" +
+                        "Each set should be in the format: First Last <user@server.com>";
+            }
+        }
+    }
+
+    private void modeSmtpBody() {
+        //Change frame vars & print
+        menuMap = "Menu Map: ... > Main > Subject > From > To > CC > BCC > Body";
+        menuTitle = "Send: Message Body";
+        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
+                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        menuInstructions = "Enter the body of your message line by line.\n" +
+                "Use [$del] to jump back and delete the previous line.\n";
+        cmdList = "Cmds: <line text>, [$del], [$back], [$exit], [$send]";
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("$del", "NONE", "NONE")) {
+            if (msgBodyArray.size() > 0) {
+                //eraseFromConsole(msgBodyArray.get(msgBodyArray.size() - 1)); //Unnecessary
+                msgBodyArray.remove(msgBodyArray.size() - 1);
+            } else {
+                statusMsg = "Cannot delete a line. No lines remaining.";
+            }
+        } else if (checkInputMatch("$back", "NONE", "NONE")) {
+            mode = "SMTP_BCC";
+        } else if (checkInputMatch("$exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else if (checkInputMatch("$send", "NONE", "NONE")) {
+            String msgBodyStr = "";
+            for (int i = 0; i < msgBodyArray.size(); i++) {
+                msgBodyStr += msgBodyArray.get(i) + "\r\n";
+            }
+            newMsg.setMessageBody(msgBodyStr);
+            mode = "SMTP_CONFIRM";
+        } else { //Assume that its a line of text
+            msgBodyArray.add(userInput);
+        }
+    }
+
+    private void modeSmtpConfirm() {
+        //Change frame vars & print
+        menuMap = "Menu Map: ... > Subject > From > To > CC > BCC > Body > Confirm";
+        menuTitle = "Send: Confirm";
+        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
+                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        menuInstructions = "Are you ready to send this email?";
+        cmdList = "Cmds: [y], [back], [exit]";
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("y", "NONE", "NONE")) {
+            mode = "SMTP_RESULT";
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "SMTP_BODY";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else {
+            statusMsg = "Please enter a valid command!";
+        }
+    }
+
+    private void modeSmtpResult() {
+        //Result vars
+        boolean connFailed = false; //Used to check for [y] after failed connection
+        boolean unknownStatus = false; //Use in case we add a sendMessage status and forget to update Client
+        String sendResult = ""; //Store result of sending msg
+        //Frame vars
+        menuMap = "Menu Map: ... > From > To > CC > BCC > Body > Confirm > Result";
+        menuTitle = "Send: Result";
+        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
+                "User: " + SMTP.getUser();
+        cmdList = "Cmds: [y], [back], [exit]"; //cmdList stays same
+        printFrameHeader(); //Print just top of menu
+        //Server interaction begins
+        System.out.print(waitMsg);
+        if (SMTP.connect()) { //connection success
+            if (SMTP.SMTPLogin()) { //login success
+                sendResult = SMTP.sendMessage(newMsg);
+                SMTP.disconnect();
+                //eraseFromConsole(waitMsg);
+                //Display different prompts based on result
+                if (sendResult.equals("SUCCESS")) {
+                    menuInstructions = "Message sent!\n" +
+                            "Would you like to send another email?";
+                } else if (sendResult.equals("NO FROM") || sendResult.equals("BAD FROM")) {
+                    menuInstructions = "Message not sent due to bad 'From' formatting.\n" +
+                            "Would you like to edit your 'From' address?";
+                } else if (sendResult.equals("NO TO") || sendResult.equals("BAD TO")) {
+                    menuInstructions = "Message not sent due to bad formatting of 'To' addresses.\n" +
+                            "Would you like to edit your 'To' addresses?";
+                } else if (sendResult.equals("MISMATCHED FROM")) {
+                    menuInstructions = "Message not sent.\n" +
+                            "Your 'From' address doesn't match your account on this server.\n" +
+                            "Would you like to edit your 'From' address?";
+                } else if (sendResult.equals("BAD DATA") || sendResult.equals("DATA REFUSED")) {
+                    menuInstructions = "Message not sent due to server error. (" + sendResult + ")\n" +
+                            "Would you like to retry sending this message?";
+                } else { //sendResult doesn't match a known code
+                    unknownStatus = true;
+                    menuInstructions = "Unknown status message: " + sendResult + "\n" +
+                            "Would you like to retry sending this message?";
+                }
+            } else { //login failed
+                SMTP.disconnect();
+                eraseFromConsole(waitMsg);
+                connFailed = true;
+                menuInstructions = "Connection issue (login failure).\n" +
+                        "Would you like to retry connection?";
+            }
+        } else { //connection failed
+            SMTP.close();
+            eraseFromConsole(waitMsg);
+            connFailed = true;
+            menuInstructions = "Connection issue (server not connected).\n" +
+                    "Would you like to retry connection?";
+        }
+        //Server enteraction ended
+        clearScreen(); //Clear screen from before results got processed (header + waitMsg)
+        printFrame(); //Display result
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("y", "NONE", "NONE")) {
+            if (connFailed || unknownStatus) { //Connection failed or unknown status from sendMessage
+                mode = "SMTP_RESULT"; //Retry sending
+            } else if (sendResult.equals("NO FROM") || sendResult.equals("BAD FROM") ||
+                    sendResult.equals("MISMATCHED FROM")) {
+                mode = "SMTP_FROM";
+            } else if (sendResult.equals("NO TO") || sendResult.equals("BAD TO")) {
+                mode = "SMTP_TO";
+            } else if (sendResult.equals("BAD DATA") || sendResult.equals("DATA REFUSED")) { //server error
+                mode = "SMTP_RESULT"; //Retry sending
+            } else if (sendResult.equals("SUCCESS")) { //user wants to send another msg
+                mode = "SMTP_MAIN"; //Alternatively use SMTP_MAIN
+            } else {
+                mode = "SMTP_RESULT";
+                statusMsg = "Uncaught status msg from sendMessage. This shouldn't be happening...";
+            }
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "SMTP_CONFIRM";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else {
+            statusMsg = "Please enter a valid command!";
+        }
+    }
+
+    private void modePopSetup() {
         //
     }
 
-    public void modeSmtpMain() {
+    private void modePopLogin() {
         //
     }
 
-    public void modeSmtpSubject() {
+    private void modePopMain() {
         //
     }
 
-    public void modeSmtpFrom() {
+    private void modePopInbox() {
         //
     }
 
-    public void modeSmtpTo() {
-        //
-    }
-
-    public void modeSmtpCC() {
-        //
-    }
-
-    public void modeSmtpBCC() {
-        //
-    }
-
-    public void modeSmtpBody() {
-        //
-    }
-
-    public void modeSmtpConfirm() {
-        //
-    }
-
-    public void modeSmtpResult() {
-        //
-    }
-
-    public void modePopSetup() {
-        //
-    }
-
-    public void modePopLogin() {
-        //
-    }
-
-    public void modePopMain() {
-        //
-    }
-
-    public void modePopInbox() {
-        //
-    }
-
-    public void modePopView() {
+    private void modePopView() {
         //
     }
 
     //-----TUI METHODS-----
-    public void clearScreen() {
+    private void clearScreen() {
         System.out.println("\033[H\033[2J");
         System.out.flush();
     }
@@ -327,6 +690,61 @@ public class NewClient {
         }
         System.out.print("|> "); //Prompt
     }
+
+    //Prints the top of a menu to a screen
+    //Several sections: Logo, menu map, menu title, optional field
+    private void printFrameHeader() {
+        //Print logo
+        for (int i = 0; i < logoLines.length; i++) {
+            System.out.println(logoLines[i]);
+        }
+        System.out.println(""); //blank line
+        System.out.println("Menu Map: " + menuMap);
+        System.out.println(menuTitle);
+        System.out.println("----------------------------------------------------------------------"); //70
+        if (! optField.equals("")) {
+            System.out.println(optField);
+            //System.out.println("----------------------------------------------------------------------"); //70
+        }
+    }
+
+    //Compose string for displaying message builder with printFrame
+    private String getDraftDisplay() {
+        String draftDisplay = "";
+        draftDisplay += "=====================================================================\n";
+        draftDisplay += " \n";
+        draftDisplay += "------------------------------New Email------------------------------\n";
+        draftDisplay += "Subject: " + newMsg.getHeaderStore().getSubject() + "\n";
+        draftDisplay += "From: " + newMsg.getHeaderStore().getFrom() + "\n";
+        draftDisplay += "To: " + newMsg.getHeaderStore().getTo() + "\n";
+        draftDisplay += "CC: " + newMsg.getHeaderStore().getCC() + "\n";
+        draftDisplay += "BCC: " + newMsg.getHeaderStore().getBCC() + "\n";
+        draftDisplay += " \n";
+        draftDisplay += "Body:\n";
+        draftDisplay += "---------------------------------------------------------------------\n";
+        for (int i = 0; i < msgBodyArray.size(); i++) {
+            draftDisplay += msgBodyArray.get(i) + "\n";
+        }
+        draftDisplay += " \n";
+        draftDisplay += "=====================================================================\n";
+        return draftDisplay;
+    }
+
+    //NOTE: Use to erase waitMsg ONLY after disconnected/closed
+    //Erases a line of text from the console (had to be printed as S.o.print(...))
+    private void eraseFromConsole(String text) {
+        String eraser = "";
+        String clearer = "";
+        for (int i = 0; i < text.length(); i++) {
+            eraser += "\b"; //Add backspace character
+            clearer += " ";
+        }
+        System.out.print(eraser);
+        System.out.print(clearer);
+        System.out.print(eraser);
+    }
+
+    //-----USER INPUT METHODS-----
 
     //Prompt and read user input
     private void getUserInput() {
@@ -429,6 +847,53 @@ public class NewClient {
         return false; //something strange has happened
     }
 
+    //ParseFrom, returns String msg signifying/error or success in From address
+    //Currently only returns "GOOD FROM", and "BAD FROM"
+    //Later expand to support different error msgs
+    private String parseFrom(String fromHeader) {
+        if (countChar(fromHeader, '<') != 1 || countChar(fromHeader, '>') != 1) {
+            return "BAD FROM";
+        }
+        int bracket1Ind = fromHeader.indexOf('<');
+        int bracket2Ind = fromHeader.indexOf('>');
+        if (bracket2Ind <= bracket1Ind) {
+            return "BAD FROM";
+        }
+        if (!(bracket1Ind + 4 <= bracket2Ind)) { //At least three chars between brackets <...>
+            return "BAD FROM";
+        }
+        if (countChar(fromHeader.substring(bracket1Ind, bracket2Ind + 1), '@') != 1) { //Must be 1 @
+            return "BAD FROM";
+        }
+        return "GOOD FROM";
+    }
+
+    //ParseTo, returns String msg signifying/error or success in To address list
+    //Currently only returns "GOOD TO", and "BAD TO"
+    //Later expand to support different error msgs
+    private String parseTo(String toHeader) {
+        int LBrCount = countChar(toHeader, '<');
+        int RBrCount = countChar(toHeader, '>');
+        if ((LBrCount < 1) || (RBrCount < 1) || (LBrCount != RBrCount)) {
+            return "BAD TO";
+        }
+        String addressLine = toHeader;
+        for (int i = 0; i < LBrCount; i++) {
+            int bracket1Ind = addressLine.indexOf('<');
+            int bracket2Ind = addressLine.indexOf('>');
+            if (!(bracket1Ind + 4 <= bracket2Ind)) { //At least three chars between brackets <...>
+                return "BAD TO";
+            }
+            if (countChar(addressLine.substring(bracket1Ind, bracket2Ind + 1), '@') != 1) { //Must be a @
+                return "BAD TO";
+            }
+            if (bracket2Ind != addressLine.length() - 1) { //If > isn't at the end
+                addressLine = addressLine.substring(bracket2Ind + 1, addressLine.length()); //Get string after >
+            }
+        }
+        return "GOOD TO";
+    }
+
     //Counts the number of target chars in given input string
     //0 if none
     private int countChar(String text, char target) {
@@ -440,5 +905,4 @@ public class NewClient {
         }
         return count;
     }
-
 }
