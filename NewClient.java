@@ -20,6 +20,33 @@
  - ... See client_remake_plan.txt in Resources for more info
  */
 
+//Frame template
+/*
+public void modeNAME() {
+        //Change frame vars & print
+        menuMap = ;
+        menuTitle = ;
+        optField = ;
+        menuInstructions = ;
+        cmdList = ;
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+        clearScreen();
+        System.out.println("Unknown console error detected (Unable to read input).\n" +
+        "Program exiting.");
+        quitUser = true;
+        } else if (userInput.equalsIgnoreCase("y")) {
+        mode = "MODE";
+        } else if (userInput.equalsIgnoreCase("exit")) {
+        quitUser = true;
+        } else {
+        statusMsg = "Please enter a valid command!";
+        }
+        }
+        */
+
 import java.io.*;
 import java.util.*;
 
@@ -34,7 +61,13 @@ public class NewClient {
     private boolean quitUser; //Whether or not user has quit
     private String mode; //Screen mode/stage
 
-    //Menu output vars
+    //Frame vars (used in printFrame())
+    private String[] logoLines; //String lines for logo
+    private String menuMap;
+    private String menuTitle;
+    private String optField; //Optional field for additional content/output
+    private String menuInstructions;
+    private String cmdList;
     private String statusMsg; //Any error or help messages
 
     //POP vars
@@ -53,12 +86,23 @@ public class NewClient {
 
     //Default constructor
     public NewClient() {
+        //User IO
         sysIn = new BufferedReader(new InputStreamReader(System.in));
         sysOut = System.out;
         userInput = "";
         consoleError = false;
+        //Looping
         quitUser = false;
         mode = "WELCOME";
+        //Frame
+        logoLines = new String[]{" __                     ",
+                "/__ o  _ |V||_  _  o  | ",
+                "\\_| | (_)| || |(_| |  | "};
+        menuMap = "";
+        menuTitle = "";
+        optField = "";
+        menuInstructions = "";
+        cmdList = "";
         statusMsg = "";
     }
 
@@ -72,39 +116,39 @@ public class NewClient {
     private void runLoop() {
         while (!quitUser) { //Until user quits
             clearScreen(); //Clear the screen
-            if (getMode().equals("WELCOME")) {
+            if (mode.equals("WELCOME")) {
                 modeWelcome();
-            } else if (getMode().equals("PROT_CHOOSE")) {
+            } else if (mode.equals("PROT_CHOOSE")) {
                 modeProtChoose();
-            } else if (getMode().equals("SMTP_SETUP")) {
+            } else if (mode.equals("SMTP_SETUP")) {
                 modeSmtpSetup();
-            } else if (getMode().equals("SMTP_LOGIN")) {
+            } else if (mode.equals("SMTP_LOGIN")) {
                 modeSmtpLogin();
-            } else if (getMode().equals("SMTP_MAIN")) {
+            } else if (mode.equals("SMTP_MAIN")) {
                 modeSmtpMain();
-            } else if (getMode().equals("SMTP_FROM")) {
+            } else if (mode.equals("SMTP_FROM")) {
                 modeSmtpFrom();
-            } else if (getMode().equals("SMTP_TO")) {
+            } else if (mode.equals("SMTP_TO")) {
                 modeSmtpTo();
-            } else if (getMode().equals("SMTP_CC")) {
+            } else if (mode.equals("SMTP_CC")) {
                 modeSmtpCC();
-            } else if (getMode().equals("SMTP_BCC")) {
+            } else if (mode.equals("SMTP_BCC")) {
                 modeSmtpBCC();
-            } else if (getMode().equals("SMTP_BODY")) {
+            } else if (mode.equals("SMTP_BODY")) {
                 modeSmtpBody();
-            } else if (getMode().equals("SMTP_CONFIRM")) {
+            } else if (mode.equals("SMTP_CONFIRM")) {
                 modeSmtpConfirm();
-            } else if (getMode().equals("SMTP_RESULT")) {
+            } else if (mode.equals("SMTP_RESULT")) {
                 modeSmtpResult();
-            } else if (getMode().equals("POP_SETUP")) {
+            } else if (mode.equals("POP_SETUP")) {
                 modePopSetup();
-            } else if (getMode().equals("POP_LOGIN")) {
+            } else if (mode.equals("POP_LOGIN")) {
                 modePopLogin();
-            } else if (getMode().equals("POP_MAIN")) {
+            } else if (mode.equals("POP_MAIN")) {
                 modePopMain();
-            } else if (getMode().equals("POP_INBOX")) {
+            } else if (mode.equals("POP_INBOX")) {
                 modePopMain();
-            } else if (getMode().equals("POP_VIEW")) {
+            } else if (mode.equals("POP_VIEW")) {
                 modePopView();
             } else {
                 sysOut.println("What have you done?!?!");
@@ -114,35 +158,25 @@ public class NewClient {
         System.out.println(">>GOODBYE<<");
     }
 
-    public boolean isQuitUser() {
-        return quitUser;
-    }
-
-    public String getMode() {
-        return mode;
-    }
-
     //-----MODE METHODS-----
     public void modeWelcome() {
-        //--Print menu header
-        System.out.println("GioMhail\n" +
-                "Menu Map: Welcome\n" +
-                "\n" +
-                "Welcome to GioMhail, your go-to email client!\n" +
-                "Would you like to continue [y] or exit [exit]?\n" +
-                "Cmds: [y] (y + <ENTER>), [exit] (exit + <ENTER>)");
-        System.out.println(""); //Blank line
-        printStatusMsg(); //Print statusMsg
-        promptGetUserInput(); //Print prompt, get input
+        //Change frame vars & print
+        menuMap = "Welcome";
+        menuTitle = "Welcome";
+        optField = "Welcome to GioMhail, your go-to email client!";
+        menuInstructions = "Would you like to continue [y] or exit [exit]?";
+        cmdList = "Cmds: [y] (y + <ENTER>), [exit] (exit + <ENTER>)";
+        printFrame();
+        getUserInput();
         //--Check user input
         if (consoleError) { //If exception on reading console
             clearScreen();
             System.out.println("Unknown console error detected (Unable to read input).\n" +
                     "Program exiting.");
             quitUser = true;
-        } else if (userInput.equalsIgnoreCase("y")) {
+        } else if (checkInputMatch("y", "NONE", "NONE")) {
             mode = "PROT_CHOOSE";
-        } else if (userInput.equalsIgnoreCase("exit")) {
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
             quitUser = true;
         } else {
             statusMsg = "Please enter a valid command!";
@@ -150,27 +184,25 @@ public class NewClient {
     }
 
     public void modeProtChoose() {
-        //--Print menu header
-        System.out.println("GioMhail\n" +
-                "Menu Map: Welcome > Choose Read\\Send\n" +
-                "Choose Read\\Send\n" +
-                "\n" +
-                "Would you like to read [read], send [send], or exit [exit]?\n" +
-                "Cmds: [read], [send], [exit]");
-        System.out.println(""); //Blank line
-        printStatusMsg(); //Print statusMsg
-        promptGetUserInput(); //Print prompt, get input
+        //Change frame vars & print
+        menuMap = "Menu Map: Welcome > Choose Read\\Send";
+        menuTitle = "Choose Read\\Send";
+        optField = "";
+        menuInstructions = "Would you like to read [read], send [send], or exit [exit]?";
+        cmdList = "Cmds: [read], [send], [exit]";
+        printFrame();
+        getUserInput();
         //--Check user input
         if (consoleError) { //If exception on reading console
             clearScreen();
             System.out.println("Unknown console error detected (Unable to read input).\n" +
                     "Program exiting.");
             quitUser = true;
-        } else if (userInput.equalsIgnoreCase("read")) {
+        } else if (checkInputMatch("read", "NONE", "NONE")) {
             mode = "POP_SETUP";
-        } else if (userInput.equalsIgnoreCase("send")) {
+        } else if (checkInputMatch("send", "NONE", "NONE")) {
             mode = "SMTP_SETUP";
-        } else if (userInput.equalsIgnoreCase("exit")) {
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
             quitUser = true;
         } else {
             statusMsg = "Please enter a valid command!";
@@ -178,7 +210,29 @@ public class NewClient {
     }
 
     public void modeSmtpSetup() {
-        //
+        //Change frame vars & print
+        menuMap = "Menu Map: Welcome > Choose Read\\Send > Send: > Setup";
+        menuTitle = "Send: Setup";
+        optField = "";
+        menuInstructions = "Please enter the address and port of your SMTP server.";
+        cmdList = "Cmds: <address port>, [back], [exit]";
+        printFrame();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("read", "NONE", "NONE")) {
+            mode = "POP_SETUP";
+        } else if (checkInputMatch("send", "NONE", "NONE")) {
+            mode = "SMTP_SETUP";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else {
+            statusMsg = "Please enter a valid command!";
+        }
     }
 
     public void modeSmtpLogin() {
@@ -247,21 +301,144 @@ public class NewClient {
         System.out.flush();
     }
 
-    //Prints the statusMsg and resets
-    private void printStatusMsg() {
-        if (!statusMsg.equals("")) {
-            System.out.println(statusMsg);
+    //Prints the entire frame to the screen
+    //Several sections: Logo, menu map, menu title, optional field, instructions, cmd lines, prompt
+    private void printFrame() {
+        //Print logo
+        for (int i = 0; i < logoLines.length; i++) {
+            System.out.println(logoLines[i]);
         }
-        statusMsg = "";
+        System.out.println(""); //blank line
+        System.out.println("Menu Map: " + menuMap);
+        System.out.println(menuTitle);
+        System.out.println("----------------------------------------------------------------------"); //70
+        System.out.println(""); //blank line
+        if (! optField.equals("")) {
+            System.out.println(optField);
+            //System.out.println("----------------------------------------------------------------------"); //70
+        }
+        System.out.println(""); //Blank line
+        System.out.println(menuInstructions);
+        System.out.println(cmdList);
+        System.out.println(""); //Blank line
+        if (! statusMsg.equals("")) {
+            System.out.println(statusMsg);
+            statusMsg = "";
+        }
+        System.out.print("|> "); //Prompt
     }
 
     //Prompt and read user input
-    private void promptGetUserInput() {
+    private void getUserInput() {
         try {
-            System.out.print("|> ");
             userInput = sysIn.readLine();
         } catch (IOException e) {
             consoleError = true;
         }
     }
+
+    private int getIntElementUserInput(int elementNum) {
+        Scanner intScan = new Scanner(userInput.trim());
+        for (int i = 0; i < elementNum - 1; i++) { //advance scanner until reach elementNum
+            intScan.next();
+        }
+        if (intScan.hasNextInt(10)) {
+            return intScan.nextInt();
+        } else {
+            return -1;
+        }
+    }
+
+    private String getStrElementUserInput(int elementNum) {
+        Scanner intScan = new Scanner(userInput.trim());
+        for (int i = 0; i < elementNum - 1; i++) { //advance scanner until reach elementNum
+            intScan.next();
+        }
+        if (intScan.hasNext()) {
+            return intScan.next(); //get a string
+        } else {
+            return "NONE";
+        }
+    }
+
+    //Checks if userInput matches expected Cmd and/or argTypes
+    //Takes in <cmdName> <type of arg1> <type of arg2>
+    //cmd can be the name of a command or NONE
+    //argTypes can be INT, STRING, or NONE
+    private boolean checkInputMatch(String cmd, String argType1, String argType2) {
+        if (argType1.equals("NONE")) { //Must be cmd
+            return cmd.equalsIgnoreCase(userInput.trim());
+        }
+        int reqSpaces = 0;
+        if ((! cmd.equals("NONE")) && (! argType2.equals("NONE"))) {
+            reqSpaces = 2; //cmd arg arg
+        } else if (cmd.equals("NONE") || argType2.equals("NONE")) {
+            reqSpaces = 1; //cmd arg or arg arg
+        } else if (cmd.equals("NONE") && argType2.equals("NONE")) {
+            reqSpaces = 0; //arg
+        } else {
+            return false; //NONE NONE NONE
+        }
+        if (reqSpaces != countChar(userInput, ' ')) {
+            return false; //Number of elements doesn't meet expectations
+        }
+        Scanner intScan = new Scanner(userInput.trim());
+        if (reqSpaces == 0) { //arg1
+            if (intScan.hasNextInt(10)) { //first element is int
+                intScan.close();
+                return argType1.equals("INT");
+            } else {
+                intScan.close();
+                return argType1.equals("STRING");
+            }
+        } else if (reqSpaces == 1 && (! argType2.equals("NONE"))) { //arg1 arg2
+            boolean match1 = false;
+            if (intScan.hasNextInt(10)) { //first element is int
+                match1 = argType1.equals("INT");
+            } else {
+                match1 = argType1.equals("STRING");
+            }
+            intScan.next(); //move to 2nd element
+            if (intScan.hasNextInt(10)) { //second element is int
+                return match1 && argType2.equals("INT");
+            } else {
+                return match1 && argType2.equals("STRING");
+            }
+        } else if (reqSpaces == 1 && (argType2.equals("NONE"))) { //cmd arg1
+            intScan.next(); //skip cmd
+            if (intScan.hasNextInt(10)) { //second element is int
+                return argType1.equals("INT");
+            } else {
+                return argType1.equals("STRING");
+            }
+        } else if (reqSpaces == 2) { //cmd arg1 arg2
+            boolean match1 = false;
+            intScan.next(); //skip cmd (1st element)
+            if (intScan.hasNextInt(10)) { //second element is int
+                match1 = argType1.equals("INT");
+            } else {
+                match1 = argType1.equals("STRING");
+            }
+            intScan.next(); //move to 3rd element
+            if (intScan.hasNextInt(10)) { //third element is int
+                return match1 && argType2.equals("INT");
+            } else {
+                return match1 && argType2.equals("STRING");
+            }
+        }
+        return false; //something strange has happened
+    }
+
+    //Counts the number of target chars in given input string
+    //0 if none
+    private int countChar(String text, char target) {
+        int count = 0;
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == target) {
+                count++;
+            }
+        }
+        return count;
+    }
+
 }
