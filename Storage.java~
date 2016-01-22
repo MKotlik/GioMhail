@@ -1,0 +1,21 @@
+public class Storage{
+    private PrintWriter out;
+
+    public String saveMessage(Message newMsg){
+	out=new PrintWriter("file.txt");
+	writeHeader(newMsg);
+	writeMessage(newMsg);
+    }
+
+    private boolean writeHeader(Message newMsg){
+	HeaderStore msgHeaders=newMsg.getHeaderStore();
+        String[] headerKeys = msgHeaders.getKeyArray();
+        for (int i = 0; i < headerKeys.length; i++) {
+            ArrayList<String> headerValueList = msgHeaders.getHeaderValue(headerKeys[i]);
+            for (int j = 0; j < headerValueList.size(); j++) {
+                String line = headerKeys[i] + ": " + headerValueList.get(j);
+                out.println(line);
+            }
+        }
+    }
+}
