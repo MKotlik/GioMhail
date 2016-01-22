@@ -12,11 +12,14 @@
  */
 
 /* TODO
- - Copy imports
- - Define instance vars
- - Default constructor
- - Main function
- - Create function for each mode
+ - [DONE] Copy imports
+ - [DONE] Define instance vars
+ - [DONE] Default constructor
+ - [DONE] Main function
+ - [DONE] Create function for each SMTP mode
+ - Create function for each POP mode
+ - Create helper function to compile inbox string
+ - Create helper function to compile msg view string
  - ... See client_remake_plan.txt in Resources for more info
  */
 
