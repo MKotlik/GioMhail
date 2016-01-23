@@ -149,7 +149,7 @@ public class Message {
                 extractMessage((ArrayList<String>) (messageLines.subList(firstLine + 1, i)));
                 getFiles((ArrayList<String>) (messageLines.subList(i, messageLines.size() - 1)));
             } else {
-		extractMessage((ArrayList<String>) (messageLines.sublist(firstLine,messageLines.length())));
+		extractMessage((ArrayList<String>) (messageLines.subList(firstLine,messageLines.size())));
 	    }
         }
         cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
@@ -212,7 +212,8 @@ public class Message {
         }
         fileName = "Data/";
         fileName += MIMEInfo.get("Content-Disposition:").substring(MIMEInfo.get("Content-Disposition:").indexOf('=') + 1, MIMEInfo.get("Content-Disposition:").length() - 1);
-	Storage.saveFile(fileBody,fileName);
+	Storage s1=new Storage();
+	s1.saveFile(fileBody,fileName);
     }
     //private void cleanText(String text)
 

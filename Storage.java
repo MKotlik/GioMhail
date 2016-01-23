@@ -13,7 +13,7 @@ public class Storage {
     public String saveMessage(Message newMsg) {
         try {
             out = new PrintWriter(newMsg.getHashID());
-            writeHeader(newMsg, newMsg.getHeaderStore());
+            writeHeader(newMsg.getHeaderStore());
             out.println(""); //print blank line to separate headers from body
             writeMessage(newMsg);
             out.close();
@@ -26,7 +26,7 @@ public class Storage {
     public String saveFile(String fileBody, String fileName) {
         try {
             out = new PrintWriter(fileName);
-            writeMessage(fileBody);
+            out.print(fileBody);
             out.close();
             return "SUCCESS";
         } catch (FileNotFoundException e) {
