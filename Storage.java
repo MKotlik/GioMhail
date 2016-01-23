@@ -13,7 +13,7 @@ public class Storage {
     public String saveMessage(Message newMsg) {
         try {
             out = new PrintWriter(newMsg.getHashID());
-            writeHeader(newMsg, newMsg.getHeaderStore());
+            writeHeader(newMsg.getHeaderStore());
             out.println(""); //print blank line to separate headers from body
             writeMessage(newMsg);
             out.close();
@@ -44,14 +44,18 @@ public class Storage {
         ArrayList<String> fileLines = new ArrayList<String>();
         try {
             BufferedReader readFromFile = new BufferedReader(new FileReader(fileName));
-            while((line = bufferedReader.readLine()) != null) {
+            String line = null;
+            while((line = readFromFile.readLine()) != null) {
                 fileLines.add(line);
             }
-            bufferedReader.close();
+            readFromFile.close();
         } catch(FileNotFoundException e) {
-            fileLines.add("FILE NOT FOUND");
+            fileLines.add("");
+            fileLines.set(0, "FILE NOT FOUND");
         } catch(IOException e) {
-            fileLines.add("READ ERROR");
+            fileLines.add("");
+            fileLines.set(0, "READ ERROR");
         }
+        return fileLines;
     }
 }

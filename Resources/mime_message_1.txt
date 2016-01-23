@@ -1,0 +1,93 @@
+                                                                                                                                                                                                                                                               
+Delivered-To: mikekotlik@gmail.com
+Received: by 10.36.211.135 with SMTP id n129csp515239itg;
+        Sat, 23 Jan 2016 10:25:12 -0800 (PST)
+X-Received: by 10.129.114.194 with SMTP id n185mr4574220ywc.283.1453573512906;
+        Sat, 23 Jan 2016 10:25:12 -0800 (PST)
+Return-Path: <enrjin888@gmail.com>
+Received: from mail-yk0-x242.google.com (mail-yk0-x242.google.com. [2607:f8b0:4002:c07::242])
+        by mx.google.com with ESMTPS id g196si4441042ywe.320.2016.01.23.10.25.12
+        for <mikekotlik@gmail.com>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Sat, 23 Jan 2016 10:25:12 -0800 (PST)
+Received-SPF: pass (google.com: domain of enrjin888@gmail.com designates 2607:f8b0:4002:c07::242 as permitted sender) client-ip=2607:f8b0:4002:c07::242;
+Authentication-Results: mx.google.com;
+       spf=pass (google.com: domain of enrjin888@gmail.com designates 2607:f8b0:4002:c07::242 as permitted sender) smtp.mailfrom=enrjin888@gmail.com;
+       dkim=pass header.i=@gmail.com;
+       dmarc=pass (p=NONE dis=NONE) header.from=gmail.com
+Received: by mail-yk0-x242.google.com with SMTP id v14so8660911ykd.1
+        for <mikekotlik@gmail.com>; Sat, 23 Jan 2016 10:25:12 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20120113;
+        h=mime-version:date:message-id:subject:from:to:content-type;
+        bh=0ErtJH/x5mmHkfM06skj8+UmwUUA4TWRO5vF25mpG0A=;
+        b=JhW34iUbW5gs97xwv7s5Yya0b8ciy9gwCuoxIxTEwwnTM6R29LF0nwe+DHBHLrWzLv
+         2bA4Ycbcf+XA6lJ/SFZGbLvhEb9ukVTwCTFb3L/rheGpMf47FrESsrhAvipdYiT3YvFt
+         lxR0Z2yK0QXiB/mdEuXZmBtRzchuEi6Y7VWACQOaK0tIr9M5o7rzj73yjTViovQo6gL4
+         GIVUpA330h0Ls/hYVz4A/uD2k7a8D1wC89bYB6IVEb0JcxXLU7KF0R7zzEY3JyyN5n2N
+         EoqVTG/TVHjrhH+nR6hlIx98mngcs099KwhJEykyisS19okna2oSnOKMFqtnG/M5O5yr
+         5e8g==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20130820;
+        h=x-gm-message-state:mime-version:date:message-id:subject:from:to
+         :content-type;
+        bh=0ErtJH/x5mmHkfM06skj8+UmwUUA4TWRO5vF25mpG0A=;
+        b=MQStB9YKwmzxdHOytTumysQWI/HZSWLy/HxrYce334Y7qUxQaPVPj/huY8fh1bLdXS
+         fPUxpH5o3oQyj/ZVL37PXD/6oINNc0NqlqxcCR2pDY44EoK++60W9KKWBIU8Kd49QGSm
+         TBSH9O1rI7wh71WXtHuBEGxM8hH7N/KjhJZCL8QcpH69qNDO6QdjwGDyYESUnjnZqdTB
+         vz4JbRiQBwH6yD5uaVAMwhIPQcljcoBmMyL8zi8vlNAbBgg99U4LYWAjgBynfPU3zYHT
+         etanrvI65MtOsk+wEthzWcs5kUhbEEDXhxSAHzZmxexg1b4Of6fMPd53lckZ0WE5IQE7
+         G6IA==
+X-Gm-Message-State: AG10YOSB/GMocHGG6OCFoZF/joDkQvKsicWOX10nWz/ZZBLpHBP6iq8Fqr3GqrsvMurP8b1prpXH/mXCV6rsLg==
+MIME-Version: 1.0
+X-Received: by 10.37.65.13 with SMTP id o13mr4551231yba.185.1453573512659;
+ Sat, 23 Jan 2016 10:25:12 -0800 (PST)
+Received: by 10.37.7.199 with HTTP; Sat, 23 Jan 2016 10:25:12 -0800 (PST)
+Date: Sat, 23 Jan 2016 13:25:12 -0500
+Message-ID: <CAHP+CUd+qD00R-REeR7TZgrgoJNo3qmetzf6WY3EFmFxfZHwbQ@mail.gmail.com>
+Subject: Apparel Sponsorship!
+From: claire jin <enrjin888@gmail.com>
+To: undisclosed-recipients:;
+Content-Type: multipart/alternative; boundary=001a11c0316ae0937e052a047434
+Bcc: mikekotlik@gmail.com
+
+--001a11c0316ae0937e052a047434
+Content-Type: text/plain; charset=UTF-8
+
+Hi everyone!
+
+I hope everyone is staying warm!
+
+Our team is currently raising funds to purchase our apparel. I know that
+you guys are all really busy with finals, homework, and other school
+related things, but this is an excuse to take a short break from your
+studies! And plus, it will only take a few minutes out of your day and just
+a few clicks on your computer. So, it's a win-win with little expenditure
+of energy = really efficient productivity.
+
+And did I mention it's free to do?
+
+Here's the link!
+https://www.pearup.com/stuyscienceolympiad/rally
+
+Happy clicking!
+Claire
+
+--001a11c0316ae0937e052a047434
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"ltr">Hi everyone!=C2=A0<div><br></div><div>I hope everyone is s=
+taying warm!=C2=A0</div><div><br></div><div>Our team is currently raising f=
+unds to purchase our apparel. I know that you guys are all really busy with=
+ finals, homework, and other school related things, but this is an excuse t=
+o take a short break from your studies! And plus, it will only take a few m=
+inutes out of your day and just a few clicks on your computer. So, it&#39;s=
+ a win-win with little expenditure of energy =3D really efficient productiv=
+ity.=C2=A0</div><div><br></div><div>And did I mention it&#39;s free to do?=
+=C2=A0</div><div><br></div><div>Here&#39;s the link!=C2=A0</div><div><a hre=
+f=3D"https://www.pearup.com/stuyscienceolympiad/rally">https://www.pearup.c=
+om/stuyscienceolympiad/rally</a><br></div><div><br></div><div>Happy clickin=
+g!=C2=A0</div><div>Claire=C2=A0</div></div>
+
+--001a11c0316ae0937e052a047434--

@@ -61,6 +61,7 @@ public class NewClient {
     private boolean consoleError; //if IOException on console read
 
     //Loop/Mode vars
+    private String initError; //Whether or not error on Client instantiation
     private boolean quitUser; //Whether or not user has quit
     private String mode; //Screen mode/stage
 
@@ -73,6 +74,8 @@ public class NewClient {
     private String statusMsg; //Any error or help messages
     private String waitMsg; //Displayed during server operations
     //Logos
+    private String bigLogoAdress = "data/biglogo.txt";
+    private String smallLogoAdress = "data/smalllogo.txt";
     private ArrayList<String> smallLogoLines;
     private ArrayList<String> bigLogoLines;
 
@@ -98,12 +101,10 @@ public class NewClient {
         userInput = "";
         consoleError = false;
         //Looping
+        initError = "";
         quitUser = false;
         mode = "WELCOME";
         //Frame
-        logoLines = new String[]{" __                     ",
-                "/__ o  _ |V||_  _  o  | ",
-                "\\_| | (_)| || |(_| |  | "};
         menuMap = "";
         menuTitle = "";
         optField = "";
@@ -111,6 +112,17 @@ public class NewClient {
         cmdList = "";
         statusMsg = "";
         waitMsg = "Please wait! Communicating with server...";
+        //Logos
+        String bigLogoResult = setBigLogo();
+        String smallLogoResult = setSmallLogo();
+        if (! bigLogoResult.equals("SUCCESS")) {
+            initError = "Could not start client. ERROR: " + bigLogoResult;
+            quitUser = true;
+        }
+        if (! smallLogoResult.equals("SUCCESS")) {
+            initError = "Could not start client. ERROR: " + smallLogoResult;
+            quitUser = true;
+        }
     }
 
     //-----MAIN-----
@@ -121,10 +133,16 @@ public class NewClient {
 
     //-----LOOP METHODS-----
     private void runLoop() {
+        //Display initError if any
+        if (! initError.isEmpty()) {
+            System.out.println(initError);
+        }
+        //Run loop if no errors
         while (!quitUser) { //Until user quits
             clearScreen(); //Clear the screen
             if (mode.equals("WELCOME")) {
-                modeWelcome();
+                modeWelcome2();
+                quitUser = true;
             } else if (mode.equals("PROT_CHOOSE")) {
                 modeProtChoose();
             } else if (mode.equals("SMTP_SETUP")) {
@@ -189,6 +207,13 @@ public class NewClient {
             quitUser = true;
         } else {
             statusMsg = "Please enter a valid command!";
+        }
+    }
+
+    private void modeWelcome2()  {
+        for (int i = 0; i < bigLogoLines.size(); i++) {
+            String line = getSpacing(bigLogoLines.get(i), "CENTER", 0, 100) + bigLogoLines.get(0);
+            System.out.println(line);
         }
     }
 
@@ -786,6 +811,7 @@ public class NewClient {
     }
 
     private void modePopInbox() {
+        /*
         //Result vars
         boolean connFailed = false; //Used to check for [y] after failed connection
         //Frame vars
@@ -830,6 +856,7 @@ public class NewClient {
         clearScreen(); //Clear screen from before results got processed (header + waitMsg)
         printFrame(); //Display result
         getUserInput();
+        */
     }
 
     private void modePopView() {
@@ -846,8 +873,8 @@ public class NewClient {
     //Several sections: Logo, menu map, menu title, optional field, instructions, cmd lines, prompt
     private void printFrame() {
         //Print logo
-        for (int i = 0; i < logoLines.length; i++) {
-            System.out.println(logoLines[i]);
+        for (int i = 0; i < smallLogoLines.size(); i++) {
+            System.out.println(smallLogoLines.get(i));
         }
         System.out.println(""); //blank line
         System.out.println("Menu Map: " + menuMap);
@@ -873,8 +900,8 @@ public class NewClient {
     //Several sections: Logo, menu map, menu title, optional field
     private void printFrameHeader() {
         //Print logo
-        for (int i = 0; i < logoLines.length; i++) {
-            System.out.println(logoLines[i]);
+        for (int i = 0; i < smallLogoLines.size(); i++) {
+            System.out.println(smallLogoLines.get(i));
         }
         System.out.println(""); //blank line
         System.out.println("Menu Map: " + menuMap);
@@ -922,8 +949,56 @@ public class NewClient {
         System.out.print(eraser);
     }
 
+    //Give text to be aligned, with a type of alignment (CENTER, RIGHT), length of initial left offset,
+    //and the total length of the line, returns a spacer String to be used for alignment
+    //Returns
+    private String getSpacing(String text, String type, int leftOffset, int totalLength) {
+        String spacer = "";
+        int numSpaces = 0;
+        if (leftOffset < 0 || totalLength < 0) {
+            return "BAD INPUT";
+        }
+        if (type.equalsIgnoreCase("CENTER")) {
+            numSpaces = (totalLength - text.length()) / 2 - leftOffset;
+
+        } else if (type.equalsIgnoreCase("RIGHT")) {
+            numSpaces = totalLength - text.length() - leftOffset;
+        } else {
+            return "BAD TYPE";
+        }
+        if (numSpaces < 0) {
+            return "BAD FIT";
+        }
+        for (int i = 0 ; i < numSpaces; i++) {
+            spacer += " ";
+        }
+        return spacer;
+    }
+
     //-----LOGO METHODS-----
-    private getBigLogo
+    private String setBigLogo() {
+        ArrayList<String> logoLines = Storage.getFileStrings(bigLogoAdress);
+        if (logoLines.get(0).equals("FILE NOT FOUND")) {
+            return "BIG LOGO FILE NOT FOUND";
+        } else if (logoLines.get(0).equals("READ ERROR")) {
+            return "BIG LOGO READ ERROR";
+        } else {
+            bigLogoLines = logoLines;
+            return "SUCCESS";
+        }
+    }
+
+    private String setSmallLogo() {
+        ArrayList<String> logoLines = Storage.getFileStrings(smallLogoAdress);
+        if (logoLines.get(0).equals("FILE NOT FOUND")) {
+            return "SMALL LOGO FILE NOT FOUND";
+        } else if (logoLines.get(0).equals("READ ERROR")) {
+            return "SMALL LOGO READ ERROR";
+        } else {
+            bigLogoLines = logoLines;
+            return "SUCCESS";
+        }
+    }
 
     //-----USER INPUT METHODS-----
 
