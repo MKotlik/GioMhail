@@ -1,5 +1,13 @@
+/* GioMhail by Coolgle
+   - Message
+   - Copyright (c) 2016, Giovanni Topa and Mikhail Kotlik, All Rights Reserved.
+   - APCS Term 1 Final Project, Stuyvesant High School
+*/
+
 import java.util.*;
 import java.io.*;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.binary.Base64;
 
 /* TODO
  - [DONE] public void fillMessage(ArrayList<String> messageLines)
@@ -18,9 +26,9 @@ public class Message {
     private HeaderStore messageHeaderStore; //HeaderStore for headers
     private String messageBody; //Actual message content
     private int messageNum; //The message number of the email in the inbox
-    private String hashCode;
+    private String hashID; //The hashed ID of the message
     private PrintWriter out;
-    
+
     //Sending constructor
     public Message() {
         messageHeaderStore = new HeaderStore();
@@ -41,6 +49,8 @@ public class Message {
         messageHeaderStore.setMessageNum(messageNum);
     }
 
+    //-----GENERAL MESSAGE METHODS-----
+
     //Fill messageHeaderStore and messageBody from trimmed output of RETR call
     public void fillMessage(ArrayList<String> messageLines) {
         int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
@@ -50,6 +60,7 @@ public class Message {
         cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
         ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
         messageHeaderStore = new HeaderStore(headerLines); //Create HeaderStore from headers in ArrayList
+        createHashId(); //generate hashid after setting up headerstore
     }
 
     //Find the first blank like between the email headers and the body
@@ -63,14 +74,32 @@ public class Message {
         return -1; //If blank line not found
     }
 
-    //Get the message's HeaderStore
-    public HeaderStore getHeaderStore() {
-        return messageHeaderStore;
+    //-----HASHID METHODS-----
+
+    public String getHashID() {
+        return hashID;
     }
 
-    ///Set the message's HeaderStore
-    public void setHeaderStore(HeaderStore newMsgHeaderStore) {
-        messageHeaderStore = newMsgHeaderStore;
+    public void createHashId() {
+        String unHashed = "";
+        //All header shortcuts return "" if header not present
+        String To = messageHeaderStore.getTo();
+        String From = messageHeaderStore.getFrom();
+        String Date = messageHeaderStore.getDate();
+        String Subject = messageHeaderStore.getSubject();
+        unHashed = Date + ";" + Subject + ";" + From + ";" + To;
+        byte[] hashedBytes = DigestUtils.sha1(unHashed); //byte[] of sha1 hash from unhashed id
+        String Base64Hashed = Base64.encodeBase64String(hashedBytes); //base64 string of hashed id
+        hashID = Base64Hashed; //set id
+    }
+
+    //-----BODY METHODS-----
+
+    private void setBody(ArrayList<String> messageLines) {
+        int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
+        for (int i = firstLine; i < messageLines.size(); i++) {
+            messageBody += messageLines.get(i) + "\r\n"; //Add lines from ArrayList, appending \n
+        }
     }
 
     //Return the message body (no headers)
@@ -93,44 +122,49 @@ public class Message {
         }
     }
 
-    public String saveMessage(Message newMsg){
-	createFileName();
-	try{
-	    out=new PrintWriter(hashCode);
-	    writeHeader();
-	    writeMessage();
-	    out.close();
-	    return "SUCCESS";
-	}catch(FileNotFoundException e){
-	    return "ERROR";
-	}
+    //-----HEADERSTORE METHODS-----
+
+    //Get the message's HeaderStore
+    public HeaderStore getHeaderStore() {
+        return messageHeaderStore;
     }
 
-    private void writeHeader(){
-        String[] headerKeys = messageHeaderStore.getKeyArray();
-        for (int i = 0; i < headerKeys.length; i++) {
-            ArrayList<String> headerValueList = messageHeaderStore.getHeaderValue(headerKeys[i]);
-            for (int j = 0; j < headerValueList.size(); j++) {
-                String line = headerKeys[i] + ": " + headerValueList.get(j);
-                out.println(line);
+    ///Set the message's HeaderStore
+    public void setHeaderStore(HeaderStore newMsgHeaderStore) {
+        messageHeaderStore = newMsgHeaderStore;
+    }
+
+    //-----MULTIPART METHODS-----
+/*
+    public void fillMultipartMessage(ArrayList<String> messageLines) {
+        int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
+        String boundary = "";
+        for (int i = firstLine; i < messageLines.size(); i++) {
+            if (i == firstLine) {
+                boundary = messageLines.get(i);
+            } else if (messageLines.get(i).equals(boundary)) {
+                extractMessage((ArrayList<String>) (messageLines.subList(firstLine + 1, i)));
+                getFile((ArrayList<String>) (messageLines.subList(i, messageLines.size() - 1)));
+            }
+        }
+        cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
+        ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
+        messageHeaderStore = new HeaderStore(headerLines); //Create HeaderStore from headers in ArrayList
+    }
+
+    private void extractMessage(ArrayList<String> messageLines) {
+        int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
+        String boundary = messageLines.get(firstLine);
+        int startPart = firstLine;
+        String msgBody = "";
+        for (int i = firstLine + 1; i < messageLines.size(); i++) {
+            if (messageLines.get(i).equals(boundary) || messageLines.get(i).equals(boundary + "--")) {
+                msgBody += getBody((ArrayList<String>) (messageLines.subList(startPart + 1, i)));
+                startPart = i;
             }
         }
     }
-
-    private void writeMessage(){
-	out.print(messageBody);
-    }
-
-    private void createFileName(){
-	String unHashed = "";
-	String To = messageHeaderStore.getTo();
-	String From = messageHeaderStore.getFrom();
-	String Date = messageHeaderStore.getDate();
-	String Subject = messageHeaderStore.getSubject();
-	unHashed = To+":"+From+":"+Date+":"+Subject;
-	hashCode = ""+unHashed.hashCode();
-    }
-    
+*/
     //private void cleanText(String text)
 
     //-----Message Number-----

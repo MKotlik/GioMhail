@@ -28,7 +28,9 @@ public class Message {
     private int messageNum; //The message number of the email in the inbox
     private String hashID; //The hashed ID of the message
     private PrintWriter out;
-
+    private String fileBody;
+    private HashMap<String,String> MIMEInfo;
+    
     //Sending constructor
     public Message() {
         messageHeaderStore = new HeaderStore();
@@ -135,7 +137,7 @@ public class Message {
     }
 
     //-----MULTIPART METHODS-----
-/*
+
     public void fillMultipartMessage(ArrayList<String> messageLines) {
         int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
         String boundary = "";
@@ -144,7 +146,7 @@ public class Message {
                 boundary = messageLines.get(i);
             } else if (messageLines.get(i).equals(boundary)) {
                 extractMessage((ArrayList<String>) (messageLines.subList(firstLine + 1, i)));
-                getFile((ArrayList<String>) (messageLines.subList(i, messageLines.size() - 1)));
+                getFiles((ArrayList<String>) (messageLines.subList(i, messageLines.size() - 1)));
             }
         }
         cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
@@ -164,7 +166,39 @@ public class Message {
             }
         }
     }
-*/
+
+    private void getFiles(ArrayList<String> fileLines){
+        int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
+        String boundary = fileLines.get(firstLine);
+        int startPart = firstLine;
+        String msgBody = "";
+        for (int i = firstLine + 1; i < fileLines.size(); i++) {
+            if (fileLines.get(i).equals(boundary) || fileLines.get(i).equals(boundary + "--")) {
+		getFiles((ArrayList<String>) (fileLines.subList(startPart + 1, i)));
+                startPart = i;
+            }
+        }
+    }
+
+    private void getFile(ArrayList<String> fileLines){
+        MIMEInfo=new HashMap<String,String>();
+	int firstLine = findBlankLine(fileLines) + 1; //First line of messageBody
+        for (int i = firstLine; i < fileLines.size(); i++) {
+            fileBody += fileLines.get(i); //Add lines from ArrayList, appending \n
+        }
+	byte[] utfBytes = Base64.decodeBase64(fileBody);
+	String utfStr = new String(utfBytes, StandardCharsets.UTF_8);
+	fileBody = utfStr;
+	ArrayList<String> MIMEHeaderLines = new ArrayList<String>(fileLines.subList(0, firstLine - 1));
+        for (int i=0;i<MIMEHeaderLines.size();i++){
+	    int space=MIMEHeaderLines.get(i).indexOf(' ');
+	    MIMEInfo.put(MIMEHeaderLines.get(i).substring(0,space),MIMEHeaderLines.get(i).substring(space+1,MIMEHeaderLines.get(i).length()));
+	}
+	String fileName = "Data/";
+	fileName+=MIMEInfo.get("Content-Disposition:").substring(MIMEInfo.get("Content-Disposition:").indexOf('=')+1,MIMEInfo.get("Content-Disposition:").length()-1);
+	out = new PrintWriter(fileName);
+	PrintWriter.print(fileBody);
+    }
     //private void cleanText(String text)
 
     //-----Message Number-----
