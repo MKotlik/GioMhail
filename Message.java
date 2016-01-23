@@ -60,8 +60,8 @@ public class Message {
 	    if (i==firstLine){
 		boundary=messageLines.get(i);
 	    }else if(messageLines.get(i).equals(boundary)){
-		extractMessage(messageLines.sublist(firstLine+1, i));
-		getFile(messageLines.subList(i, messageLines.getSize()));
+		extractMessage((ArrayList<String>)(messageLines.subList(firstLine+1, i)));
+		getFile((ArrayList<String>)(messageLines.subList(i, messageLines.size()-1)));
 	    }
 	}
 	cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
@@ -76,7 +76,8 @@ public class Message {
 	String msgBody = "";
 	for (int i=firstLine+1;i<messageLines.size();i++){
 	    if (messageLines.get(i).equals(boundary)||messageLines.get(i).equals(boundary+"--")){
-		msgBody+=getBody(messageLines.subList(startPart+1,i));
+		msgBody+=getBody((ArrayList<String>)(messageLines.subList(startPart+1,i)));
+		startPart=i;
 	    }
 	}
     }
