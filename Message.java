@@ -56,14 +56,18 @@ public class Message {
 
     //Fill messageHeaderStore and messageBody from trimmed output of RETR call
     public void fillMessage(ArrayList<String> messageLines) {
-        int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
-        for (int i = firstLine; i < messageLines.size(); i++) {
-            messageBody += messageLines.get(i) + "\r\n"; //Add lines from ArrayList, appending \n
-        }
-        cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
-        ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
+	int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
+	ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
         messageHeaderStore = new HeaderStore(headerLines); //Create HeaderStore from headers in ArrayList
         createHashId(); //generate hashid after setting up headerstore
+	if (messageHeaderStore.getMIMEConfirm()==""){
+	    for (int i = firstLine; i < messageLines.size(); i++) {
+		messageBody += messageLines.get(i) + "\r\n"; //Add lines from ArrayList, appending \n
+	    }
+	    cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
+	}else{
+	    fillMultipartMessage(messageLines);
+	}
     }
 
     //Find the first blank like between the email headers and the body
