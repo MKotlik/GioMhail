@@ -55,14 +55,18 @@ public class Storage {
         ArrayList<String> fileLines = new ArrayList<String>();
         try {
             BufferedReader readFromFile = new BufferedReader(new FileReader(fileName));
-            while((line = bufferedReader.readLine()) != null) {
+            String line = null;
+            while((line = readFromFile.readLine()) != null) {
                 fileLines.add(line);
             }
-            bufferedReader.close();
+            readFromFile.close();
         } catch(FileNotFoundException e) {
-            fileLines.add("FILE NOT FOUND");
+            fileLines.add("");
+            fileLines.set(0, "FILE NOT FOUND");
         } catch(IOException e) {
-            fileLines.add("READ ERROR");
+            fileLines.add("");
+            fileLines.set(0, "READ ERROR");
         }
+        return fileLines;
     }
 }
