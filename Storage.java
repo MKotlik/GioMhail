@@ -6,7 +6,7 @@ public class Storage{
 
     public String saveMessage(Message newMsg){
 	try{
-	    out=new PrintWriter("file.txt");
+	    out=new PrintWriter(""+createFileName(newMsg.getHeaderStore()));
 	    writeHeader(newMsg, newMsg.getHeaderStore());
 	    writeMessage(newMsg);
 	    out.close();
