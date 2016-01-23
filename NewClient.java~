@@ -799,9 +799,9 @@ public class NewClient {
                 msgCount = POP.getMessageCount(); //Update msgCount
                 ArrayList<HeaderStore> HeaderStoreList = POP.getHeaderStoreList(minMsg, maxMsg);
                 POP.disconnect();
-                optField = "=====================================================================\n";
-                optField += "Msg # |      Date & Time Sent       |    From     |      Subject\n";
-                optField += getMessageSummaries();
+                outField = "=====================================================================\n";
+                outField += "Msg # |      Date & Time Sent       |    From     |      Subject\n";
+                outField = getMessageSummaries();
 
 
                 menuInstructions = "How many messages would you to list in Inbox? [list <num>]";
