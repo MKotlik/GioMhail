@@ -21,7 +21,7 @@ public class POPConsole {
         PrintStream sysOut = System.out; //Print to console
         SSLSocketFactory mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault(); //Get default SSL socket factory
         try {
-            SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket("pop.mail.yahoo.com", 995); //create, connect, start handshake
+            SSLSocket clientSocket = (SSLSocket) mainFactory.createSocket("pop.gmail.com", 995); //create, connect, start handshake
             printSocketInfo(clientSocket); //Print connection info
             BufferedWriter serverWriter = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream())); //Write to server
             BufferedReader serverReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); //Read from server
