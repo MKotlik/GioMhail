@@ -1,22 +1,29 @@
+/* GioMhail by Coolgle
+   - Storage
+   - Copyright (c) 2016, Giovanni Topa and Mikhail Kotlik, All Rights Reserved.
+   - APCS Term 1 Final Project, Stuyvesant High School
+*/
+
 import java.util.*;
 import java.io.*;
 
-public class Storage{
+public class Storage {
     private PrintWriter out;
 
-    public String saveMessage(Message newMsg){
-	try{
-	    out=new PrintWriter(""+createFileName(newMsg.getHeaderStore()));
-	    writeHeader(newMsg, newMsg.getHeaderStore());
-	    writeMessage(newMsg);
-	    out.close();
-	    return "SUCCESS";
-	}catch(FileNotFoundException e){
-	    return "ERROR";
-	}
+    public String saveMessage(Message newMsg) {
+        try {
+            out = new PrintWriter(newMsg.getHashID());
+            writeHeader(newMsg, newMsg.getHeaderStore());
+            out.println(""); //print blank line to separate headers from body
+            writeMessage(newMsg);
+            out.close();
+            return "SUCCESS";
+        } catch (FileNotFoundException e) {
+            return "ERROR";
+        }
     }
 
-    private void writeHeader(Message newMsg, HeaderStore msgHeaders){
+    private void writeHeader(HeaderStore msgHeaders) {
         String[] headerKeys = msgHeaders.getKeyArray();
         for (int i = 0; i < headerKeys.length; i++) {
             ArrayList<String> headerValueList = msgHeaders.getHeaderValue(headerKeys[i]);
@@ -27,18 +34,7 @@ public class Storage{
         }
     }
 
-    private void writeMessage(Message newMsg){
-	out.print(newMsg.getMessageBody());
+    private void writeMessage(Message newMsg) {
+        out.print(newMsg.getMessageBody());
     }
-
-    private int createFileName(HeaderStore msgHeaders){
-	String unHashed = "";
-	String To = msgHeaders.getTo();
-	String From = msgHeaders.getFrom();
-	String Date = msgHeaders.getDate();
-	String Subject = msgHeaders.getSubject();
-	unHashed = To+":"+From+":"+Date+":"+Subject;
-	return unHashed.hashCode();
-    }
-
 }
