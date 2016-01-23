@@ -158,10 +158,9 @@ public class Message {
         int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
         String boundary = messageLines.get(firstLine);
         int startPart = firstLine;
-        String msgBody = "";
         for (int i = firstLine + 1; i < messageLines.size(); i++) {
             if (messageLines.get(i).equals(boundary) || messageLines.get(i).equals(boundary + "--")) {
-                msgBody += getBody((ArrayList<String>) (messageLines.subList(startPart + 1, i)));
+                messageBody += getBody((ArrayList<String>) (messageLines.subList(startPart + 1, i)));
                 startPart = i;
             }
         }
@@ -180,6 +179,14 @@ public class Message {
         }
     }
 
+    private String getBody(ArrayList<String> messageLines){
+	int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
+        for (int i = firstLine; i < messageLines.size(); i++) {
+            msgBody += messageLines.get(i) + "\r\n"; //Add lines from ArrayList, appending \n
+        }
+	return msgBody;
+    }
+    
     private void getFile(ArrayList<String> fileLines){
         MIMEInfo=new HashMap<String,String>();
 	int firstLine = findBlankLine(fileLines) + 1; //First line of messageBody
@@ -187,7 +194,7 @@ public class Message {
             fileBody += fileLines.get(i); //Add lines from ArrayList, appending \n
         }
 	byte[] utfBytes = Base64.decodeBase64(fileBody);
-	String utfStr = new String(utfBytes, StandardCharsets.UTF_8);
+	String utfStr = new String(utfBytes, "UTF_8");
 	fileBody = utfStr;
 	ArrayList<String> MIMEHeaderLines = new ArrayList<String>(fileLines.subList(0, firstLine - 1));
         for (int i=0;i<MIMEHeaderLines.size();i++){
