@@ -28,10 +28,10 @@ public class Message {
     private String messageBody; //Actual message content
     private int messageNum; //The message number of the email in the inbox
     private String hashID; //The hashed ID of the message
-    private PrintWriter out;
     private String fileBody;
     private HashMap<String, String> MIMEInfo;
-
+    private String fileName;
+    
     //Sending constructor
     public Message() {
         messageHeaderStore = new HeaderStore();
@@ -145,10 +145,12 @@ public class Message {
         for (int i = firstLine; i < messageLines.size(); i++) {
             if (i == firstLine) {
                 boundary = messageLines.get(i);
-            } else if (messageLines.get(i).equals(boundary)) {
+            } else if (messageLines.get(i).equals(boundary) && messageLines.get(i-1).substring(0,1).equals("-")) {
                 extractMessage((ArrayList<String>) (messageLines.subList(firstLine + 1, i)));
                 getFiles((ArrayList<String>) (messageLines.subList(i, messageLines.size() - 1)));
-            }
+            } else {
+		extractMessage((ArrayList<String>) (messageLines.sublist(firstLine,messageLines.length())));
+	    }
         }
         cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
         ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
@@ -208,8 +210,9 @@ public class Message {
             int space = MIMEHeaderLines.get(i).indexOf(' ');
             MIMEInfo.put(MIMEHeaderLines.get(i).substring(0, space), MIMEHeaderLines.get(i).substring(space + 1, MIMEHeaderLines.get(i).length()));
         }
-        String fileName = "Data/";
+        fileName = "Data/";
         fileName += MIMEInfo.get("Content-Disposition:").substring(MIMEInfo.get("Content-Disposition:").indexOf('=') + 1, MIMEInfo.get("Content-Disposition:").length() - 1);
+	Storage.saveFile(fileBody,fileName);
     }
     //private void cleanText(String text)
 

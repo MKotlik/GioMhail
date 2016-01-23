@@ -23,6 +23,17 @@ public class Storage {
         }
     }
 
+    public String saveFile(String fileBody, String fileName) {
+        try {
+            out = new PrintWriter(fileName);
+            writeMessage(fileBody);
+            out.close();
+            return "SUCCESS";
+        } catch (FileNotFoundException e) {
+            return "ERROR";
+        }
+    }
+    
     private void writeHeader(HeaderStore msgHeaders) {
         String[] headerKeys = msgHeaders.getKeyArray();
         for (int i = 0; i < headerKeys.length; i++) {
