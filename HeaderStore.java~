@@ -26,6 +26,7 @@ import java.util.*;
 public class HeaderStore {
     //This should be private
     private HashMap<String, ArrayList<String>> headerMap;
+    private int messageNum; //The message number of the email in the inbox
 
     //Sending constructor
     public HeaderStore() {
@@ -38,6 +39,12 @@ public class HeaderStore {
         fillHeaderStore(headerLines);
     }
 
+    //Receiving Constructor + Message Number
+    public HeaderStore(ArrayList<String> headerLines, int msgNum) {
+        this(headerLines);
+        messageNum = msgNum;
+    }
+
     //Fill in all header values from ArrayList<String> of HeaderStore output
     public void fillHeaderStore(ArrayList<String> HeaderLines) {
         String headerKey = "";
@@ -47,7 +54,8 @@ public class HeaderStore {
                 headerKey = findHeaderKey(HeaderLines.get(i));
                 headerValue = findHeaderValue(HeaderLines.get(i));
             } else if (i == HeaderLines.size() - 1) { //Spec. case, always put prev. and/or new header key/value pair
-                if (HeaderLines.get(i).startsWith(" ")) { //If continuation of multi-line headerValue
+                if (HeaderLines.get(i).startsWith(" ") ||
+                        HeaderLines.get(i).startsWith("\t")) { //If continuation of multi-line headerValue
                     headerValue += HeaderLines.get(i).substring(1, HeaderLines.get(i).length()); //append to cur. value
                     setHeader(headerKey, headerValue); //Add pair to headerMap, or append to existing pair
                 } else { //If new header attribute
@@ -57,7 +65,8 @@ public class HeaderStore {
                     setHeader(headerKey, headerValue); //Put new header key/value pair in headerMap
                 }
             } else { //Any line but first and last
-                if (HeaderLines.get(i).startsWith(" ")) { //If continuation of multi-line headerValue
+                if (HeaderLines.get(i).startsWith(" ") ||
+                        HeaderLines.get(i).startsWith("\t")) { //If continuation of multi-line headerValue
                     headerValue += HeaderLines.get(i).substring(1, HeaderLines.get(i).length()); //append to cur. value
                 } else { //If new header attribute
                     setHeader(headerKey, headerValue); //Put old header key/value pair in store
@@ -70,22 +79,22 @@ public class HeaderStore {
 
     //Returns header key from a header response line
     private String findHeaderKey(String line) {
-        for (int i = 0; i < line.length(); i++) {
-            if (line.charAt(i) == ':') { //Find colon at end of header key
-                return line.substring(0, i); //Return header key up to colon
-            }
+        int colonPos = line.indexOf(':');
+        if (colonPos == -1) { //No colon found
+            return null; //or ""?
+        } else {
+            return line.substring(0, colonPos);
         }
-        return null; //or ""?
     }
 
     //Returns header value from a header response line
     private String findHeaderValue(String line) {
-        for (int i = 0; i < line.length(); i++) {
-            if (line.charAt(i) == ' ') { //Find space before first char of header value
-                return line.substring(i + 1, line.length()); //Return header value from 1st char to end
-            }
+        int colonPos = line.indexOf(':');
+        if (colonPos == -1) { //No colon found
+            return null; //or ""?
+        } else {
+            return line.substring(colonPos + 2, line.length()); //Start from 1st char after : and space
         }
-        return null; //or ""?
     }
 
     //Get ArrayList<String> containing header attributes for specified key
@@ -105,33 +114,82 @@ public class HeaderStore {
         }
     }
 
+    //Force set header value for specified key, deleting old
+    public void setHeaderForce(String headerKey, String headerValue) {
+        ArrayList<String> headerValueList = new ArrayList<String>();
+        headerValueList.add(headerValue);
+        headerMap.put(headerKey, headerValueList);
+    }
+
+    //Get HashSet of all headerKeys
+    public HashSet getKeyHashSet() {
+        return (HashSet) headerMap.keySet();
+    }
+
+    //Get array of all headerKeys
+    public String[] getKeyArray() {
+        Set<String> keys = headerMap.keySet();
+        String[] keyArray = keys.toArray(new String[keys.size()]);
+        return keyArray;
+    }
+
+    //-----GET SHORTCUTS-----
+
     //Get value of To header
     public String getTo() {
-        return getHeaderValue("To").get(0);
+        if (getHeaderValue("To") != null) {
+            return getHeaderValue("To").get(0);
+        }
+        return "";
     }
 
     //Get value of From header
     public String getFrom() {
-        return getHeaderValue("From").get(0);
+        if (getHeaderValue("From") != null) {
+            return getHeaderValue("From").get(0);
+        }
+        return "";
     }
 
     //Get value of Subject header
     public String getSubject() {
-        return getHeaderValue("Subject").get(0);
+        if (getHeaderValue("Subject") != null) {
+            return getHeaderValue("Subject").get(0);
+        }
+        return "";
     }
 
     //Get value of Date header
     public String getDate() {
-        return getHeaderValue("Date").get(0);
+        if (getHeaderValue("Date") != null) {
+            return getHeaderValue("Date").get(0);
+        }
+        return "";
     }
 
     //Get value of CC header
     public String getCC() {
-        return getHeaderValue("CC").get(0);
+        if (getHeaderValue("CC") != null) {
+            return getHeaderValue("CC").get(0);
+        }
+        return "";
     }
 
     //Get value of BCC header
     public String getBCC() {
-        return getHeaderValue("BCC").get(0);
+        if (getHeaderValue("BCC") != null) {
+            return getHeaderValue("BCC").get(0);
+        }
+        return "";
+    }
+
+    //-----Message Number-----
+
+    public int getMessageNum() {
+        return messageNum;
+    }
+
+    public void setMessageNum(int newMsgNum) {
+        messageNum = newMsgNum;
     }
 }

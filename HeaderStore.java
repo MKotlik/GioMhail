@@ -183,6 +183,12 @@ public class HeaderStore {
         return "";
     }
 
+    public String getMIMEConfirm(){
+	if (getHeaderValue("BCC") != null) {
+            return getHeaderValue("Content-Type").get(0);
+        }
+        return "";
+    }
     //-----Message Number-----
 
     public int getMessageNum() {
