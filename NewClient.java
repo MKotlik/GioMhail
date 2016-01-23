@@ -141,8 +141,7 @@ public class NewClient {
         while (!quitUser) { //Until user quits
             clearScreen(); //Clear the screen
             if (mode.equals("WELCOME")) {
-                modeWelcome2();
-                quitUser = true;
+                modeWelcome();
             } else if (mode.equals("PROT_CHOOSE")) {
                 modeProtChoose();
             } else if (mode.equals("SMTP_SETUP")) {
@@ -186,6 +185,7 @@ public class NewClient {
     }
 
     //-----MODE METHODS-----
+    /*
     private void modeWelcome() {
         //Change frame vars & print
         menuMap = "Welcome";
@@ -209,11 +209,28 @@ public class NewClient {
             statusMsg = "Please enter a valid command!";
         }
     }
+    */
 
-    private void modeWelcome2()  {
-        for (int i = 0; i < bigLogoLines.size(); i++) {
-            String line = getSpacing(bigLogoLines.get(i), "CENTER", 0, 100) + bigLogoLines.get(0);
-            System.out.println(line);
+    private void modeWelcome()  {
+        //Change frame vars & print
+        //No need for menumap and menutitle in welcome menu
+        optField = "Welcome to GioMhail, your go-to email client!";
+        menuInstructions = "Would you like to continue [y] or exit [exit]?";
+        cmdList = "Cmds: [y] (y + <ENTER>), [exit] (exit + <ENTER>)";
+        printWelcomeMenu();
+        getUserInput();
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("y", "NONE", "NONE")) {
+            mode = "PROT_CHOOSE";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else {
+            statusMsg = "Please enter a valid command!";
         }
     }
 
@@ -913,6 +930,32 @@ public class NewClient {
         }
     }
 
+    private void printWelcomeMenu() {
+        System.out.println("=========================================================================================" +
+                "===========");
+        System.out.println(""); //cushion
+        //Print big logo
+        for (int i = 0; i < bigLogoLines.size(); i++) {
+            String line = getSpacing(bigLogoLines.get(i), "CENTER", 0, 100) + bigLogoLines.get(i);
+            System.out.println(line);
+        }
+        System.out.println(""); //cushion
+        //Print centered welcome message
+        System.out.println(getSpacing(optField, "CENTER", 0, 100) + optField);
+        System.out.println(""); //cushion
+        //Print instructions & cmds separator
+        System.out.println("________________________________________________________________________________________" +
+                "____________");
+        System.out.println(menuInstructions);
+        System.out.println(cmdList);
+        System.out.println(""); //Blank line
+        if (! statusMsg.equals("")) {
+            System.out.println(statusMsg);
+            statusMsg = "";
+        }
+        System.out.print("|> "); //Prompt
+    }
+
     //Compose string for displaying message builder with printFrame
     private String getDraftDisplay() {
         String draftDisplay = "";
@@ -995,7 +1038,7 @@ public class NewClient {
         } else if (logoLines.get(0).equals("READ ERROR")) {
             return "SMALL LOGO READ ERROR";
         } else {
-            bigLogoLines = logoLines;
+            smallLogoLines = logoLines;
             return "SUCCESS";
         }
     }
