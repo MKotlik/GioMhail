@@ -52,6 +52,42 @@ public class Message {
         messageHeaderStore = new HeaderStore(headerLines); //Create HeaderStore from headers in ArrayList
     }
 
+    //----------Multipart Messages--------------
+    public void fillMultipartMessage(ArrayList<String> messageLines){
+	int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
+	String boundary = "";
+	for (int i = firstLine; i < messageLines.size(); i++){
+	    if (i==firstLine){
+		boundary=messageLines.get(i);
+	    }else if(messageLines.get(i).equals(boundary)){
+		extractMessage(messageLines.sublist(firstLine+1, i));
+		getFile(messageLines.subList(i, messageLines.getSize()));
+	    }
+	}
+	cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
+        ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
+        messageHeaderStore = new HeaderStore(headerLines); //Create HeaderStore from headers in ArrayList
+    }
+
+    private void extractMessage(ArrayList<String> messageLines){
+	int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody	
+	String boundary = messageLines.get(firstLine);
+	int startPart = firstLine;
+	String msgBody = "";
+	for (int i=firstLine+1;i<messageLines.size();i++){
+	    if (messageLines.get(i).equals(boundary)||messageLines.get(i).equals(boundary+"--")){
+		msgBody+=getBody(messageLines.subList(startPart+1,i));
+	    }
+	}
+    }
+
+    private String getBody(ArrayList<String> messageLines){
+	int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
+        for (int i = firstLine; i < messageLines.size(); i++) {
+            messageBody += messageLines.get(i) + "\r\n"; //Add lines from ArrayList, appending \n
+        }
+    }
+
     //Find the first blank like between the email headers and the body
     private int findBlankLine(ArrayList<String> messageLines) {
         for (int i = 0; i < messageLines.size(); i++) {

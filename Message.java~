@@ -1,4 +1,5 @@
 import java.util.*;
+import java.io.*;
 
 /* TODO
  - [DONE] public void fillMessage(ArrayList<String> messageLines)
@@ -17,7 +18,9 @@ public class Message {
     private HeaderStore messageHeaderStore; //HeaderStore for headers
     private String messageBody; //Actual message content
     private int messageNum; //The message number of the email in the inbox
-
+    private String hashCode;
+    private PrintWriter out;
+    
     //Sending constructor
     public Message() {
         messageHeaderStore = new HeaderStore();
@@ -90,6 +93,44 @@ public class Message {
         }
     }
 
+    public String saveMessage(Message newMsg){
+	createFileName();
+	try{
+	    out=new PrintWriter(hashCode);
+	    writeHeader();
+	    writeMessage();
+	    out.close();
+	    return "SUCCESS";
+	}catch(FileNotFoundException e){
+	    return "ERROR";
+	}
+    }
+
+    private void writeHeader(){
+        String[] headerKeys = messageHeaderStore.getKeyArray();
+        for (int i = 0; i < headerKeys.length; i++) {
+            ArrayList<String> headerValueList = messageHeaderStore.getHeaderValue(headerKeys[i]);
+            for (int j = 0; j < headerValueList.size(); j++) {
+                String line = headerKeys[i] + ": " + headerValueList.get(j);
+                out.println(line);
+            }
+        }
+    }
+
+    private void writeMessage(){
+	out.print(messageBody);
+    }
+
+    private void createFileName(){
+	String unHashed = "";
+	String To = messageHeaderStore.getTo();
+	String From = messageHeaderStore.getFrom();
+	String Date = messageHeaderStore.getDate();
+	String Subject = messageHeaderStore.getSubject();
+	unHashed = To+":"+From+":"+Date+":"+Subject;
+	hashCode = ""+unHashed.hashCode();
+    }
+    
     //private void cleanText(String text)
 
     //-----Message Number-----
