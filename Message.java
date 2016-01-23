@@ -6,6 +6,7 @@
 
 import java.util.*;
 import java.io.*;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.binary.Base64;
 
@@ -29,8 +30,8 @@ public class Message {
     private String hashID; //The hashed ID of the message
     private PrintWriter out;
     private String fileBody;
-    private HashMap<String,String> MIMEInfo;
-    
+    private HashMap<String, String> MIMEInfo;
+
     //Sending constructor
     public Message() {
         messageHeaderStore = new HeaderStore();
@@ -166,45 +167,49 @@ public class Message {
         }
     }
 
-    private void getFiles(ArrayList<String> fileLines){
-        int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
+    private void getFiles(ArrayList<String> fileLines) {
+        int firstLine = findBlankLine(fileLines) + 1; //First line of messageBody
         String boundary = fileLines.get(firstLine);
         int startPart = firstLine;
         String msgBody = "";
         for (int i = firstLine + 1; i < fileLines.size(); i++) {
             if (fileLines.get(i).equals(boundary) || fileLines.get(i).equals(boundary + "--")) {
-		getFiles((ArrayList<String>) (fileLines.subList(startPart + 1, i)));
+                getFiles((ArrayList<String>) (fileLines.subList(startPart + 1, i)));
                 startPart = i;
             }
         }
     }
 
-    private String getBody(ArrayList<String> messageLines){
-	int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
+    private String getBody(ArrayList<String> messageLines) {
+        String msgBody = "";
+        int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
         for (int i = firstLine; i < messageLines.size(); i++) {
             msgBody += messageLines.get(i) + "\r\n"; //Add lines from ArrayList, appending \n
         }
-	return msgBody;
+        return msgBody;
     }
-    
-    private void getFile(ArrayList<String> fileLines){
-        MIMEInfo=new HashMap<String,String>();
-	int firstLine = findBlankLine(fileLines) + 1; //First line of messageBody
+
+    private void getFile(ArrayList<String> fileLines) {
+        MIMEInfo = new HashMap<String, String>();
+        int firstLine = findBlankLine(fileLines) + 1; //First line of messageBody
         for (int i = firstLine; i < fileLines.size(); i++) {
             fileBody += fileLines.get(i); //Add lines from ArrayList, appending \n
         }
-	byte[] utfBytes = Base64.decodeBase64(fileBody);
-	String utfStr = new String(utfBytes, "UTF_8");
-	fileBody = utfStr;
-	ArrayList<String> MIMEHeaderLines = new ArrayList<String>(fileLines.subList(0, firstLine - 1));
-        for (int i=0;i<MIMEHeaderLines.size();i++){
-	    int space=MIMEHeaderLines.get(i).indexOf(' ');
-	    MIMEInfo.put(MIMEHeaderLines.get(i).substring(0,space),MIMEHeaderLines.get(i).substring(space+1,MIMEHeaderLines.get(i).length()));
-	}
-	String fileName = "Data/";
-	fileName+=MIMEInfo.get("Content-Disposition:").substring(MIMEInfo.get("Content-Disposition:").indexOf('=')+1,MIMEInfo.get("Content-Disposition:").length()-1);
-	out = new PrintWriter(fileName);
-	PrintWriter.print(fileBody);
+        byte[] utfBytes = Base64.decodeBase64(fileBody);
+        String utfStr = "";
+        try {
+            utfStr = new String(utfBytes, "UTF_8");
+        } catch (UnsupportedEncodingException e) {
+            //Do nothing
+        }
+        fileBody = utfStr;
+        ArrayList<String> MIMEHeaderLines = new ArrayList<String>(fileLines.subList(0, firstLine - 1));
+        for (int i = 0; i < MIMEHeaderLines.size(); i++) {
+            int space = MIMEHeaderLines.get(i).indexOf(' ');
+            MIMEInfo.put(MIMEHeaderLines.get(i).substring(0, space), MIMEHeaderLines.get(i).substring(space + 1, MIMEHeaderLines.get(i).length()));
+        }
+        String fileName = "Data/";
+        fileName += MIMEInfo.get("Content-Disposition:").substring(MIMEInfo.get("Content-Disposition:").indexOf('=') + 1, MIMEInfo.get("Content-Disposition:").length() - 1);
     }
     //private void cleanText(String text)
 

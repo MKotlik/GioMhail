@@ -37,4 +37,21 @@ public class Storage {
     private void writeMessage(Message newMsg) {
         out.print(newMsg.getMessageBody());
     }
+
+    //-----FILE/LOGO METHODS-----
+
+    public static ArrayList<String> getFileStrings(String fileName) {
+        ArrayList<String> fileLines = new ArrayList<String>();
+        try {
+            BufferedReader readFromFile = new BufferedReader(new FileReader(fileName));
+            while((line = bufferedReader.readLine()) != null) {
+                fileLines.add(line);
+            }
+            bufferedReader.close();
+        } catch(FileNotFoundException e) {
+            fileLines.add("FILE NOT FOUND");
+        } catch(IOException e) {
+            fileLines.add("READ ERROR");
+        }
+    }
 }

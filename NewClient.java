@@ -65,7 +65,6 @@ public class NewClient {
     private String mode; //Screen mode/stage
 
     //Frame vars (used in printFrame())
-    private String[] logoLines; //String lines for logo
     private String menuMap;
     private String menuTitle;
     private String optField; //Optional field for additional content/output
@@ -73,6 +72,9 @@ public class NewClient {
     private String cmdList;
     private String statusMsg; //Any error or help messages
     private String waitMsg; //Displayed during server operations
+    //Logos
+    private ArrayList<String> smallLogoLines;
+    private ArrayList<String> bigLogoLines;
 
     //POP vars
     private POPSession POP = null;
@@ -919,6 +921,9 @@ public class NewClient {
         System.out.print(clearer);
         System.out.print(eraser);
     }
+
+    //-----LOGO METHODS-----
+    private getBigLogo
 
     //-----USER INPUT METHODS-----
 
