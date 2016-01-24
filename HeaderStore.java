@@ -22,12 +22,18 @@
  */
 
 import java.util.*;
+import java.io.*;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.codec.binary.Base64;
+
 
 public class HeaderStore {
     //This should be private
     private HashMap<String, ArrayList<String>> headerMap;
     private int messageNum; //The message number of the email in the inbox
-
+    private String hashID; //The hashed ID of the message
+    
     //Sending constructor
     public HeaderStore() {
         headerMap = new HashMap<String, ArrayList<String>>();
@@ -197,5 +203,23 @@ public class HeaderStore {
 
     public void setMessageNum(int newMsgNum) {
         messageNum = newMsgNum;
+    }
+    //-----HASHID METHODS-----
+
+    public String getHashID() {
+        return hashID;
+    }
+
+    public void createHashId() {
+        String unHashed = "";
+        //All header shortcuts return "" if header not present
+        String To = getTo();
+        String From = getFrom();
+        String Date = getDate();
+        String Subject = getSubject();
+        unHashed = Date + ";" + Subject + ";" + From + ";" + To;
+        byte[] hashedBytes = DigestUtils.sha1(unHashed); //byte[] of sha1 hash from unhashed id
+        String Base64Hashed = Base64.encodeBase64String(hashedBytes); //base64 string of hashed id
+        hashID = Base64Hashed; //set id
     }
 }

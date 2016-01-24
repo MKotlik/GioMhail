@@ -27,7 +27,6 @@ public class Message {
     private HeaderStore messageHeaderStore; //HeaderStore for headers
     private String messageBody; //Actual message content
     private int messageNum; //The message number of the email in the inbox
-    private String hashID; //The hashed ID of the message
     private String fileBody;
     private HashMap<String, String> MIMEInfo;
     private String fileName;
@@ -84,24 +83,6 @@ public class Message {
     public void fillMessageFile(String fileName, String folderName){
 	Storage s1=new Storage();
 	fillMessage(s1.getMsg(fileName, folderName));
-    }
-    //-----HASHID METHODS-----
-
-    public String getHashID() {
-        return hashID;
-    }
-
-    public void createHashId() {
-        String unHashed = "";
-        //All header shortcuts return "" if header not present
-        String To = messageHeaderStore.getTo();
-        String From = messageHeaderStore.getFrom();
-        String Date = messageHeaderStore.getDate();
-        String Subject = messageHeaderStore.getSubject();
-        unHashed = Date + ";" + Subject + ";" + From + ";" + To;
-        byte[] hashedBytes = DigestUtils.sha1(unHashed); //byte[] of sha1 hash from unhashed id
-        String Base64Hashed = Base64.encodeBase64String(hashedBytes); //base64 string of hashed id
-        hashID = Base64Hashed; //set id
     }
 
     //-----BODY METHODS-----
