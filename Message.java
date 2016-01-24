@@ -81,6 +81,10 @@ public class Message {
         return -1; //If blank line not found
     }
 
+    public void fillMessageFile(String fileName){
+	Storage s1=new Storage();
+	fillMessage(s1.getMsg(fileName));
+    }
     //-----HASHID METHODS-----
 
     public String getHashID() {

@@ -49,6 +49,18 @@ public class Storage {
         out.print(newMsg.getMessageBody());
     }
 
+    public ArrayList<String> getMsg(String fileName){
+	ArrayList<String> al1 = new ArrayList<String>();
+	try{
+	    Scanner sc = new Scanner(new File(fileName));
+	    while (sc.hasNextLine()){
+		al1.add(sc.nextLine());
+	    }
+	    return al1;
+	}catch(FileNotFoundException e){
+	    return al1;
+	}
+    }
     //-----FILE/LOGO METHODS-----
 
     public static ArrayList<String> getFileStrings(String fileName) {
