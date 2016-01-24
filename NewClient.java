@@ -178,7 +178,7 @@ public class NewClient {
             } else if (mode.equals("POP_MAIN")) {
                 modePopMain();
             } else if (mode.equals("POP_INBOX")) {
-                modePopMain();
+                modePopInbox();
             } else if (mode.equals("POP_VIEW")) {
                 modePopView();
             } else {
@@ -775,14 +775,15 @@ public class NewClient {
                 msgCount = POP.getMessageCount(); //Update msgCount
                 //get HeaderStore of latest message here
                 POP.disconnect();
+                optField = "You have " + msgCount + " messages.";
+                //Add summaryLine of newest message here.
                 menuInstructions = "How many messages would you to list in Inbox? [list <num>]";
                 cmdList = "Cmds: [list <num>], [back], [exit]";
             } else { //login failed
                 POP.disconnect();
                 eraseFromConsole(waitMsg);
                 connFailed = true;
-                optField = "You have " + msgCount + " messages.";
-                //Add summaryLine of newest message here.
+                optField = "";
                 menuInstructions = "Connection issue (login failure).\n" +
                         "Would you like to retry connection?";
                 cmdList = "Cmds: [y], [back], [exit]"; //cmdList stays same
@@ -791,6 +792,7 @@ public class NewClient {
             POP.close();
             eraseFromConsole(waitMsg);
             connFailed = true;
+            optField = "";
             menuInstructions = "Connection issue (server not connected).\n" +
                     "Would you like to retry connection?";
             cmdList = "Cmds: [y], [back], [exit]"; //cmdList stays same
@@ -825,14 +827,12 @@ public class NewClient {
     }
 
     private void modePopInbox() {
-        /*
         //Result vars
         boolean connFailed = false; //Used to check for [y] after failed connection
         //Frame vars
-        menuMap = "Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login > Main > Inbox";
+        menuMap = "Menu Map: ... > Choose Read\\View > Read: > Setup > Login > Main > Inbox";
         menuTitle = "Read: Inbox";
-        optField = "Server: " + POP.getHost() + " | " + POP.getPort() + "\n" +
-                "User: " + POP.getUser();
+        optField = "";
         printFrameHeader(); //Print just top of menu
         //Server interaction begins
         System.out.print(waitMsg);
@@ -841,18 +841,16 @@ public class NewClient {
                 msgCount = POP.getMessageCount(); //Update msgCount
                 ArrayList<HeaderStore> HeaderStoreList = POP.getHeaderStoreList(minMsg, maxMsg);
                 POP.disconnect();
-                optField = "=====================================================================\n";
-                optField += "Msg # |      Date & Time Sent       |    From     |      Subject\n";
-                optField += getMessageSummaries();
-
-
-                menuInstructions = "How many messages would you to list in Inbox? [list <num>]";
-                cmdList = "Cmds: [list <num>], [back], [exit]";
+                optField = getMessageSummaryList(HeaderStoreList);
+                menuInstructions = "List different emails, choose an email to view or delete, or download email(s).";
+                cmdList = "Cmds: [view <msgNum>], [del <msgNum>], [save <msgNum>], [save], [list <numMsgs>],\n" +
+                        "[list <minMsg> <maxMsg>], [back], [exit]";
+                quitUser = true;
             } else { //login failed
                 POP.disconnect();
                 eraseFromConsole(waitMsg);
                 connFailed = true;
-                optField = "You have " + msgCount + " messages.";
+                optField = "";
                 //Add summaryLine of newest message here.
                 menuInstructions = "Connection issue (login failure).\n" +
                         "Would you like to retry connection?";
@@ -862,6 +860,7 @@ public class NewClient {
             POP.close();
             eraseFromConsole(waitMsg);
             connFailed = true;
+            optField = "";
             menuInstructions = "Connection issue (server not connected).\n" +
                     "Would you like to retry connection?";
             cmdList = "Cmds: [y], [back], [exit]"; //cmdList stays same
@@ -870,7 +869,7 @@ public class NewClient {
         clearScreen(); //Clear screen from before results got processed (header + waitMsg)
         printFrame(); //Display result
         getUserInput();
-        */
+        quitUser = true;
     }
 
     private void modePopView() {
@@ -1171,29 +1170,30 @@ public class NewClient {
     }
 
     private static String getMessageSummaryList(ArrayList<HeaderStore> HeaderStoreList) {
-        //Raw sizes: Saved = 5; Date ~ 28; msgNum determined; msgFrom <= 30
-        //Spaced sizes: Saved = 6; Date ~ 30; msgNum determined; msgFrom <= 32; total = 120
-        //4 for | chars, total = 116
-        //116 - 7 - 32 - 30 - 5, Subject raw = 38, spaced = 40
-        int msgNumMax = 5;
-        int dateLimit = summaryArray[i][1].length(); //max allowed length of date fields, based on localeDate
-        int dateMax = dateLimit; //28 in US
-        int fromLimit = 30; //max allowed length of from field
-        int fromMax = 4;
-        int subjectLimit = 0; //gets calculated later
-        int subjectMax = 7;
-        //msgNum varies, Saved is always 1 (+2 = 3)
-        String[][] summaryArray = String[HeaderStoreList.size()][];
+        String[][] summaryArray = new String[HeaderStoreList.size()][];
         for (int i = HeaderStoreList.size() - 1; i >= 0; i--) {
             summaryArray[i] = getMessageSummary(HeaderStoreList.get(i));
         }
         //Each subarray has msgNum in 0, date in 1, from in 2, and subject in 3
+        int msgNumMax = 5;
+        int dateMax = 4;
+        int fromLimit = 30; //max allowed length of from field
+        int fromMax = 4;
+        int subjectLimit = 0; //gets calculated later
+        int subjectMax = 7;
         //Find maximum length of msgNum Strings
         for (int i = 0; i < summaryArray.length; i++) {
             if (summaryArray[i][0].length() > msgNumMax) {
                 msgNumMax = summaryArray[i][0].length();
             }
         }
+        //Find max length of date Strings
+        for (int i = 0; i < summaryArray.length; i++) {
+            if (summaryArray[i][1].length() > dateMax) {
+                dateMax = summaryArray[i][1].length();
+            }
+        }
+        int dateLimit = dateMax;
         //Find max length of from Strings
         for (int i = 0; i < summaryArray.length; i++) {
             if (summaryArray[i][2].length() > fromMax) {
@@ -1201,11 +1201,11 @@ public class NewClient {
             }
         }
         if (fromMax < fromLimit) {
-            subjectLimit = 120 - 4 - msgNumMax - 1 - 1 - 5 - dateMax - 2 - fromMax - 2 - 2;
+            subjectLimit = 120 - 4 - msgNumMax - 2 - 2 - 5 - dateMax - 2 - fromMax - 2 - 2;
         } else {
-            subjectLimit = 120 - 4 - msgNumMax - 1 - 1 - 5 - dateMax - 2 - fromLimit - 2 - 2;
+            subjectLimit = 120 - 4 - msgNumMax - 2 - 2 - 5 - dateMax - 2 - fromLimit - 2 - 2;
         }
-        // = total - dividerCount - msgNumMax - rightSpace - leftSpace - SAVED - dataMax - spacers - fromMax - spacers
+        // = total - dividerCount - msgNumMax - spacers - spacers - SAVED - dataMax - spacers - fromMax - spacers
         //- subjectSpacers
         //Find max length of subject Strings
         for (int i = 0; i < summaryArray.length; i++) {
@@ -1221,7 +1221,7 @@ public class NewClient {
         //Correct fromLimit if subjectMax < subjectLimit and fromMax > fromLimit
         if (subjectMax < subjectLimit && fromMax > fromLimit) {
             if (fromMax - fromLimit < subjectLimit - subjectMax) {
-                subjectLimit - (fromMax - fromLimit);
+                subjectLimit = (fromMax - fromLimit);
                 fromLimit = fromMax;
             } else {
                 fromLimit = subjectLimit - subjectMax;
@@ -1246,17 +1246,50 @@ public class NewClient {
                 summaryArray[i][3] = appendElipse(summaryArray[i][3], subjectLimit);
             }
         }
-        String headerLine = getSpacing("Msg #", "CENTER", 0, msgNumMax + 1) + "Msg #" + " | " +
-                getSpacing("Date", "CENTER", 1, dateLimit + 2) + "Date" + " | " +
-                getSpacing("From", "CENTER", 1, fromLimit + 2) + "From" + " | " +
-                getSpacing("Subject", "CENTER", 1, subjectLimit + 2) + "Subject" + " | " +
-                "Saved\n";
+        //Create header line of Inbox list
+        String LHMsgNum = " " + getSpacing("Msg #", "CENTER", 1, msgNumMax + 2) + "Msg #";
+        String RHMsgNum = addEndSpacer(LHMsgNum, msgNumMax + 2) + "|";
+        String LHDate = " " + getSpacing("Date", "CENTER", 1, dateLimit + 2) + "Date";
+        String RHDate = addEndSpacer(LHDate, dateLimit + 2) + "|";
+        String LHFrom = " " + getSpacing("From", "CENTER", 1, fromLimit + 2) + "From";
+        String RHFrom = addEndSpacer(LHFrom, fromLimit + 2) + "|";
+        String LHSubject = " " + getSpacing("Subject", "CENTER", 1, subjectLimit + 2) + "Subject";
+        String RHSubject = addEndSpacer(LHSubject, subjectLimit + 2) + "|";
+        String LHSaved = " Saved \n";
+        String headerLine = LHMsgNum + RHMsgNum + LHDate + RHDate + LHFrom + RHFrom + LHSubject + RHSubject + LHSaved;
         String totalList = headerLine + "---------------------------------------------------------------------------" +
                 "---------------------------------------------\n";
-        //Finish this by appending inbox list lines to the totalList
-        return "boo";
+        //Generate spaced summary lines and append to list
+        for (int i = 0; i < summaryArray.length; i++) {
+            String leftMsgNum = " " + getSpacing(summaryArray[i][0], "CENTER", 0, msgNumMax + 2) + summaryArray[i][0];
+            String rightMsgNum = addEndSpacer(leftMsgNum, msgNumMax + 2) + "|";
+            String leftDate = " " + getSpacing(summaryArray[i][1], "CENTER", 1, dateLimit + 2) + summaryArray[i][1];
+            String rightDate = addEndSpacer(leftDate, dateLimit + 2) + "|";
+            String leftFrom = " " + getSpacing(summaryArray[i][2], "CENTER", 1, fromLimit + 2) + summaryArray[i][2];
+            String rightFrom = addEndSpacer(leftFrom, fromLimit + 2) + "|";
+            String leftSubject = " " + getSpacing(summaryArray[i][3], "CENTER", 1, subjectLimit + 2) + summaryArray[i][3];
+            String rightSubject = addEndSpacer(leftSubject, subjectLimit + 2) + "|";
+            String leftSaved = " " + getSpacing("Y", "CENTER", 1, " Saved ".length()) + "Y\n";
+            String msgLine = leftMsgNum + rightMsgNum + leftDate + rightDate + leftFrom + rightFrom + leftSubject +
+                    rightSubject + leftSaved;
+            totalList += msgLine;
+        }
+        return totalList;
     }
 
+    //Returns string of spacers needed to bring a text to total length
+    private static String addEndSpacer(String text, int totalLength) {
+        String spacer = "";
+        if (totalLength - text.length() < 0) {
+            return "BAD FIT";
+        }
+        for (int i = 0; i < totalLength - text.length(); i++) {
+            spacer += " ";
+        }
+        return spacer;
+    }
+
+    //Trims text if over limit and appends ...
     private static String appendElipse(String text, int limit) {
         return text.substring(0, limit - 3) + "...";
     }
@@ -1267,6 +1300,8 @@ public class NewClient {
         String date = msgHeader.getDate(); //may be null
         if (date.equals("")) {
             date = "NO DATE";
+        } else {
+            date = ParseUtils.parseEmailDate(date);
         }
         String from = msgHeader.getFrom(); //may be null
         if (from.equals("")) {

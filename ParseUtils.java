@@ -28,7 +28,11 @@ public class ParseUtils {
         SimpleDateFormat emailFormat = new SimpleDateFormat(emailPattern, Locale.US);
         ParsePosition startParse = new ParsePosition(0);
         Date localeDate = emailFormat.parse(trimmed, startParse);
-        return localeDate.toString();
+        if (localeDate != null) {
+            return localeDate.toString();
+        } else {
+            return "BAD DATE";
+        }
     }
     
     //-----TO-----
