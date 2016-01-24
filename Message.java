@@ -81,9 +81,9 @@ public class Message {
         return -1; //If blank line not found
     }
 
-    public void fillMessageFile(String fileName){
+    public void fillMessageFile(String fileName, String folderName){
 	Storage s1=new Storage();
-	fillMessage(s1.getMsg(fileName));
+	fillMessage(s1.getMsg(fileName, folderName));
     }
     //-----HASHID METHODS-----
 

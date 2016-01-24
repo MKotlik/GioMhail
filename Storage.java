@@ -10,9 +10,9 @@ import java.io.*;
 public class Storage {
     private PrintWriter out;
 
-    public String saveMessage(Message newMsg) {
+    public String saveMessage(Message newMsg, String fileName) {
         try {
-            out = new PrintWriter(newMsg.getHashID());
+            out = new PrintWriter("saved_emails/"+fileName+"/"+newMsg.getHashID());
             writeHeader(newMsg.getHeaderStore());
             out.println(""); //print blank line to separate headers from body
             writeMessage(newMsg);
@@ -49,15 +49,16 @@ public class Storage {
         out.print(newMsg.getMessageBody());
     }
 
-    public ArrayList<String> getMsg(String fileName){
+    public ArrayList<String> getMsg(String fileName, String folderName){
 	ArrayList<String> al1 = new ArrayList<String>();
 	try{
-	    Scanner sc = new Scanner(new File(fileName));
+	    Scanner sc = new Scanner(new File("saved_emails/"+folderName+"/"+fileName));
 	    while (sc.hasNextLine()){
 		al1.add(sc.nextLine());
 	    }
 	    return al1;
 	}catch(FileNotFoundException e){
+	    al1.add("FILENOTFOUND");
 	    return al1;
 	}
     }
