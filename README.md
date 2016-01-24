@@ -16,6 +16,28 @@ Open your favorite console and type: java Client. It's that simple!
 Just follow the client's instructions! Helpful in-app prompts and command lists will guide you as you use it. It's that simple!
 
 ## Changelog
+1/24:
+
+Misha:
+
+Gio:
+* Worked on hashID(moved to HeaderStore)
+* Created method to fill a msgClass from a file
+
+1/23:
+
+Misha:
+
+Gio:
+* Researched MIME
+* Wrote methods to read multipart messages based on MIME protocols and save attachments to local files
+
+1/22:
+
+Misha:
+
+Gio:
+* Worked on saving an email from the server to a file
 
 1/21:
 
