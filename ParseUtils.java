@@ -7,6 +7,7 @@
 import java.util.Date;
 import java.util.Locale;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.text.SimpleDateFormat;
 import java.text.ParsePosition;
 
@@ -148,5 +149,75 @@ public class ParseUtils {
             }
         }
         return count;
+    }
+
+    //-----USER INPUT-----
+
+    //Checks if userInput matches expected Cmd and/or argTypes
+    //Takes in <cmdName> <type of arg1> <type of arg2>
+    //cmd can be the name of a command or NONE
+    //argTypes can be INT, STRING, or NONE
+    public static boolean checkInputMatch(String input, String cmd, String argType1, String argType2) {
+        if (argType1.equals("NONE")) { //Must be cmd
+            return cmd.equalsIgnoreCase(input.trim());
+        }
+        int reqSpaces = 0;
+        if ((!cmd.equals("NONE")) && (!argType2.equals("NONE"))) {
+            reqSpaces = 2; //cmd arg arg
+        } else if (cmd.equals("NONE") || argType2.equals("NONE")) {
+            reqSpaces = 1; //cmd arg or arg arg
+        } else if (cmd.equals("NONE") && argType2.equals("NONE")) {
+            reqSpaces = 0; //arg
+        } else {
+            return false; //NONE NONE NONE
+        }
+        if (reqSpaces != countChar(input, ' ')) {
+            return false; //Number of elements doesn't meet expectations
+        }
+        Scanner intScan = new Scanner(input.trim());
+        if (reqSpaces == 0) { //arg1
+            if (intScan.hasNextInt(10)) { //first element is int
+                intScan.close();
+                return argType1.equals("INT");
+            } else {
+                intScan.close();
+                return argType1.equals("STRING");
+            }
+        } else if (reqSpaces == 1 && (!argType2.equals("NONE"))) { //arg1 arg2
+            boolean match1 = false;
+            if (intScan.hasNextInt(10)) { //first element is int
+                match1 = argType1.equals("INT");
+            } else {
+                match1 = argType1.equals("STRING");
+            }
+            intScan.next(); //move to 2nd element
+            if (intScan.hasNextInt(10)) { //second element is int
+                return match1 && argType2.equals("INT");
+            } else {
+                return match1 && argType2.equals("STRING");
+            }
+        } else if (reqSpaces == 1 && (argType2.equals("NONE"))) { //cmd arg1
+            intScan.next(); //skip cmd
+            if (intScan.hasNextInt(10)) { //second element is int
+                return input.toUpperCase().startsWith(cmd) && argType1.equals("INT");
+            } else {
+                return input.toUpperCase().startsWith(cmd) && argType1.equals("STRING");
+            }
+        } else if (reqSpaces == 2) { //cmd arg1 arg2
+            boolean match1 = false;
+            intScan.next(); //skip cmd (1st element)
+            if (intScan.hasNextInt(10)) { //second element is int
+                match1 = argType1.equals("INT");
+            } else {
+                match1 = argType1.equals("STRING");
+            }
+            intScan.next(); //move to 3rd element
+            if (intScan.hasNextInt(10)) { //third element is int
+                return input.toUpperCase().startsWith(cmd) && match1 && argType2.equals("INT");
+            } else {
+                return input.toUpperCase().startsWith(cmd) && match1 && argType2.equals("STRING");
+            }
+        }
+        return false; //something strange has happened
     }
 }

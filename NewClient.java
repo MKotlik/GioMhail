@@ -1143,72 +1143,8 @@ public class NewClient {
         }
     }
 
-    //Checks if userInput matches expected Cmd and/or argTypes
-    //Takes in <cmdName> <type of arg1> <type of arg2>
-    //cmd can be the name of a command or NONE
-    //argTypes can be INT, STRING, or NONE
     private boolean checkInputMatch(String cmd, String argType1, String argType2) {
-        if (argType1.equals("NONE")) { //Must be cmd
-            return cmd.equalsIgnoreCase(userInput.trim());
-        }
-        int reqSpaces = 0;
-        if ((!cmd.equals("NONE")) && (!argType2.equals("NONE"))) {
-            reqSpaces = 2; //cmd arg arg
-        } else if (cmd.equals("NONE") || argType2.equals("NONE")) {
-            reqSpaces = 1; //cmd arg or arg arg
-        } else if (cmd.equals("NONE") && argType2.equals("NONE")) {
-            reqSpaces = 0; //arg
-        } else {
-            return false; //NONE NONE NONE
-        }
-        if (reqSpaces != countChar(userInput, ' ')) {
-            return false; //Number of elements doesn't meet expectations
-        }
-        Scanner intScan = new Scanner(userInput.trim());
-        if (reqSpaces == 0) { //arg1
-            if (intScan.hasNextInt(10)) { //first element is int
-                intScan.close();
-                return argType1.equals("INT");
-            } else {
-                intScan.close();
-                return argType1.equals("STRING");
-            }
-        } else if (reqSpaces == 1 && (!argType2.equals("NONE"))) { //arg1 arg2
-            boolean match1 = false;
-            if (intScan.hasNextInt(10)) { //first element is int
-                match1 = argType1.equals("INT");
-            } else {
-                match1 = argType1.equals("STRING");
-            }
-            intScan.next(); //move to 2nd element
-            if (intScan.hasNextInt(10)) { //second element is int
-                return match1 && argType2.equals("INT");
-            } else {
-                return match1 && argType2.equals("STRING");
-            }
-        } else if (reqSpaces == 1 && (argType2.equals("NONE"))) { //cmd arg1
-            intScan.next(); //skip cmd
-            if (intScan.hasNextInt(10)) { //second element is int
-                return userInput.toUpperCase().startsWith(cmd) && argType1.equals("INT");
-            } else {
-                return userInput.toUpperCase().startsWith(cmd) && argType1.equals("STRING");
-            }
-        } else if (reqSpaces == 2) { //cmd arg1 arg2
-            boolean match1 = false;
-            intScan.next(); //skip cmd (1st element)
-            if (intScan.hasNextInt(10)) { //second element is int
-                match1 = argType1.equals("INT");
-            } else {
-                match1 = argType1.equals("STRING");
-            }
-            intScan.next(); //move to 3rd element
-            if (intScan.hasNextInt(10)) { //third element is int
-                return userInput.toUpperCase().startsWith(cmd) && match1 && argType2.equals("INT");
-            } else {
-                return userInput.toUpperCase().startsWith(cmd) && match1 && argType2.equals("STRING");
-            }
-        }
-        return false; //something strange has happened
+        return ParseUtils.checkInputMatch(userInput, cmd, argType1, argType2);
     }
 
     //Counts the number of target chars in given input string
@@ -1234,9 +1170,100 @@ public class NewClient {
         return retStr;
     }
 
+    private static String getMessageSummaryList(ArrayList<HeaderStore> HeaderStoreList) {
+        //Raw sizes: Saved = 5; Date ~ 28; msgNum determined; msgFrom <= 30
+        //Spaced sizes: Saved = 6; Date ~ 30; msgNum determined; msgFrom <= 32; total = 120
+        //4 for | chars, total = 116
+        //116 - 7 - 32 - 30 - 5, Subject raw = 38, spaced = 40
+        int msgNumMax = 5;
+        int dateLimit = summaryArray[i][1].length(); //max allowed length of date fields, based on localeDate
+        int dateMax = dateLimit; //28 in US
+        int fromLimit = 30; //max allowed length of from field
+        int fromMax = 4;
+        int subjectLimit = 0; //gets calculated later
+        int subjectMax = 7;
+        //msgNum varies, Saved is always 1 (+2 = 3)
+        String[][] summaryArray = String[HeaderStoreList.size()][];
+        for (int i = HeaderStoreList.size() - 1; i >= 0; i--) {
+            summaryArray[i] = getMessageSummary(HeaderStoreList.get(i));
+        }
+        //Each subarray has msgNum in 0, date in 1, from in 2, and subject in 3
+        //Find maximum length of msgNum Strings
+        for (int i = 0; i < summaryArray.length; i++) {
+            if (summaryArray[i][0].length() > msgNumMax) {
+                msgNumMax = summaryArray[i][0].length();
+            }
+        }
+        //Find max length of from Strings
+        for (int i = 0; i < summaryArray.length; i++) {
+            if (summaryArray[i][2].length() > fromMax) {
+                fromMax = summaryArray[i][2].length();
+            }
+        }
+        if (fromMax < fromLimit) {
+            subjectLimit = 120 - 4 - msgNumMax - 1 - 1 - 5 - dateMax - 2 - fromMax - 2 - 2;
+        } else {
+            subjectLimit = 120 - 4 - msgNumMax - 1 - 1 - 5 - dateMax - 2 - fromLimit - 2 - 2;
+        }
+        // = total - dividerCount - msgNumMax - rightSpace - leftSpace - SAVED - dataMax - spacers - fromMax - spacers
+        //- subjectSpacers
+        //Find max length of subject Strings
+        for (int i = 0; i < summaryArray.length; i++) {
+            if (summaryArray[i][3].length() > subjectMax) {
+                if (summaryArray[i][3].length() > subjectLimit) {
+                    subjectMax = subjectLimit;
+                    break;
+                } else {
+                    subjectMax = summaryArray[i][3].length();
+                }
+            }
+        }
+        //Correct fromLimit if subjectMax < subjectLimit and fromMax > fromLimit
+        if (subjectMax < subjectLimit && fromMax > fromLimit) {
+            if (fromMax - fromLimit < subjectLimit - subjectMax) {
+                subjectLimit - (fromMax - fromLimit);
+                fromLimit = fromMax;
+            } else {
+                fromLimit = subjectLimit - subjectMax;
+                subjectLimit = subjectMax;
+            }
+        }
+        //Shorten date Strings if need be (limit is already known)
+        for (int i = 0; i < summaryArray.length; i++) {
+            if (summaryArray[i][1].length() > dateLimit) {
+                summaryArray[i][1] = appendElipse(summaryArray[i][1], dateLimit);
+            }
+        }
+        //Shorten from Strings if need be (limit is already known)
+        for (int i = 0; i < summaryArray.length; i++) {
+            if (summaryArray[i][2].length() > fromLimit) {
+                summaryArray[i][2] = appendElipse(summaryArray[i][2], fromLimit);
+            }
+        }
+        //Shorten subject Strings if need be (limit is already known)
+        for (int i = 0; i < summaryArray.length; i++) {
+            if (summaryArray[i][3].length() > subjectLimit) {
+                summaryArray[i][3] = appendElipse(summaryArray[i][3], subjectLimit);
+            }
+        }
+        String headerLine = getSpacing("Msg #", "CENTER", 0, msgNumMax + 1) + "Msg #" + " | " +
+                getSpacing("Date", "CENTER", 1, dateLimit + 2) + "Date" + " | " +
+                getSpacing("From", "CENTER", 1, fromLimit + 2) + "From" + " | " +
+                getSpacing("Subject", "CENTER", 1, subjectLimit + 2) + "Subject" + " | " +
+                "Saved\n";
+        String totalList = headerLine + "---------------------------------------------------------------------------" +
+                "---------------------------------------------\n";
+        //Finish this by appending inbox list lines to the totalList
+        return "boo";
+    }
+
+    private static String appendElipse(String text, int limit) {
+        return text.substring(0, limit - 3) + "...";
+    }
+
     //Builds a summary line from a HeaderStore
-    private static String getMessageSummary(HeaderStore msgHeader) {
-        int msgNum = msgHeader.getMessageNum(); //this is alsways present
+    private static String[] getMessageSummary(HeaderStore msgHeader) {
+        String msgNum = Integer.toString(msgHeader.getMessageNum()); //this is alsways present
         String date = msgHeader.getDate(); //may be null
         if (date.equals("")) {
             date = "NO DATE";
@@ -1249,6 +1276,6 @@ public class NewClient {
         if (subject.equals("")) {
             subject = "NO SUBJECT";
         }
-        return msgNum + " | " + date + " | " + from + " | " + subject;
+        return new String[]{msgNum, date, from, subject};
     }
 }
