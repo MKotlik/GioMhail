@@ -24,7 +24,12 @@ public class ParseUtils {
         } else {
             trimmed = emailDate;
         }
-        String emailPattern = "EEE, dd MMM yyyy HH:mm:ss Z";
+        String emailPattern = "";
+        if (trimmed.length() > 3 && trimmed.charAt(3) == ',') {
+            emailPattern = "EEE, dd MMM yyyy HH:mm:ss Z";
+        } else {
+            emailPattern = "dd MMM yyyy HH:mm:ss Z";
+        }
         SimpleDateFormat emailFormat = new SimpleDateFormat(emailPattern, Locale.US);
         ParsePosition startParse = new ParsePosition(0);
         Date localeDate = emailFormat.parse(trimmed, startParse);
