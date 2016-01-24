@@ -306,7 +306,7 @@ public class NewClient {
         //Change frame vars & print
         menuMap = "Menu Map: Welcome > Choose Read\\Send > Send: > Setup > Login";
         menuTitle = "Send: Login";
-        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort();
+        optField = "";
         menuInstructions = "Please enter your username and password.";
         cmdList = "Cmds: <user pass>, [back], [exit]";
         printFrame();
@@ -347,8 +347,7 @@ public class NewClient {
         //Change frame vars & print
         menuMap = "Menu Map: Welcome > Choose Read\\Send > Send: > Setup > Login > Main";
         menuTitle = "Send: Main Menu";
-        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
-                "User: " + SMTP.getUser();
+        optField = "";
         menuInstructions = "Would you like to send an email?";
         cmdList = "Cmds: [y], [back], [exit]";
         printFrame();
@@ -376,8 +375,7 @@ public class NewClient {
         //Change frame vars & print
         menuMap = "Menu Map: Welcome > Choose Read\\Send > Send: > Setup > Login > Main > Subject";
         menuTitle = "Send: Subject";
-        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
-                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        optField = getDraftDisplay();
         menuInstructions = "Please enter a subject";
         cmdList = "Cmds: <subject>, [back], [exit]";
         printFrame();
@@ -402,8 +400,7 @@ public class NewClient {
         //Change frame vars & print
         menuMap = "Menu Map: ... > Choose Read\\Send > Send: > Setup > Login > Main > Subject > From";
         menuTitle = "Send: From";
-        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
-                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        optField = getDraftDisplay();
         menuInstructions = "Please enter your From name & address in the format: " +
                 "First Last <user@server.com>, with brackets.\n" +
                 "Note, the address should correspond to your account on this server.";
@@ -421,7 +418,7 @@ public class NewClient {
         } else if (checkInputMatch("exit", "NONE", "NONE")) {
             quitUser = true;
         } else { //Assume that its from address
-            if (parseFrom(userInput).equals("GOOD FROM")) {
+            if (ParseUtils.checkFrom(userInput).equals("GOOD FROM")) {
                 newMsg.getHeaderStore().setHeaderForce("From", userInput);
                 mode = "SMTP_TO";
             } else {
@@ -435,8 +432,7 @@ public class NewClient {
         //Change frame vars & print
         menuMap = "Menu Map: ... > Send: > Setup > Login > Main > Subject > From > To";
         menuTitle = "Send: To";
-        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
-                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        optField = getDraftDisplay();
         menuInstructions = "Please enter a list of 'to' names & addresses.\n" +
                 "Follow the format: First Last <user@server.com>, " +
                 "First Last <user@server.com>, ... Use brackets.";
@@ -454,7 +450,7 @@ public class NewClient {
         } else if (checkInputMatch("exit", "NONE", "NONE")) {
             quitUser = true;
         } else { //Assume that its the to addresses
-            if (parseTo(userInput).equals("GOOD TO")) {
+            if (ParseUtils.checkTo(userInput).equals("GOOD TO")) {
                 newMsg.getHeaderStore().setHeaderForce("To", userInput);
                 mode = "SMTP_CC";
             } else {
@@ -468,8 +464,7 @@ public class NewClient {
         //Change frame vars & print
         menuMap = "Menu Map: ... > Setup > Login > Main > Subject > From > To > CC";
         menuTitle = "Send: CC";
-        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
-                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        optField = getDraftDisplay();
         menuInstructions = "You may choose to enter a list of CC names & addresses, or enter [n] to skip.\n" +
                 "Follow the format: First Last <user@server.com>, " +
                 "First Last <user@server.com>, ... Use brackets.";
@@ -489,7 +484,7 @@ public class NewClient {
         } else if (checkInputMatch("exit", "NONE", "NONE")) {
             quitUser = true;
         } else { //Assume that its the CC addresses
-            if (parseTo(userInput).equals("GOOD TO")) {
+            if (ParseUtils.checkTo(userInput).equals("GOOD TO")) {
                 newMsg.getHeaderStore().setHeaderForce("CC", userInput);
                 mode = "SMTP_BCC";
             } else {
@@ -503,8 +498,7 @@ public class NewClient {
         //Change frame vars & print
         menuMap = "Menu Map: ... > Login > Main > Subject > From > To > CC > BCC";
         menuTitle = "Send: BCC";
-        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
-                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        optField = getDraftDisplay();
         menuInstructions = "You may choose to enter a list of BCC names & addresses, or enter [n] to skip.\n" +
                 "Follow the format: First Last <user@server.com>, " +
                 "First Last <user@server.com>, ... Use brackets.";
@@ -524,7 +518,7 @@ public class NewClient {
         } else if (checkInputMatch("exit", "NONE", "NONE")) {
             quitUser = true;
         } else { //Assume that its the BCC addresses
-            if (parseTo(userInput).equals("GOOD TO")) {
+            if (ParseUtils.checkTo(userInput).equals("GOOD TO")) {
                 newMsg.getHeaderStore().setHeaderForce("BCC", userInput);
                 mode = "SMTP_BODY";
             } else {
@@ -538,8 +532,7 @@ public class NewClient {
         //Change frame vars & print
         menuMap = "Menu Map: ... > Main > Subject > From > To > CC > BCC > Body";
         menuTitle = "Send: Message Body";
-        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
-                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        optField = getDraftDisplay();
         menuInstructions = "Enter the body of your message line by line.\n" +
                 "Use [$del] to jump back and delete the previous line.\n";
         cmdList = "Cmds: <line text>, [$del], [$back], [$exit], [$send]";
@@ -578,8 +571,7 @@ public class NewClient {
         //Change frame vars & print
         menuMap = "Menu Map: ... > Subject > From > To > CC > BCC > Body > Confirm";
         menuTitle = "Send: Confirm";
-        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
-                "User: " + SMTP.getUser() + "\n" + getDraftDisplay();
+        optField = getDraftDisplay();
         menuInstructions = "Are you ready to send this email?";
         cmdList = "Cmds: [y], [back], [exit]";
         printFrame();
@@ -609,8 +601,7 @@ public class NewClient {
         //Frame vars
         menuMap = "Menu Map: ... > From > To > CC > BCC > Body > Confirm > Result";
         menuTitle = "Send: Result";
-        optField = "Server: " + SMTP.getHost() + " | " + SMTP.getPort() + "\n" +
-                "User: " + SMTP.getUser();
+        optField = "";
         cmdList = "Cmds: [y], [back], [exit]"; //cmdList stays same
         printFrameHeader(); //Print just top of menu
         //Server interaction begins
@@ -732,7 +723,7 @@ public class NewClient {
         //Change frame vars & print
         menuMap = "Menu Map: Welcome > Choose Read\\Send > Read: > Setup > Login";
         menuTitle = "Read: Login";
-        optField = "Server: " + POP.getHost() + " | " + POP.getPort();
+        optField = "";
         menuInstructions = "Please enter your username and password.";
         cmdList = "Cmds: <user pass>, [back], [exit]";
         printFrame();
@@ -775,8 +766,7 @@ public class NewClient {
         //Frame vars
         menuMap = "Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login > Main";
         menuTitle = "Read: Main";
-        optField = "Server: " + POP.getHost() + " | " + POP.getPort() + "\n" +
-                "User: " + POP.getUser();
+        optField = "";
         printFrameHeader(); //Print just top of menu
         //Server interaction begins
         System.out.print(waitMsg);
@@ -895,32 +885,6 @@ public class NewClient {
 
     //Prints the entire frame to the screen
     //Several sections: Logo, menu map, menu title, optional field, instructions, cmd lines, prompt
-    private void printFrame2() {
-        //Print logo
-        for (int i = 0; i < smallLogoLines.size(); i++) {
-            System.out.println(smallLogoLines.get(i));
-        }
-        System.out.println(""); //blank line
-        System.out.println("Menu Map: " + menuMap);
-        System.out.println(menuTitle);
-        System.out.println("----------------------------------------------------------------------"); //70
-        System.out.println(""); //blank line
-        if (!optField.equals("")) {
-            System.out.println(optField);
-            //System.out.println("----------------------------------------------------------------------"); //70
-        }
-        System.out.println(""); //Blank line
-        System.out.println(menuInstructions);
-        System.out.println(cmdList);
-        System.out.println(""); //Blank line
-        if (!statusMsg.equals("")) {
-            System.out.println(statusMsg);
-            statusMsg = "";
-        }
-        System.out.print("|> "); //Prompt
-    }
-
-    //New version of printFrame
     private void printFrame() {
         //Print top bar
         System.out.println("========================================================================================" +
@@ -944,21 +908,21 @@ public class NewClient {
                 "--------------------------------"); //Header separator
         //Print server & user info if in POP or SMTP
         if (mode.toUpperCase().startsWith("POP")) {
-            if ((! POP.getUser().equals("")) && (! mode.toUpperCase().equals("POP_LOGIN"))) { //right user has been set
+            if ((!POP.getUser().equals("")) && (!mode.toUpperCase().equals("POP_LOGIN"))) { //right user has been set
                 String serverInfo = POP.getHost() + " | " + POP.getPort();
                 String line = POP.getUser() + getSpacing(serverInfo, "RIGHT", POP.getUser().length(), 120) + serverInfo;
                 System.out.println(line);
-            } else if ((! POP.getHost().equals("")) && (! mode.toUpperCase().equals("POP_SETUP"))) { //host & ! user
+            } else if ((!POP.getHost().equals("")) && (!mode.toUpperCase().equals("POP_SETUP"))) { //host & ! user
                 String serverInfo = POP.getHost() + " | " + POP.getPort();
                 String line = getSpacing(serverInfo, "RIGHT", 0, 120) + serverInfo;
                 System.out.println(line);
             }
         } else if (mode.toUpperCase().startsWith("SMTP")) {
-            if ((! SMTP.getUser().equals("")) && (! mode.toUpperCase().equals("SMTP_LOGIN"))) { //right user has been set
+            if ((!SMTP.getUser().equals("")) && (!mode.toUpperCase().equals("SMTP_LOGIN"))) { //right user has been set
                 String serverInfo = SMTP.getHost() + " | " + SMTP.getPort();
                 String line = SMTP.getUser() + getSpacing(serverInfo, "RIGHT", SMTP.getUser().length(), 120) + serverInfo;
                 System.out.println(line);
-            } else if ((! SMTP.getHost().equals("")) && (! mode.toUpperCase().equals("SMTP_SETUP"))) { //host & ! user
+            } else if ((!SMTP.getHost().equals("")) && (!mode.toUpperCase().equals("SMTP_SETUP"))) { //host & ! user
                 String serverInfo = SMTP.getHost() + " | " + SMTP.getPort();
                 String line = getSpacing(serverInfo, "RIGHT", 0, 120) + serverInfo;
                 System.out.println(line);
@@ -984,17 +948,54 @@ public class NewClient {
     //Prints the top of a menu to a screen
     //Several sections: Logo, menu map, menu title, optional field
     private void printFrameHeader() {
+        //Print top bar
+        System.out.println("========================================================================================" +
+                "================================");
+        System.out.println(""); //cushion
         //Print logo
         for (int i = 0; i < smallLogoLines.size(); i++) {
-            System.out.println(smallLogoLines.get(i));
+            if (i == smallLogoLines.size() - 2) { //print menuTitle
+                String line = smallLogoLines.get(i) +
+                        getSpacing(menuTitle, "CENTER", smallLogoLines.get(i).length(), 120) + menuTitle;
+                System.out.println(line);
+            } else if (i == smallLogoLines.size() - 1) {
+                String line = smallLogoLines.get(i) +
+                        getSpacing(menuMap, "CENTER", smallLogoLines.get(i).length(), 120) + menuMap;
+                System.out.println(line);
+            } else {
+                System.out.println(smallLogoLines.get(i));
+            }
         }
-        System.out.println(""); //blank line
-        System.out.println("Menu Map: " + menuMap);
-        System.out.println(menuTitle);
-        System.out.println("----------------------------------------------------------------------"); //70
+        System.out.println("----------------------------------------------------------------------------------------" +
+                "--------------------------------"); //Header separator
+        //Print server & user info if in POP or SMTP
+        if (mode.toUpperCase().startsWith("POP")) {
+            if ((!POP.getUser().equals("")) && (!mode.toUpperCase().equals("POP_LOGIN"))) { //right user has been set
+                String serverInfo = POP.getHost() + " | " + POP.getPort();
+                String line = POP.getUser() + getSpacing(serverInfo, "RIGHT", POP.getUser().length(), 120) + serverInfo;
+                System.out.println(line);
+            } else if ((!POP.getHost().equals("")) && (!mode.toUpperCase().equals("POP_SETUP"))) { //host & ! user
+                String serverInfo = POP.getHost() + " | " + POP.getPort();
+                String line = getSpacing(serverInfo, "RIGHT", 0, 120) + serverInfo;
+                System.out.println(line);
+            }
+        } else if (mode.toUpperCase().startsWith("SMTP")) {
+            if ((!SMTP.getUser().equals("")) && (!mode.toUpperCase().equals("SMTP_LOGIN"))) { //right user has been set
+                String serverInfo = SMTP.getHost() + " | " + SMTP.getPort();
+                String line = SMTP.getUser() + getSpacing(serverInfo, "RIGHT", SMTP.getUser().length(), 120) + serverInfo;
+                System.out.println(line);
+            } else if ((!SMTP.getHost().equals("")) && (!mode.toUpperCase().equals("SMTP_SETUP"))) { //host & ! user
+                String serverInfo = SMTP.getHost() + " | " + SMTP.getPort();
+                String line = getSpacing(serverInfo, "RIGHT", 0, 120) + serverInfo;
+                System.out.println(line);
+            }
+        }
+        System.out.println(""); //cushion
         if (!optField.equals("")) {
             System.out.println(optField);
-            //System.out.println("----------------------------------------------------------------------"); //70
+            System.out.println(""); //cushion
+            //System.out.println("____________________________________________________________________________________" +
+            //        "____________________________________");
         }
     }
 
@@ -1027,9 +1028,6 @@ public class NewClient {
     //Compose string for displaying message builder with printFrame
     private String getDraftDisplay() {
         String draftDisplay = "";
-        draftDisplay += "=====================================================================\n";
-        draftDisplay += " \n";
-        draftDisplay += "------------------------------New Email------------------------------\n";
         draftDisplay += "Subject: " + newMsg.getHeaderStore().getSubject() + "\n";
         draftDisplay += "From: " + newMsg.getHeaderStore().getFrom() + "\n";
         draftDisplay += "To: " + newMsg.getHeaderStore().getTo() + "\n";
@@ -1037,12 +1035,11 @@ public class NewClient {
         draftDisplay += "BCC: " + newMsg.getHeaderStore().getBCC() + "\n";
         draftDisplay += " \n";
         draftDisplay += "Body:\n";
-        draftDisplay += "---------------------------------------------------------------------\n";
+        draftDisplay += "----------------------------------------------------------------------------------------" +
+                "--------------------------------\n";
         for (int i = 0; i < msgBodyArray.size(); i++) {
             draftDisplay += msgBodyArray.get(i) + "\n";
         }
-        draftDisplay += " \n";
-        draftDisplay += "=====================================================================\n";
         return draftDisplay;
     }
 
@@ -1063,7 +1060,7 @@ public class NewClient {
     //Give text to be aligned, with a type of alignment (CENTER, RIGHT), length of initial left offset,
     //and the total length of the line, returns a spacer String to be used for alignment
     //Returns
-    private String getSpacing(String text, String type, int leftOffset, int totalLength) {
+    private static String getSpacing(String text, String type, int leftOffset, int totalLength) {
         String spacer = "";
         int numSpaces = 0;
         if (leftOffset < 0 || totalLength < 0) {
@@ -1214,56 +1211,9 @@ public class NewClient {
         return false; //something strange has happened
     }
 
-    //ParseFrom, returns String msg signifying/error or success in From address
-    //Currently only returns "GOOD FROM", and "BAD FROM"
-    //Later expand to support different error msgs
-    private String parseFrom(String fromHeader) {
-        if (countChar(fromHeader, '<') != 1 || countChar(fromHeader, '>') != 1) {
-            return "BAD FROM";
-        }
-        int bracket1Ind = fromHeader.indexOf('<');
-        int bracket2Ind = fromHeader.indexOf('>');
-        if (bracket2Ind <= bracket1Ind) {
-            return "BAD FROM";
-        }
-        if (!(bracket1Ind + 4 <= bracket2Ind)) { //At least three chars between brackets <...>
-            return "BAD FROM";
-        }
-        if (countChar(fromHeader.substring(bracket1Ind, bracket2Ind + 1), '@') != 1) { //Must be 1 @
-            return "BAD FROM";
-        }
-        return "GOOD FROM";
-    }
-
-    //ParseTo, returns String msg signifying/error or success in To address list
-    //Currently only returns "GOOD TO", and "BAD TO"
-    //Later expand to support different error msgs
-    private String parseTo(String toHeader) {
-        int LBrCount = countChar(toHeader, '<');
-        int RBrCount = countChar(toHeader, '>');
-        if ((LBrCount < 1) || (RBrCount < 1) || (LBrCount != RBrCount)) {
-            return "BAD TO";
-        }
-        String addressLine = toHeader;
-        for (int i = 0; i < LBrCount; i++) {
-            int bracket1Ind = addressLine.indexOf('<');
-            int bracket2Ind = addressLine.indexOf('>');
-            if (!(bracket1Ind + 4 <= bracket2Ind)) { //At least three chars between brackets <...>
-                return "BAD TO";
-            }
-            if (countChar(addressLine.substring(bracket1Ind, bracket2Ind + 1), '@') != 1) { //Must be a @
-                return "BAD TO";
-            }
-            if (bracket2Ind != addressLine.length() - 1) { //If > isn't at the end
-                addressLine = addressLine.substring(bracket2Ind + 1, addressLine.length()); //Get string after >
-            }
-        }
-        return "GOOD TO";
-    }
-
     //Counts the number of target chars in given input string
     //0 if none
-    private int countChar(String text, char target) {
+    private static int countChar(String text, char target) {
         int count = 0;
         for (int i = 0; i < text.length(); i++) {
             if (text.charAt(i) == target) {
@@ -1276,7 +1226,7 @@ public class NewClient {
     //-----MESSAGE METHODS-----
 
     //Prints summary lines from an ArrayList of HeaderStores
-    private String getMessageSummaries(ArrayList<HeaderStore> HeaderStoreList) {
+    private static String getMessageSummaries(ArrayList<HeaderStore> HeaderStoreList) {
         String retStr = "";
         for (int i = HeaderStoreList.size() - 1; i >= 0; i--) {
             retStr += getMessageSummary(HeaderStoreList.get(i)) + "\n";
@@ -1285,7 +1235,7 @@ public class NewClient {
     }
 
     //Builds a summary line from a HeaderStore
-    private String getMessageSummary(HeaderStore msgHeader) {
+    private static String getMessageSummary(HeaderStore msgHeader) {
         int msgNum = msgHeader.getMessageNum(); //this is alsways present
         String date = msgHeader.getDate(); //may be null
         if (date.equals("")) {

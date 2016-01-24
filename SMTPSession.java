@@ -49,11 +49,11 @@ public class SMTPSession extends Session {
             return "NO TO";
         }
         //Parsse From and To headers and return errors of bad format
-        String from = parseFrom(msgHeaders.getFrom());
+        String from = ParseUtils.parseFrom(msgHeaders.getFrom());
         if (from.equals("BAD FROM")) {
             return "BAD FROM";
         }
-        ArrayList<String> toList = parseTo(msgHeaders.getTo());
+        ArrayList<String> toList = ParseUtils.parseTo(msgHeaders.getTo());
         if (toList.get(0).equals("BAD TO")) {
             return "BAD TO";
         }
@@ -109,120 +109,4 @@ public class SMTPSession extends Session {
             }
         }
     }
-
-
-    //This method parses the fromHeader
-    //The header normally looks like: "Misha Kotlik <mikekotlik@gmail.com>"
-    //This function has to count the number of brackets. If it doesn't match 2, return "BAD FROM"
-    //Otherwise,  the address with the brackets
-    private String parseFrom(String fromHeader) {
-        if (countChar(fromHeader, '<') != 1 || countChar(fromHeader, '>') != 1) {
-            return "BAD FROM";
-        }
-        int bracket1Ind = fromHeader.indexOf('<');
-        int bracket2Ind = fromHeader.indexOf('>');
-        if (bracket2Ind <= bracket1Ind) {
-            return "BAD FROM";
-        }
-        if (!(bracket1Ind + 4 <= bracket2Ind)) { //At least three chars between brackets <...>
-            return "BAD FROM";
-        }
-        if (countChar(fromHeader.substring(bracket1Ind, bracket2Ind + 1), '@') != 1) { //Must be 1 @
-            return "BAD FROM";
-        }
-        return fromHeader.substring(bracket1Ind, bracket2Ind + 1);
-    }
-
-    //This method parses the toHeader
-    //The header normally looks like: "Gio Topa <giotopa@gmail.com>, Gio Kotlik <giokotlik@yahoo.com>"
-    //Header must have addresses as <...>, with at least three characters within <...> and one @
-    //If the above condition isn't met, return "BAD TO" as first element of ArrayList
-    //Otherwise, add the addresses with the brackets to an ArrayList and return it
-    private ArrayList<String> parseTo(String toHeader) {
-        ArrayList<String> toAddresses = new ArrayList<String>();
-        int LBrCount = countChar(toHeader, '<');
-        int RBrCount = countChar(toHeader, '>');
-        if ((LBrCount < 1) || (RBrCount < 1) || (LBrCount != RBrCount)) {
-            toAddresses.add("BAD TO");
-            return toAddresses;
-        }
-        String addressLine = toHeader;
-        for (int i = 0; i < LBrCount; i++) {
-            int bracket1Ind = addressLine.indexOf('<');
-            int bracket2Ind = addressLine.indexOf('>');
-            if (!(bracket1Ind + 4 <= bracket2Ind)) { //At least three chars between brackets <...>
-                toAddresses.add("BAD TO"); //Need this to insure always has 0 index
-                toAddresses.set(0, "BAD TO");
-                return toAddresses;
-            }
-            if (countChar(addressLine.substring(bracket1Ind, bracket2Ind + 1), '@') != 1) { //Must be a @
-                toAddresses.add("BAD TO"); //Need this to insure always has 0 index
-                toAddresses.set(0, "BAD TO");
-                return toAddresses;
-            }
-            toAddresses.add(addressLine.substring(bracket1Ind, bracket2Ind + 1));
-            if (bracket2Ind != addressLine.length() - 1) { //If > isn't at the end
-                addressLine = addressLine.substring(bracket2Ind + 1, addressLine.length()); //Get string after >
-            }
-        }
-        return toAddresses;
-    }
-
-    //Counts the number of target chars in given input string
-    //0 if none
-    private int countChar(String text, char target) {
-        int count = 0;
-        for (int i = 0; i < text.length(); i++) {
-            if (text.charAt(i) == target) {
-                count++;
-            }
-        }
-        return count;
-    }
-
 }
-
-/* Deprecated sendMail code
-
-    public String sendMail(Message newMsg) {
-        header = newMsg.getHeaderStore();
-        if (!header.getTo() = null) {
-            writeServer("MAIL From: " + header.getFrom());
-            String serverInput = read(false).get(0);
-            if (checkResponseCode(serverInput, "250")) {
-                if (!header.getTo() = null) {
-                    writeServer("RCPT To: " + header.getTo());
-                    serverInput = read(false).get(0);
-                    if (checkResponseCode(serverInput, "250")) {
-                        writeServer("DATA");
-                        serverInput = read(false).get(0);
-                        if (checkResponseCode(serverInput, "354")) {
-                            String head = "";
-                            String[] headersAvailable = header.getKeyArray();
-                            for (int i = 0; i < headerAvailable.length; i++) {
-                                head += headerAvailable[i] + ": " + header.getHeaderValue(headerAvailable[i]) + "\n";
-                            }
-                            writeServer(head + newMsg.getMessageBody() + "\n.");
-                            serverInput = read(true).get(0);
-                            if (checkResponseCode(serverInput, "250")) {
-                                return "Mail sent";
-                            } else {
-                                return "Please enter valid message body";
-                            }
-                        } else {
-                            return "Connection issues";
-                        }
-                    } else {
-                        return "Please enter valid recipient";
-                    }
-                } else {
-                    return "Please enter a recpipient";
-                }
-            } else {
-                return "Please enter valid sender information";
-            }
-        } else {
-            return "Please enter sender info";
-        }
-    }
- */
