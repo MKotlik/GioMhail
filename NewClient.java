@@ -843,8 +843,9 @@ public class NewClient {
                 POP.disconnect();
                 optField = getMessageSummaryList(HeaderStoreList);
                 menuInstructions = "List different emails, choose an email to view or delete, or download email(s).";
-                cmdList = "Cmds: [view <msgNum>], [del <msgNum>], [save <msgNum>], [save], [list <numMsgs>],\n" +
-                        "[list <minMsg> <maxMsg>], [back], [exit]";
+                cmdList = "Cmds: [view <msgNum>], [list <numMsgs>], [list <minMsg> <maxMsg>], [back], [exit]";
+                //cmdList = "Cmds: [view <msgNum>], [del <msgNum>], [save <msgNum>], [save], [list <numMsgs>],\n" +
+                //        "[list <minMsg> <maxMsg>], [back], [exit]";
                 quitUser = true;
             } else { //login failed
                 POP.disconnect();
@@ -1160,15 +1161,6 @@ public class NewClient {
 
     //-----MESSAGE METHODS-----
 
-    //Prints summary lines from an ArrayList of HeaderStores
-    private static String getMessageSummaries(ArrayList<HeaderStore> HeaderStoreList) {
-        String retStr = "";
-        for (int i = HeaderStoreList.size() - 1; i >= 0; i--) {
-            retStr += getMessageSummary(HeaderStoreList.get(i)) + "\n";
-        }
-        return retStr;
-    }
-
     private static String getMessageSummaryList(ArrayList<HeaderStore> HeaderStoreList) {
         String[][] summaryArray = new String[HeaderStoreList.size()][];
         for (int i = HeaderStoreList.size() - 1; i >= 0; i--) {
@@ -1201,31 +1193,36 @@ public class NewClient {
             }
         }
         if (fromMax < fromLimit) {
-            subjectLimit = 120 - 4 - msgNumMax - 2 - 2 - 5 - dateMax - 2 - fromMax - 2 - 2;
+            subjectLimit = 120 - 4 - msgNumMax - 2 - 2 - 5 - dateMax - 2 - fromMax - 2 - 2 - 5;
         } else {
-            subjectLimit = 120 - 4 - msgNumMax - 2 - 2 - 5 - dateMax - 2 - fromLimit - 2 - 2;
+            subjectLimit = 120 - 4 - msgNumMax - 2 - 2 - 5 - dateMax - 2 - fromLimit - 2 - 2 - 5;
         }
         // = total - dividerCount - msgNumMax - spacers - spacers - SAVED - dataMax - spacers - fromMax - spacers
         //- subjectSpacers
         //Find max length of subject Strings
         for (int i = 0; i < summaryArray.length; i++) {
             if (summaryArray[i][3].length() > subjectMax) {
-                if (summaryArray[i][3].length() > subjectLimit) {
-                    subjectMax = subjectLimit;
-                    break;
-                } else {
-                    subjectMax = summaryArray[i][3].length();
-                }
+                subjectMax = summaryArray[i][3].length();
             }
         }
         //Correct fromLimit if subjectMax < subjectLimit and fromMax > fromLimit
         if (subjectMax < subjectLimit && fromMax > fromLimit) {
             if (fromMax - fromLimit < subjectLimit - subjectMax) {
-                subjectLimit = (fromMax - fromLimit);
+                subjectLimit -= (fromMax - fromLimit);
                 fromLimit = fromMax;
             } else {
-                fromLimit = subjectLimit - subjectMax;
+                fromLimit += subjectLimit - subjectMax;
                 subjectLimit = subjectMax;
+            }
+        }
+        //Correct subjectLimit if fromMax < fromLimit and subjectMax > subjectLimit
+        if (fromMax < fromLimit && subjectMax > subjectLimit) {
+            if (subjectMax - subjectLimit < fromLimit - fromMax) {
+                fromLimit -= (subjectMax - subjectLimit);
+                subjectLimit = subjectMax;
+            } else {
+                subjectLimit += fromLimit - fromMax;
+                fromLimit = fromMax;
             }
         }
         //Shorten date Strings if need be (limit is already known)
@@ -1269,7 +1266,7 @@ public class NewClient {
             String rightFrom = addEndSpacer(leftFrom, fromLimit + 2) + "|";
             String leftSubject = " " + getSpacing(summaryArray[i][3], "CENTER", 1, subjectLimit + 2) + summaryArray[i][3];
             String rightSubject = addEndSpacer(leftSubject, subjectLimit + 2) + "|";
-            String leftSaved = " " + getSpacing("Y", "CENTER", 1, " Saved ".length()) + "Y\n";
+            String leftSaved = " " + getSpacing("Y", "CENTER", 1, " Saved ".length()) + "N\n";
             String msgLine = leftMsgNum + rightMsgNum + leftDate + rightDate + leftFrom + rightFrom + leftSubject +
                     rightSubject + leftSaved;
             totalList += msgLine;
@@ -1289,12 +1286,12 @@ public class NewClient {
         return spacer;
     }
 
-    //Trims text if over limit and appends ...
+    //Trims text if over limit and appends: ...
     private static String appendElipse(String text, int limit) {
         return text.substring(0, limit - 3) + "...";
     }
 
-    //Builds a summary line from a HeaderStore
+    //Returns String[] containing summary-critical headerValues
     private static String[] getMessageSummary(HeaderStore msgHeader) {
         String msgNum = Integer.toString(msgHeader.getMessageNum()); //this is alsways present
         String date = msgHeader.getDate(); //may be null
@@ -1306,11 +1303,32 @@ public class NewClient {
         String from = msgHeader.getFrom(); //may be null
         if (from.equals("")) {
             from = "NO FROM ADDRESS";
+        } else {
+            from = formatFromForInbox(from);
         }
         String subject = msgHeader.getSubject(); //may be null
         if (subject.equals("")) {
             subject = "NO SUBJECT";
         }
         return new String[]{msgNum, date, from, subject};
+    }
+
+    //Formats the From headervalue of header summaries acquire through getMessageSummary
+    //If From headers have name & <address>, returns name
+    //If Form headers have only <address>, returns address
+    //If improper format, returns original headerValue
+    private static String formatFromForInbox(String originalFrom) {
+        if (originalFrom.contains("<")) {
+            if (originalFrom.indexOf("<") != 0) {
+                return originalFrom.substring(0, originalFrom.indexOf("<")).trim();
+            } else if (originalFrom.contains(">") && originalFrom.indexOf("<") != originalFrom.length() - 1 &&
+                    originalFrom.indexOf("<") < originalFrom.indexOf(">")){
+                return originalFrom.substring(originalFrom.indexOf("<") + 1, originalFrom.indexOf(">"));
+            } else {
+                return originalFrom;
+            }
+        } else {
+            return originalFrom;
+        }
     }
 }
