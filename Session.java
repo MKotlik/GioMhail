@@ -57,6 +57,16 @@ public class Session {
         mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
     }
 
+    //Unknown server session constructor
+    public Session(String prot) {
+        host = "";
+        port = 0;
+        protocol = prot;
+        user = "";
+        pass = "";
+        mainFactory = (SSLSocketFactory) SSLSocketFactory.getDefault();
+    }
+
     //-----CONNECTION-----
 
     //Connect to POP/SMTP server based on port
@@ -217,6 +227,22 @@ public class Session {
         }
     }
 
+    public String getHost() {
+        return host;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public void setHost(String host) {
+        this.host = host;
+    }
+
     //-----LOGIN-----
 
     //Attempts different auth/login methods for POP
@@ -346,14 +372,6 @@ public class Session {
     //Set password
     public void setPass(String newPass) {
         pass = newPass;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public int getPort() {
-        return port;
     }
 
     //-----RESPONSE CHECKING-----

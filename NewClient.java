@@ -80,7 +80,7 @@ public class NewClient {
     private ArrayList<String> bigLogoLines;
 
     //POP vars
-    private POPSession POP = null;
+    private POPSession POP;
     private int msgCount; //updated number of msgs in inbox
     private int minMsg = 0; //Oldest message being listed in inbox
     private int maxMsg = 0; //Newest message being listed in inbox
@@ -88,8 +88,8 @@ public class NewClient {
     //Later, add vars like delMsgNum, viewMsgLclID, and others for more features
 
     //SMTP vars
-    private SMTPSession SMTP = null;
-    private ArrayList<String> msgBodyArray = new ArrayList<String>();
+    private SMTPSession SMTP;
+    private ArrayList<String> msgBodyArray;
     private Message newMsg = null; //This shall be a new message to send
     //Later, add vars for attachments, for localMsgID, for sending from text file
 
@@ -115,14 +115,19 @@ public class NewClient {
         //Logos
         String bigLogoResult = setBigLogo();
         String smallLogoResult = setSmallLogo();
-        if (! bigLogoResult.equals("SUCCESS")) {
+        if (!bigLogoResult.equals("SUCCESS")) {
             initError = "Could not start client. ERROR: " + bigLogoResult;
             quitUser = true;
         }
-        if (! smallLogoResult.equals("SUCCESS")) {
+        if (!smallLogoResult.equals("SUCCESS")) {
             initError = "Could not start client. ERROR: " + smallLogoResult;
             quitUser = true;
         }
+        //POP vars
+        POP = new POPSession();
+        //SMTP vars
+        SMTP = new SMTPSession();
+        msgBodyArray = new ArrayList<String>();
     }
 
     //-----MAIN-----
@@ -134,7 +139,7 @@ public class NewClient {
     //-----LOOP METHODS-----
     private void runLoop() {
         //Display initError if any
-        if (! initError.isEmpty()) {
+        if (!initError.isEmpty()) {
             System.out.println(initError);
         }
         //Run loop if no errors
@@ -211,7 +216,7 @@ public class NewClient {
     }
     */
 
-    private void modeWelcome()  {
+    private void modeWelcome() {
         //Change frame vars & print
         //No need for menumap and menutitle in welcome menu
         optField = "Welcome to GioMhail, your go-to email client!";
@@ -283,7 +288,8 @@ public class NewClient {
             String SMTPHost = getStrElementUserInput(1);
             int SMTPPort = getIntElementUserInput(2);
             System.out.print(waitMsg); //Wait on server operations
-            SMTP = new SMTPSession(SMTPHost, SMTPPort);
+            SMTP.setHost(SMTPHost);
+            SMTP.setPort(SMTPPort);
             if (SMTP.connect()) {
                 SMTP.disconnect(); //Disconnect (QUIT) successful connection
                 mode = "SMTP_LOGIN";
@@ -708,7 +714,8 @@ public class NewClient {
             String POPHost = getStrElementUserInput(1);
             int POPPort = getIntElementUserInput(2);
             System.out.print(waitMsg); //Wait on server operations
-            POP = new POPSession(POPHost, POPPort);
+            POP.setHost(POPHost);
+            POP.setPort(POPPort);
             if (POP.connect()) {
                 POP.disconnect(); //Disconnect (QUIT) successful connection
                 mode = "POP_LOGIN";
@@ -888,7 +895,7 @@ public class NewClient {
 
     //Prints the entire frame to the screen
     //Several sections: Logo, menu map, menu title, optional field, instructions, cmd lines, prompt
-    private void printFrame() {
+    private void printFrame2() {
         //Print logo
         for (int i = 0; i < smallLogoLines.size(); i++) {
             System.out.println(smallLogoLines.get(i));
@@ -898,7 +905,7 @@ public class NewClient {
         System.out.println(menuTitle);
         System.out.println("----------------------------------------------------------------------"); //70
         System.out.println(""); //blank line
-        if (! optField.equals("")) {
+        if (!optField.equals("")) {
             System.out.println(optField);
             //System.out.println("----------------------------------------------------------------------"); //70
         }
@@ -906,7 +913,68 @@ public class NewClient {
         System.out.println(menuInstructions);
         System.out.println(cmdList);
         System.out.println(""); //Blank line
-        if (! statusMsg.equals("")) {
+        if (!statusMsg.equals("")) {
+            System.out.println(statusMsg);
+            statusMsg = "";
+        }
+        System.out.print("|> "); //Prompt
+    }
+
+    //New version of printFrame
+    private void printFrame() {
+        //Print top bar
+        System.out.println("========================================================================================" +
+                "================================");
+        System.out.println(""); //cushion
+        //Print logo
+        for (int i = 0; i < smallLogoLines.size(); i++) {
+            if (i == smallLogoLines.size() - 2) { //print menuTitle
+                String line = smallLogoLines.get(i) +
+                        getSpacing(menuTitle, "CENTER", smallLogoLines.get(i).length(), 120) + menuTitle;
+                System.out.println(line);
+            } else if (i == smallLogoLines.size() - 1) {
+                String line = smallLogoLines.get(i) +
+                        getSpacing(menuMap, "CENTER", smallLogoLines.get(i).length(), 120) + menuMap;
+                System.out.println(line);
+            } else {
+                System.out.println(smallLogoLines.get(i));
+            }
+        }
+        System.out.println("----------------------------------------------------------------------------------------" +
+                "--------------------------------"); //Header separator
+        //Print server & user info if in POP or SMTP
+        if (mode.toUpperCase().startsWith("POP")) {
+            if ((! POP.getUser().equals("")) && (! mode.toUpperCase().equals("POP_LOGIN"))) { //right user has been set
+                String serverInfo = POP.getHost() + " | " + POP.getPort();
+                String line = POP.getUser() + getSpacing(serverInfo, "RIGHT", POP.getUser().length(), 120) + serverInfo;
+                System.out.println(line);
+            } else if ((! POP.getHost().equals("")) && (! mode.toUpperCase().equals("POP_SETUP"))) { //host & ! user
+                String serverInfo = POP.getHost() + " | " + POP.getPort();
+                String line = getSpacing(serverInfo, "RIGHT", 0, 120) + serverInfo;
+                System.out.println(line);
+            }
+        } else if (mode.toUpperCase().startsWith("SMTP")) {
+            if ((! SMTP.getUser().equals("")) && (! mode.toUpperCase().equals("SMTP_LOGIN"))) { //right user has been set
+                String serverInfo = SMTP.getHost() + " | " + SMTP.getPort();
+                String line = SMTP.getUser() + getSpacing(serverInfo, "RIGHT", SMTP.getUser().length(), 120) + serverInfo;
+                System.out.println(line);
+            } else if ((! SMTP.getHost().equals("")) && (! mode.toUpperCase().equals("SMTP_SETUP"))) { //host & ! user
+                String serverInfo = SMTP.getHost() + " | " + SMTP.getPort();
+                String line = getSpacing(serverInfo, "RIGHT", 0, 120) + serverInfo;
+                System.out.println(line);
+            }
+        }
+        System.out.println(""); //cushion
+        if (!optField.equals("")) {
+            System.out.println(optField);
+            System.out.println(""); //cushion
+            System.out.println("____________________________________________________________________________________" +
+                    "____________________________________");
+        }
+        System.out.println(menuInstructions);
+        System.out.println(cmdList);
+        System.out.println(""); //Blank line
+        if (!statusMsg.equals("")) {
             System.out.println(statusMsg);
             statusMsg = "";
         }
@@ -924,32 +992,32 @@ public class NewClient {
         System.out.println("Menu Map: " + menuMap);
         System.out.println(menuTitle);
         System.out.println("----------------------------------------------------------------------"); //70
-        if (! optField.equals("")) {
+        if (!optField.equals("")) {
             System.out.println(optField);
             //System.out.println("----------------------------------------------------------------------"); //70
         }
     }
 
     private void printWelcomeMenu() {
-        System.out.println("=========================================================================================" +
-                "===========");
+        System.out.println("========================================================================================" +
+                "================================");
         System.out.println(""); //cushion
         //Print big logo
         for (int i = 0; i < bigLogoLines.size(); i++) {
-            String line = getSpacing(bigLogoLines.get(i), "CENTER", 0, 100) + bigLogoLines.get(i);
+            String line = getSpacing(bigLogoLines.get(i), "CENTER", 0, 120) + bigLogoLines.get(i);
             System.out.println(line);
         }
         System.out.println(""); //cushion
         //Print centered welcome message
-        System.out.println(getSpacing(optField, "CENTER", 0, 100) + optField);
+        System.out.println(getSpacing(optField, "CENTER", 0, 120) + optField);
         System.out.println(""); //cushion
         //Print instructions & cmds separator
         System.out.println("________________________________________________________________________________________" +
-                "____________");
+                "________________________________");
         System.out.println(menuInstructions);
         System.out.println(cmdList);
         System.out.println(""); //Blank line
-        if (! statusMsg.equals("")) {
+        if (!statusMsg.equals("")) {
             System.out.println(statusMsg);
             statusMsg = "";
         }
@@ -1012,7 +1080,7 @@ public class NewClient {
         if (numSpaces < 0) {
             return "BAD FIT";
         }
-        for (int i = 0 ; i < numSpaces; i++) {
+        for (int i = 0; i < numSpaces; i++) {
             spacer += " ";
         }
         return spacer;
@@ -1087,7 +1155,7 @@ public class NewClient {
             return cmd.equalsIgnoreCase(userInput.trim());
         }
         int reqSpaces = 0;
-        if ((! cmd.equals("NONE")) && (! argType2.equals("NONE"))) {
+        if ((!cmd.equals("NONE")) && (!argType2.equals("NONE"))) {
             reqSpaces = 2; //cmd arg arg
         } else if (cmd.equals("NONE") || argType2.equals("NONE")) {
             reqSpaces = 1; //cmd arg or arg arg
@@ -1108,7 +1176,7 @@ public class NewClient {
                 intScan.close();
                 return argType1.equals("STRING");
             }
-        } else if (reqSpaces == 1 && (! argType2.equals("NONE"))) { //arg1 arg2
+        } else if (reqSpaces == 1 && (!argType2.equals("NONE"))) { //arg1 arg2
             boolean match1 = false;
             if (intScan.hasNextInt(10)) { //first element is int
                 match1 = argType1.equals("INT");

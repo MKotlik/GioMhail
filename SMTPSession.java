@@ -23,6 +23,11 @@ public class SMTPSession extends Session {
         super(host, port, "SMTP");
     }
 
+    //Unknown server SMTPSession constructor
+    public SMTPSession() {
+        super("SMTP");
+    }
+
     //Sends a message to a server
     //Returns a String indicated an error or success
     //Possible error Strings: "NO FROM", "NO TO", "BAD FROM", "BAD TO", "MISMATCHED FROM", "DATA REFUSED", "BAD DATA"

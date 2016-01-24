@@ -44,6 +44,11 @@ public class POPSession extends Session{
         super(host, port, "POP");
     }
 
+    //Unknown server POPSession constructor
+    public POPSession() {
+        super("POP");
+    }
+
     //-----Getting Header-----
 
     //Returns ArrayList of the latest numMessages of HeaderStores
