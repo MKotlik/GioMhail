@@ -43,6 +43,7 @@ public class HeaderStore {
     public HeaderStore(ArrayList<String> headerLines) {
         headerMap = new HashMap<String, ArrayList<String>>();
         fillHeaderStore(headerLines);
+        createHashId(); //generate hashid after setting up headerstore
     }
 
     //Receiving Constructor + Message Number
@@ -195,6 +196,7 @@ public class HeaderStore {
         }
         return "";
     }
+
     //-----Message Number-----
 
     public int getMessageNum() {
@@ -204,6 +206,7 @@ public class HeaderStore {
     public void setMessageNum(int newMsgNum) {
         messageNum = newMsgNum;
     }
+
     //-----HASHID METHODS-----
 
     public String getHashID() {

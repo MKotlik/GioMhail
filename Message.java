@@ -7,7 +7,6 @@
 import java.util.*;
 import java.io.*;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.binary.Base64;
 
 /* TODO
@@ -30,7 +29,7 @@ public class Message {
     private String fileBody;
     private HashMap<String, String> MIMEInfo;
     private String fileName;
-    
+
     //Sending constructor
     public Message() {
         messageHeaderStore = new HeaderStore();
@@ -55,18 +54,17 @@ public class Message {
 
     //Fill messageHeaderStore and messageBody from trimmed output of RETR call
     public void fillMessage(ArrayList<String> messageLines) {
-	int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
-	ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
+        int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
+        ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
         messageHeaderStore = new HeaderStore(headerLines); //Create HeaderStore from headers in ArrayList
-        createHashId(); //generate hashid after setting up headerstore
-	if (messageHeaderStore.getMIMEConfirm()==""){
-	    for (int i = firstLine; i < messageLines.size(); i++) {
-		messageBody += messageLines.get(i) + "\r\n"; //Add lines from ArrayList, appending \n
-	    }
-	    cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
-	}else{
-	    fillMultipartMessage(messageLines);
-	}
+        if (messageHeaderStore.getMIMEConfirm() == "") {
+            for (int i = firstLine; i < messageLines.size(); i++) {
+                messageBody += messageLines.get(i) + "\r\n"; //Add lines from ArrayList, appending \n
+            }
+            cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
+        } else {
+            fillMultipartMessage(messageLines);
+        }
     }
 
     //Find the first blank like between the email headers and the body
@@ -80,9 +78,9 @@ public class Message {
         return -1; //If blank line not found
     }
 
-    public void fillMessageFile(String fileName, String folderName){
-	Storage s1=new Storage();
-	fillMessage(s1.getMsg(fileName, folderName));
+    public void fillMessageFile(String fileName, String folderName) {
+        Storage s1 = new Storage();
+        fillMessage(s1.getMsg(fileName, folderName));
     }
 
     //-----BODY METHODS-----
@@ -134,12 +132,12 @@ public class Message {
         for (int i = firstLine; i < messageLines.size(); i++) {
             if (i == firstLine) {
                 boundary = messageLines.get(i);
-            } else if (messageLines.get(i).equals(boundary) && messageLines.get(i-1).substring(0,1).equals("-")) {
+            } else if (messageLines.get(i).equals(boundary) && messageLines.get(i - 1).substring(0, 1).equals("-")) {
                 extractMessage((ArrayList<String>) (messageLines.subList(firstLine + 1, i)));
                 getFiles((ArrayList<String>) (messageLines.subList(i, messageLines.size() - 1)));
             } else {
-		extractMessage((ArrayList<String>) (messageLines.subList(firstLine,messageLines.size())));
-	    }
+                extractMessage((ArrayList<String>) (messageLines.subList(firstLine, messageLines.size())));
+            }
         }
         cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
         ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
@@ -201,8 +199,8 @@ public class Message {
         }
         fileName = "Data/";
         fileName += MIMEInfo.get("Content-Disposition:").substring(MIMEInfo.get("Content-Disposition:").indexOf('=') + 1, MIMEInfo.get("Content-Disposition:").length() - 1);
-	Storage s1=new Storage();
-	s1.saveFile(fileBody,fileName);
+        Storage s1 = new Storage();
+        s1.saveFile(fileBody, fileName);
     }
     //private void cleanText(String text)
 
