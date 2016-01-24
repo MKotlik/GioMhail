@@ -1257,7 +1257,7 @@ public class NewClient {
         String totalList = headerLine + "---------------------------------------------------------------------------" +
                 "---------------------------------------------\n";
         //Generate spaced summary lines and append to list
-        for (int i = 0; i < summaryArray.length; i++) {
+        for (int i = summaryArray.length - 1; i >= 0; i--) {
             String leftMsgNum = " " + getSpacing(summaryArray[i][0], "CENTER", 0, msgNumMax + 2) + summaryArray[i][0];
             String rightMsgNum = addEndSpacer(leftMsgNum, msgNumMax + 2) + "|";
             String leftDate = " " + getSpacing(summaryArray[i][1], "CENTER", 1, dateLimit + 2) + summaryArray[i][1];
