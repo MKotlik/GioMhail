@@ -190,7 +190,7 @@ public class HeaderStore {
     }
 
     public String getMIMEConfirm() {
-        if (getHeaderValue("BCC") != null) {
+        if (getHeaderValue("Content-Type") != null) {
             return getHeaderValue("Content-Type").get(0);
         }
         return "";
