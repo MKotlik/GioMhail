@@ -28,6 +28,10 @@ Features:
 ## Instructions
 Just follow the client's instructions! Helpful in-app prompts and command lists will guide you as you use it. It's that simple!
 
+##Semi-completed Features
+* We have code to read simple multipart messages and the outline of code to save the attachments in a file. However, upon doing more research we found that MIME was a lot more complex than we thought and that our code could not deal with some of the things it might have to (such as parts, within parts, within parts). Therefore, we are not including it in our final version although it is able to read simple MIME messages
+* We also have code to download emails locally, however we ran out of time and were not able to test it
+* We have code that should be able to read from a file, however, we did not have time to test it and since we are not implementing the saving of emails, have excluded this as well
 ## Changelog
 1/25:
 
