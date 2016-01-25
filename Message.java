@@ -164,12 +164,12 @@ public class Message {
         for (int i = firstLine; i < messageLines.size(); i++) {
             if (i == firstLine) {
                 boundary = messageLines.get(i);
-            } else if (messageLines.get(i).equals(boundary) && (messageLines.get(i).equals("")||messageLines.get(i).substring(0, 1).equals("-"))) {
+		messageLines.get(i).equals("");
+	    } else if (messageLines.get(i).equals(boundary)&&messageLines.get(i).equals("")){
+                extractMessage(messageLines.subList(firstLine, messageLines.size()));
+            }else if (messageLines.get(i).equals(boundary) && (messageLines.get(i).equals("")||messageLines.get(i).substring(0, 1).equals("-"))) {
                 extractMessage(messageLines.subList(firstLine + 1, i));
                 //getFiles(messageLines.subList(i, messageLines.size() - 1));
-	    } else if (messageLines.get(i).equals(boundary)){
-                extractMessage(messageLines.subList(firstLine, messageLines.size()));
-            }
         }
         cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
         ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
