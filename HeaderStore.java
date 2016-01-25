@@ -190,8 +190,8 @@ public class HeaderStore {
     }
 
     public String getMIMEConfirm() {
-        if (getHeaderValue("Content-Type") != null) {
-            return getHeaderValue("Content-Type").get(0);
+        if (getHeaderValue("MIME-Version") != null) {
+            return getHeaderValue("MIME-Version").get(0);
         }
         return "";
     }
