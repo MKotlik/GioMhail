@@ -94,6 +94,7 @@ public class Message {
         System.out.println(-1);
         return -1; //If blank line not found
     }
+
     public void fillMessageFile(String fileName, String folderName) {
         Storage s1 = new Storage();
         fillMessage(s1.getMsg(fileName, folderName));
@@ -164,16 +165,17 @@ public class Message {
         for (int i = firstLine; i < messageLines.size(); i++) {
             if (i == firstLine) {
                 boundary = messageLines.get(i);
-		messageLines.get(i).equals("");
-	    } else if (messageLines.get(i).equals(boundary)&&messageLines.get(i).equals("")){
+                messageLines.get(i).equals("");
+            } else if (messageLines.get(i).equals(boundary) && messageLines.get(i).equals("")) {
                 extractMessage(messageLines.subList(firstLine, messageLines.size()));
-            }else if (messageLines.get(i).equals(boundary) && (messageLines.get(i).equals("")||messageLines.get(i).substring(0, 1).equals("-"))) {
+            } else if (messageLines.get(i).equals(boundary) && (messageLines.get(i).equals("") || messageLines.get(i).substring(0, 1).equals("-"))) {
                 extractMessage(messageLines.subList(firstLine + 1, i));
                 //getFiles(messageLines.subList(i, messageLines.size() - 1));
+            }
+            cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
+            ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
+            messageHeaderStore = new HeaderStore(headerLines); //Create HeaderStore from headers in ArrayList
         }
-        cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
-        ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
-        messageHeaderStore = new HeaderStore(headerLines); //Create HeaderStore from headers in ArrayList
     }
 
     private void extractMessage(List<String> messageLines) {
@@ -182,7 +184,7 @@ public class Message {
         int startPart = firstLine;
         for (int i = firstLine + 1; i < messageLines.size(); i++) {
             if (messageLines.get(i).equals(boundary) || messageLines.get(i).equals(boundary + "--")) {
-                messageBodyArray.addAll(getBody (messageLines.subList(startPart + 1, i)));
+                messageBodyArray.addAll(getBody(messageLines.subList(startPart + 1, i)));
                 startPart = i;
             }
         }
