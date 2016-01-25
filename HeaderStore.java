@@ -33,7 +33,7 @@ public class HeaderStore {
     private HashMap<String, ArrayList<String>> headerMap;
     private int messageNum; //The message number of the email in the inbox
     private String hashID; //The hashed ID of the message
-    
+
     //Sending constructor
     public HeaderStore() {
         headerMap = new HashMap<String, ArrayList<String>>();
@@ -43,7 +43,6 @@ public class HeaderStore {
     public HeaderStore(ArrayList<String> headerLines) {
         headerMap = new HashMap<String, ArrayList<String>>();
         fillHeaderStore(headerLines);
-        createHashId(); //generate hashid after setting up headerstore
     }
 
     //Receiving Constructor + Message Number
@@ -190,13 +189,12 @@ public class HeaderStore {
         return "";
     }
 
-    public String getMIMEConfirm(){
-	if (getHeaderValue("BCC") != null) {
+    public String getMIMEConfirm() {
+        if (getHeaderValue("BCC") != null) {
             return getHeaderValue("Content-Type").get(0);
         }
         return "";
     }
-
     //-----Message Number-----
 
     public int getMessageNum() {
@@ -206,7 +204,6 @@ public class HeaderStore {
     public void setMessageNum(int newMsgNum) {
         messageNum = newMsgNum;
     }
-
     //-----HASHID METHODS-----
 
     public String getHashID() {

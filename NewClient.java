@@ -85,6 +85,8 @@ public class NewClient {
     private int minMsg = 0; //Oldest message being listed in inbox
     private int maxMsg = 0; //Newest message being listed in inbox
     private int viewMsgNum = 0; //msgNum (ID) of message to view
+    private int delMsgNum = 0; //msgNum of message to delete
+    private boolean viewOrig = false;
     //Later, add vars like delMsgNum, viewMsgLclID, and others for more features
 
     //SMTP vars
@@ -181,6 +183,8 @@ public class NewClient {
                 modePopInbox();
             } else if (mode.equals("POP_VIEW")) {
                 modePopView();
+            } else if (mode.equals("POP_DELETE")) {
+                modePopDelete();
             } else {
                 sysOut.println("What have you done?!?!");
                 quitUser = true;
@@ -764,7 +768,7 @@ public class NewClient {
         //Result vars
         boolean connFailed = false; //Used to check for [y] after failed connection
         //Frame vars
-        menuMap = "Menu Map: Welcome > Choose Read\\View > Read: > Setup > Login > Main";
+        menuMap = "Menu Map: ... > Choose Read\\View > Read: > Setup > Login > Main";
         menuTitle = "Read: Main";
         optField = "";
         printFrameHeader(); //Print just top of menu
@@ -773,9 +777,16 @@ public class NewClient {
         if (POP.connect()) { //connection success
             if (POP.POPLogin()) { //login success
                 msgCount = POP.getMessageCount(); //Update msgCount
-                //get HeaderStore of latest message here
+                ArrayList<HeaderStore> newestMsgList = null;
+                if (msgCount > 0) {
+                    newestMsgList = POP.getHeaderStoreList(msgCount, msgCount);
+                }
                 POP.disconnect();
                 optField = "You have " + msgCount + " messages.";
+                if (msgCount > 0) {
+                    optField += "\n \n" + "Latest Message:\n \n";
+                    optField += getMessageSummaryList(newestMsgList);
+                }
                 //Add summaryLine of newest message here.
                 menuInstructions = "How many messages would you to list in Inbox? [list <num>]";
                 cmdList = "Cmds: [list <num>], [back], [exit]";
@@ -814,13 +825,22 @@ public class NewClient {
         } else if (checkInputMatch("exit", "NONE", "NONE")) {
             quitUser = true;
         } else if (checkInputMatch("LIST", "INT", "NONE")) {
-            int numMsgs = getIntElementUserInput(2);
-            if (numMsgs > msgCount) {
-                numMsgs = msgCount;
+            if (msgCount == 0) {
+                minMsg = 0;
+                maxMsg = 0;
+                statusMsg = "Empty inbox. No messages to list.";
+            } else {
+                int numMsgs = getIntElementUserInput(2);
+                if (numMsgs > msgCount) {
+                    numMsgs = msgCount;
+                }
+                minMsg = msgCount - numMsgs + 1;
+                if (minMsg > msgCount || minMsg < 0) {
+                    minMsg = 0;
+                }
+                maxMsg = msgCount;
+                mode = "POP_INBOX";
             }
-            minMsg = msgCount - numMsgs + 1;
-            maxMsg = msgCount;
-            mode = "POP_INBOX";
         } else {
             statusMsg = "Please enter a valid command!";
         }
@@ -829,8 +849,9 @@ public class NewClient {
     private void modePopInbox() {
         //Result vars
         boolean connFailed = false; //Used to check for [y] after failed connection
+        viewOrig = false;
         //Frame vars
-        menuMap = "Menu Map: ... > Choose Read\\View > Read: > Setup > Login > Main > Inbox";
+        menuMap = "Menu Map: ... > Read: > Setup > Login > Main > Inbox";
         menuTitle = "Read: Inbox";
         optField = "";
         printFrameHeader(); //Print just top of menu
@@ -839,14 +860,25 @@ public class NewClient {
         if (POP.connect()) { //connection success
             if (POP.POPLogin()) { //login success
                 msgCount = POP.getMessageCount(); //Update msgCount
-                ArrayList<HeaderStore> HeaderStoreList = POP.getHeaderStoreList(minMsg, maxMsg);
-                POP.disconnect();
-                optField = getMessageSummaryList(HeaderStoreList);
-                menuInstructions = "List different emails, choose an email to view or delete, or download email(s).";
-                cmdList = "Cmds: [view <msgNum>], [list <numMsgs>], [list <minMsg> <maxMsg>], [back], [exit]";
-                //cmdList = "Cmds: [view <msgNum>], [del <msgNum>], [save <msgNum>], [save], [list <numMsgs>],\n" +
-                //        "[list <minMsg> <maxMsg>], [back], [exit]";
-                quitUser = true;
+                if (msgCount == 0) {
+                    POP.disconnect();
+                    optField = "Inbox is empty.";
+                    menuInstructions = "Refresh inbox.";
+                    cmdList = "Cmds: [refresh], [back], [exit]";
+                } else {
+                    if (maxMsg > msgCount) {
+                        maxMsg = msgCount;
+                    }
+                    ArrayList<HeaderStore> HeaderStoreList = POP.getHeaderStoreList(minMsg, maxMsg);
+                    POP.disconnect();
+                    optField = "Total Message Count: " + msgCount + "\n" + " \n" +
+                            getMessageSummaryList(HeaderStoreList);
+                    menuInstructions = "List different emails, or choose an email to view or delete.";
+                    cmdList = "Cmds: [view <msgNum>], [del <msgNum>], [refresh], [list <numMsgs>], " +
+                            "[list <minMsg> <maxMsg>], [back], [exit]";
+                    //cmdList = "Cmds: [view <msgNum>], [del <msgNum>], [save <msgNum>], [save], [list <numMsgs>],\n" +
+                    //        "[list <minMsg> <maxMsg>], [back], [exit]";
+                }
             } else { //login failed
                 POP.disconnect();
                 eraseFromConsole(waitMsg);
@@ -870,11 +902,239 @@ public class NewClient {
         clearScreen(); //Clear screen from before results got processed (header + waitMsg)
         printFrame(); //Display result
         getUserInput();
-        quitUser = true;
+        //--Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("y", "NONE", "NONE") && connFailed) {
+            mode = "POP_INBOX"; //retry access
+        } else if (checkInputMatch("REFRESH", "NONE", "NONE")) {
+            mode = "POP_INBOX";
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            mode = "POP_MAIN";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else if (checkInputMatch("LIST", "INT", "NONE")) {
+            int numMsgs = getIntElementUserInput(2);
+            if (numMsgs > msgCount) {
+                numMsgs = msgCount;
+            }
+            minMsg = msgCount - numMsgs + 1;
+            maxMsg = msgCount;
+            mode = "POP_INBOX";
+        } else if (checkInputMatch("LIST", "INT", "INT")) {
+            minMsg = getIntElementUserInput(2);
+            maxMsg = getIntElementUserInput(3);
+            //Sanitize minMsg and maxMsg, don't allow user to break with stupid things
+            if (msgCount == 0) {
+                minMsg = 0;
+                maxMsg = 0;
+                statusMsg = "Inbox is empty";
+            } else {
+                if (minMsg > maxMsg) {
+                    int store = maxMsg;
+                    maxMsg = minMsg;
+                    minMsg = store;
+                }
+                if (minMsg < 1) {
+                    minMsg = 1;
+                }
+                if (minMsg > msgCount) {
+                    minMsg = msgCount;
+                }
+                if (maxMsg < 1) {
+                    maxMsg = 1;
+                }
+                if (maxMsg > msgCount) {
+                    maxMsg = msgCount;
+                }
+                mode = "POP_INBOX";
+            }
+        } else if (checkInputMatch("VIEW", "INT", "NONE")) {
+            viewMsgNum = getIntElementUserInput(2);
+            //Check that viewMsgNum is within range
+            if (viewMsgNum < 1 || viewMsgNum > msgCount) { //If chosen msg is out of range
+                viewMsgNum = 0;
+                statusMsg = "Please choose a message that is between 1 and " + msgCount + ", inclusive.";
+            } else { //Number is in range
+                mode = "POP_VIEW";
+            }
+        } else if (checkInputMatch("DEL", "INT", "NONE")) {
+            delMsgNum = getIntElementUserInput(2);
+            //Check that viewMsgNum is within range
+            if (delMsgNum < 1 || delMsgNum > msgCount) { //If chosen msg is out of range
+                delMsgNum = 0;
+                statusMsg = "Please choose a message that is between 1 and " + msgCount + ", inclusive.";
+            } else { //Number is in range
+                mode = "POP_DELETE";
+            }
+        } else if (userInput.toUpperCase().startsWith("LIST")) { //LIST but bad format
+            statusMsg = "Please enter list command as: list <numMsgs> or list <minMsg> <maxMsg>.\n" +
+                    "Separate list and all numbers with spaces, and do not write brackets.";
+        } else if (userInput.toUpperCase().startsWith("VIEW")) { //VIEW but bad format
+            statusMsg = "Please enter view, followed by space, followed by the number of the message to view.";
+        } else {
+            statusMsg = "Please enter a valid command!";
+        }
     }
 
     private void modePopView() {
-        //
+        //Result vars
+        boolean connFailed = false; //Used to check for [y] after failed connection
+        //Frame vars
+        menuMap = "Menu Map: ... > Setup > Login > Main > View";
+        menuTitle = "Read: View";
+        optField = "";
+        printFrameHeader(); //Print just top of menu
+        //Server interaction begins
+        System.out.print(waitMsg);
+        if (POP.connect()) { //connection success
+            if (POP.POPLogin()) { //login success
+                msgCount = POP.getMessageCount(); //Update msgCount
+                Message chosenMsg = POP.getMessage(viewMsgNum);
+                POP.disconnect();
+                if (chosenMsg == null) { //Message not found
+                    optField = "No message found with number " + viewMsgNum;
+                    menuInstructions = "Please return to Inbox, choose a different message number.";
+                    cmdList = "Cmds: [back], [exit]";
+                } else { //Msg found
+                    //Print message info
+                    optField = "Msg #: " + chosenMsg.getHeaderStore().getMessageNum() + "\n";
+                    optField += wrapLine("Subject: " + chosenMsg.getHeaderStore().getSubject(), 120) + "\n";
+                    optField += wrapLine("From: " + chosenMsg.getHeaderStore().getFrom(), 120) + "\n";
+                    optField += wrapLine("To: " + chosenMsg.getHeaderStore().getTo(), 120) + "\n";
+                    optField += wrapLine("CC: " + chosenMsg.getHeaderStore().getCC(), 120) + "\n";
+                    optField += " \n"; //blank line
+                    optField += "Message Contents:\n";
+                    optField += "-----------------------------------------------------------------------------------" +
+                            "-------------------------------------\n";
+                    if (! viewOrig) {
+                        for (int i = 0; i < chosenMsg.getMessageBodyArray().size(); i++) {
+                            optField += wrapLine(chosenMsg.getMessageBodyArray().get(i), 120) + "\n";
+                        }
+                        menuInstructions = "View original, delete this message, view a different message, or return to inbox.";
+                        cmdList = "Cmds: [del], [orig], [view <msgNum>], [back], [exit]";
+                    } else {
+                        for (int i = 0; i < chosenMsg.getOriginalContent().size(); i++) {
+                            optField += wrapLine(chosenMsg.getOriginalContent().get(i), 120) + "\n";
+                        }
+                        menuInstructions = "View regular, delete this message, view a different message, or return to inbox.";
+                        cmdList = "Cmds: [del], [reg], [view <msgNum>], [back], [exit]";
+                    }
+
+                }
+            } else { //login failed
+                POP.disconnect();
+                eraseFromConsole(waitMsg);
+                connFailed = true;
+                optField = "";
+                //Add summaryLine of newest message here.
+                menuInstructions = "Connection issue (login failure).\n" +
+                        "Would you like to retry connection?";
+                cmdList = "Cmds: [y], [back], [exit]"; //cmdList stays same
+            }
+        } else { //connection failed
+            POP.close();
+            eraseFromConsole(waitMsg);
+            connFailed = true;
+            optField = "";
+            menuInstructions = "Connection issue (server not connected).\n" +
+                    "Would you like to retry connection?";
+            cmdList = "Cmds: [y], [back], [exit]"; //cmdList stays same
+        }
+        //Server enteraction ended
+        clearScreen(); //Clear screen from before results got processed (header + waitMsg)
+        printFrame(); //Display result
+        getUserInput();
+        //-----Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("y", "NONE", "NONE") && connFailed) {
+            viewOrig = false;
+            mode = "POP_VIEW"; //retry access
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            viewOrig = false;
+            mode = "POP_INBOX";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else if (checkInputMatch("VIEW", "INT", "NONE")) {
+            viewOrig = false;
+            viewMsgNum = getIntElementUserInput(2);
+            //Check that viewMsgNum is within range
+            if (viewMsgNum < 1 || viewMsgNum > msgCount) { //If chosen msg is out of range
+                statusMsg = "Please choose a message that is between 1 and " + msgCount + ", inclusive.";
+            } else { //Number is in range
+                mode = "POP_VIEW";
+            }
+        } else if (checkInputMatch("ORIG", "NONE", "NONE")) {
+            viewOrig = true;
+            mode = "POP_VIEW";
+        } else if (checkInputMatch("REG", "NONE", "NONE")) {
+            viewOrig = false;
+            mode = "POP_VIEW";
+        } else if (checkInputMatch("DEL", "NONE", "NONE")) {
+            viewOrig = false;
+            delMsgNum = viewMsgNum;
+            mode = "POP_DELETE";
+        } else if (userInput.toUpperCase().startsWith("VIEW")) { //VIEW but bad format
+            statusMsg = "Please enter view, followed by space, followed by the number of the message to view.";
+        } else {
+            statusMsg = "Please enter a valid command!";
+        }
+    }
+
+    private void modePopDelete(){
+        viewOrig = false;
+        menuMap = "Menu Map: ... > Setup > Login > Main > Delete";
+        menuTitle = "Read: Delete";
+        optField = "Are you sure you want to delete message " + delMsgNum + "?";
+        menuInstructions = "Say [yes] to delete the message, or go back to inbox.";
+        cmdList = "Cmds: [yes], [back], [exit]";
+        printFrame();
+        getUserInput();
+        //-----Check user input
+        if (consoleError) { //If exception on reading console
+            clearScreen();
+            System.out.println("Unknown console error detected (Unable to read input).\n" +
+                    "Program exiting.");
+            quitUser = true;
+        } else if (checkInputMatch("back", "NONE", "NONE")) {
+            statusMsg = "User aborted deletion.";
+            mode = "POP_INBOX";
+        } else if (checkInputMatch("exit", "NONE", "NONE")) {
+            quitUser = true;
+        } else if (checkInputMatch("YES", "NONE", "NONE")) {
+            System.out.print(waitMsg);
+            if (POP.connect()) { //connection success
+                if (POP.POPLogin()) { //login success
+                    boolean deletionResult = POP.delete(delMsgNum);
+                    POP.disconnect();
+                    eraseFromConsole(waitMsg);
+                    if (deletionResult) {
+                        statusMsg = "Message deleted.";
+                    } else {
+                        statusMsg = "Message could not be deleted.";
+                    }
+                    delMsgNum = 0;
+                    mode = "POP_INBOX";
+                } else { //login failed
+                    POP.disconnect();
+                    eraseFromConsole(waitMsg);
+                    statusMsg = "Connection issue (login failure). Please retry.";
+                }
+            } else { //connection failed
+                POP.close();
+                eraseFromConsole(waitMsg);
+                statusMsg = "Connection issue (server not connected). Please retry.";
+            }
+        } else {
+            statusMsg = "Please enter a valid command!";
+        }
     }
 
     //-----TUI METHODS-----
@@ -1192,12 +1452,15 @@ public class NewClient {
                 fromMax = summaryArray[i][2].length();
             }
         }
+        /*
         if (fromMax < fromLimit) {
-            subjectLimit = 120 - 4 - msgNumMax - 2 - 2 - 5 - dateMax - 2 - fromMax - 2 - 2 - 5;
+            subjectLimit = 120 - 4 - msgNumMax - 2 - dateMax - 2 -fromMax - 2 - 5 - 2;
         } else {
-            subjectLimit = 120 - 4 - msgNumMax - 2 - 2 - 5 - dateMax - 2 - fromLimit - 2 - 2 - 5;
+            subjectLimit = 120 - 4 - msgNumMax - 2 - dateMax - 2 - fromLimit - 2 - 5 - 2;
         }
-        // = total - dividerCount - msgNumMax - spacers - spacers - SAVED - dataMax - spacers - fromMax - spacers
+        */
+        subjectLimit = 120 - 4 - msgNumMax - 2 - dateMax - 2 - fromLimit - 2 - 5 - 2 - 1;
+        // = total - dividerCount - msgNumMax - spacers - dateMax - spacers - fromMax/Limit - spacers - Saved - spacers
         //- subjectSpacers
         //Find max length of subject Strings
         for (int i = 0; i < summaryArray.length; i++) {
@@ -1225,6 +1488,12 @@ public class NewClient {
                 fromLimit = fromMax;
             }
         }
+        /*
+        if (fromMax < fromLimit) {
+            subjectLimit += (fromLimit - fromMax);
+            fromLimit = fromMax;
+        }
+        */
         //Shorten date Strings if need be (limit is already known)
         for (int i = 0; i < summaryArray.length; i++) {
             if (summaryArray[i][1].length() > dateLimit) {
@@ -1266,7 +1535,7 @@ public class NewClient {
             String rightFrom = addEndSpacer(leftFrom, fromLimit + 2) + "|";
             String leftSubject = " " + getSpacing(summaryArray[i][3], "CENTER", 1, subjectLimit + 2) + summaryArray[i][3];
             String rightSubject = addEndSpacer(leftSubject, subjectLimit + 2) + "|";
-            String leftSaved = " " + getSpacing("Y", "CENTER", 1, " Saved ".length()) + "N\n";
+            String leftSaved = " " + getSpacing("N", "CENTER", 1, " Saved ".length()) + "N\n";
             String msgLine = leftMsgNum + rightMsgNum + leftDate + rightDate + leftFrom + rightFrom + leftSubject +
                     rightSubject + leftSaved;
             totalList += msgLine;
@@ -1329,6 +1598,16 @@ public class NewClient {
             }
         } else {
             return originalFrom;
+        }
+    }
+
+    //returns a wrapped line if it's length is based the char limit of the line
+    private static String wrapLine(String originalLine, int limit) {
+        if (originalLine.length() <= limit) {
+            return originalLine;
+        } else {
+            return originalLine.substring(0, limit - 1) + "-\n" +
+                    wrapLine(originalLine.substring(limit - 1, originalLine.length()), limit);
         }
     }
 }

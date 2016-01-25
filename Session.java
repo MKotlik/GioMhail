@@ -98,7 +98,7 @@ public class Session {
                 return checkResponseCode(serverInput.get(0), "220");
             }
         } catch (IOException e) {
-            System.err.println(e.toString());
+            //System.err.println(e.toString());
             return false;
         }
     }
@@ -136,7 +136,7 @@ public class Session {
             serverInput = read(false);
             return checkOK(serverInput.get(0));
         } catch (IOException e) {
-            System.err.println(e.toString());
+            //System.err.println(e.toString());
             return false;
         }
     }
@@ -184,7 +184,7 @@ public class Session {
             serverInput = read(true); //EHLO has multiline capa output
             return checkResponseCode(serverInput.get(0), "250"); //Output whether connection success
         } catch (IOException e) {
-            System.err.println(e.toString());
+            //System.err.println(e.toString());
             return false;
         }
     }
@@ -223,7 +223,7 @@ public class Session {
                 secureSocket.close();
             }
         } catch (IOException e) {
-            System.err.println(e.toString());
+            //System.err.println(e.toString());
         }
     }
 
@@ -422,7 +422,7 @@ public class Session {
             }
             return response;
         } catch (IOException e) {
-            System.err.println(e.toString());
+            //System.err.println(e.toString());
             return null; //NOTE, implementations need to check that message is not null
             //Could also add "READ ERROR" to arraylist and check for that
         }
@@ -437,7 +437,7 @@ public class Session {
             serverWriter.flush();
             return true;
         } catch (IOException e) {
-            System.err.println(e.toString());
+            //System.err.println(e.toString());
             return false;
         }
     }

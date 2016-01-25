@@ -25,6 +25,8 @@ import org.apache.commons.codec.binary.Base64;
 public class Message {
     private HeaderStore messageHeaderStore; //HeaderStore for headers
     private String messageBody; //Actual message content
+    private ArrayList<String> originalContent;
+    private ArrayList<String> messageBodyArray; //ArrayList of messageBody
     private int messageNum; //The message number of the email in the inbox
     private String fileBody;
     private HashMap<String, String> MIMEInfo;
@@ -34,16 +36,20 @@ public class Message {
     public Message() {
         messageHeaderStore = new HeaderStore();
         messageBody = "";
+        originalContent = new ArrayList<String>();
+        messageBodyArray = new ArrayList<String>();
     }
 
     //Receiving constructor
     public Message(ArrayList<String> messageLines) {
         messageHeaderStore = new HeaderStore();
         messageBody = "";
+        originalContent = messageLines;
+        messageBodyArray = new ArrayList<String>();
         fillMessage(messageLines);
     }
 
-    //Receiving constructor + messagen number
+    //Receiving constructor + message number
     public Message(ArrayList<String> messageLines, int msgNum) {
         this(messageLines);
         messageNum = msgNum;
@@ -57,8 +63,9 @@ public class Message {
         int firstLine = findBlankLine(messageLines) + 1; //First line of messageBody
         ArrayList<String> headerLines = new ArrayList<String>(messageLines.subList(0, firstLine - 1));
         messageHeaderStore = new HeaderStore(headerLines); //Create HeaderStore from headers in ArrayList
-        if (messageHeaderStore.getMIMEConfirm() == "") {
+        if (messageHeaderStore.getMIMEConfirm().equals("")) {
             for (int i = firstLine; i < messageLines.size(); i++) {
+                messageBodyArray.add(messageLines.get(i));
                 messageBody += messageLines.get(i) + "\r\n"; //Add lines from ArrayList, appending \n
             }
             cleanMsgBody(); //Converts any \r\n.\r\n to \r\n>.\r\n, preventing data breakage
@@ -110,6 +117,22 @@ public class Message {
             messageBody = messageBody.substring(0, badPeriod + 4) + ">" +
                     messageBody.substring(badPeriod + 4, messageBody.length());
         }
+    }
+
+    public ArrayList<String> getMessageBodyArray() {
+        return messageBodyArray;
+    }
+
+    public void setMessageBodyArray(ArrayList<String> messageBodyArray) {
+        this.messageBodyArray = messageBodyArray;
+    }
+
+    public ArrayList<String> getOriginalContent() {
+        return originalContent;
+    }
+
+    public void setOriginalContent(ArrayList<String> originalContent) {
+        this.originalContent = originalContent;
     }
 
     //-----HEADERSTORE METHODS-----
@@ -178,39 +201,41 @@ public class Message {
         return msgBody;
     }
 
-    private void getFile(ArrayList<String> fileLines) {
+    /*
+    private boolean getFile(ArrayList<String> fileLines) {
         MIMEInfo = new HashMap<String, String>();
         int firstLine = findBlankLine(fileLines) + 1; //First line of messageBody
-	ArrayList<String> MIMEHeaderLines = new ArrayList<String>(fileLines.subList(0, firstLine - 1));
+        ArrayList<String> MIMEHeaderLines = new ArrayList<String>(fileLines.subList(0, firstLine - 1));
         for (int i = 0; i < MIMEHeaderLines.size(); i++) {
             int space = MIMEHeaderLines.get(i).indexOf(' ');
             MIMEInfo.put(MIMEHeaderLines.get(i).substring(0, space), MIMEHeaderLines.get(i).substring(space + 1, MIMEHeaderLines.get(i).length()));
         }
-	if(MIMEInfo.get("Content-Disposition").substring(MIMEInfo.get("Content-Disposition").indexOf('.')+1,MIMEInfo.get("Content-Disposition").length()).equals("txt")){
-	    for (int i = firstLine; i < fileLines.size(); i++) {
-		fileBody += fileLines.get(i); //Add lines from ArrayList, appending \n
-	    }
-	    byte[] utfBytes = Base64.decodeBase64(fileBody);
-	    String utfStr = "";
-	    try {
-		utfStr = new String(utfBytes, "UTF_8");
-	    } catch (UnsupportedEncodingException e) {
-		//Do nothing
-	    }
-	    fileBody = utfStr;
-	    fileName = "Data/";
-	    fileName += MIMEInfo.get("Content-Disposition:").substring(MIMEInfo.get("Content-Disposition:").indexOf('=') + 1, MIMEInfo.get("Content-Disposition:").length() - 1);
-	    Storage s1=new Storage();
-	    s1.saveFile(fileBody,fileName);
-	    return true;
-	}else{
-	    return false;
-	}
+        if (MIMEInfo.get("Content-Disposition").substring(MIMEInfo.get("Content-Disposition").indexOf('.') + 1, MIMEInfo.get("Content-Disposition").length()).equals("txt")) {
+            for (int i = firstLine; i < fileLines.size(); i++) {
+                fileBody += fileLines.get(i); //Add lines from ArrayList, appending \n
+            }
+            byte[] utfBytes = Base64.decodeBase64(fileBody);
+            String utfStr = "";
+            try {
+                utfStr = new String(utfBytes, "UTF_8");
+            } catch (UnsupportedEncodingException e) {
+                //Do nothing
+            }
+            fileBody = utfStr;
+            fileName = "Data/";
+            fileName += MIMEInfo.get("Content-Disposition:").substring(MIMEInfo.get("Content-Disposition:").indexOf('=') + 1, MIMEInfo.get("Content-Disposition:").length() - 1);
+            Storage s1 = new Storage();
+            s1.saveFile(fileBody, fileName);
+            return true;
+        } else {
+            return false;
+        }
         fileName = "Data/";
         fileName += MIMEInfo.get("Content-Disposition:").substring(MIMEInfo.get("Content-Disposition:").indexOf('=') + 1, MIMEInfo.get("Content-Disposition:").length() - 1);
         Storage s1 = new Storage();
         s1.saveFile(fileBody, fileName);
     }
+    */
     //private void cleanText(String text)
 
     //-----Message Number-----
