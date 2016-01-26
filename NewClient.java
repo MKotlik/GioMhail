@@ -276,6 +276,9 @@ public class NewClient {
         optField = "";
         menuInstructions = "Please enter the address and port of your SMTP server.";
         cmdList = "Cmds: <address port>, [back], [exit]";
+        //Reset host & user, printFrame() catch not working
+        SMTP.setHost("");
+        SMTP.setUser("");
         printFrame();
         getUserInput();
         //--Check user input
@@ -313,6 +316,8 @@ public class NewClient {
         optField = "";
         menuInstructions = "Please enter your username and password.";
         cmdList = "Cmds: <user pass>, [back], [exit]";
+        //Reset user, printFrame() catch not working
+        SMTP.setUser("");
         printFrame();
         getUserInput();
         //--Check user input
@@ -693,6 +698,9 @@ public class NewClient {
         optField = "";
         menuInstructions = "Please enter the address and port of your POP server.";
         cmdList = "Cmds: <address port>, [back], [exit]";
+        //Reset host & user, printFrame() catch not working
+        POP.setHost("");
+        POP.setUser("");
         printFrame();
         getUserInput();
         //--Check user input
@@ -730,6 +738,8 @@ public class NewClient {
         optField = "";
         menuInstructions = "Please enter your username and password.";
         cmdList = "Cmds: <user pass>, [back], [exit]";
+        //Reset user, printFrame() catch not working
+        POP.setUser("");
         printFrame();
         getUserInput();
         //--Check user input
@@ -1259,6 +1269,7 @@ public class NewClient {
         }
     }
 
+    //Like printFrame(), but modified for biglogo of Welcome screen
     private void printWelcomeMenu() {
         System.out.println("========================================================================================" +
                 "================================");
@@ -1379,6 +1390,7 @@ public class NewClient {
         }
     }
 
+    //Get the integer element at a specific pos in the String
     private int getIntElementUserInput(int elementNum) {
         Scanner intScan = new Scanner(userInput.trim());
         for (int i = 0; i < elementNum - 1; i++) { //advance scanner until reach elementNum
@@ -1391,6 +1403,7 @@ public class NewClient {
         }
     }
 
+    //Get the String element at a specific pos in the String
     private String getStrElementUserInput(int elementNum) {
         Scanner intScan = new Scanner(userInput.trim());
         for (int i = 0; i < elementNum - 1; i++) { //advance scanner until reach elementNum
@@ -1403,6 +1416,7 @@ public class NewClient {
         }
     }
 
+    //Shortcut for the ParseUtils function, passes userinput
     private boolean checkInputMatch(String cmd, String argType1, String argType2) {
         return ParseUtils.checkInputMatch(userInput, cmd, argType1, argType2);
     }
@@ -1421,6 +1435,10 @@ public class NewClient {
 
     //-----MESSAGE METHODS-----
 
+    //Builds the summaryList of the inbox
+    //For each message, shows its message number, date, from, and subject
+    //Can also show if message is saved locally, but currently not supported
+    //Calculates and distributes column sizes and maintains alingment
     private static String getMessageSummaryList(ArrayList<HeaderStore> HeaderStoreList) {
         String[][] summaryArray = new String[HeaderStoreList.size()][];
         for (int i = HeaderStoreList.size() - 1; i >= 0; i--) {
@@ -1459,9 +1477,11 @@ public class NewClient {
             subjectLimit = 120 - 4 - msgNumMax - 2 - dateMax - 2 - fromLimit - 2 - 5 - 2;
         }
         */
-        subjectLimit = 120 - 4 - msgNumMax - 2 - dateMax - 2 - fromLimit - 2 - 5 - 2 - 1;
+        //The subjectLimit calculation below supports Saved column, which is nonfunctional
+        //subjectLimit = 120 - 4 - msgNumMax - 2 - dateMax - 2 - fromLimit - 2 - 5 - 2 - 1;
         // = total - dividerCount - msgNumMax - spacers - dateMax - spacers - fromMax/Limit - spacers - Saved - spacers
         //- subjectSpacers
+        subjectLimit = 120 - 4 - msgNumMax - 2 - dateMax - 2 - fromLimit - 2 - 1;
         //Find max length of subject Strings
         for (int i = 0; i < summaryArray.length; i++) {
             if (summaryArray[i][3].length() > subjectMax) {
@@ -1519,10 +1539,11 @@ public class NewClient {
         String RHDate = addEndSpacer(LHDate, dateLimit + 2) + "|";
         String LHFrom = " " + getSpacing("From", "CENTER", 1, fromLimit + 2) + "From";
         String RHFrom = addEndSpacer(LHFrom, fromLimit + 2) + "|";
-        String LHSubject = " " + getSpacing("Subject", "CENTER", 1, subjectLimit + 2) + "Subject";
-        String RHSubject = addEndSpacer(LHSubject, subjectLimit + 2) + "|";
-        String LHSaved = " Saved \n";
-        String headerLine = LHMsgNum + RHMsgNum + LHDate + RHDate + LHFrom + RHFrom + LHSubject + RHSubject + LHSaved;
+        String LHSubject = " " + getSpacing("Subject", "CENTER", 1, subjectLimit + 2) + "Subject" + "\n";
+        //String RHSubject = addEndSpacer(LHSubject, subjectLimit + 2) + "|";
+        //String LHSaved = " Saved \n";
+        String headerLine = LHMsgNum + RHMsgNum + LHDate + RHDate + LHFrom + RHFrom + LHSubject;
+        //String headerLine = LHMsgNum + RHMsgNum + LHDate + RHDate + LHFrom + RHFrom + LHSubject + RHSubject + LHSaved;
         String totalList = headerLine + "---------------------------------------------------------------------------" +
                 "---------------------------------------------\n";
         //Generate spaced summary lines and append to list
@@ -1533,11 +1554,13 @@ public class NewClient {
             String rightDate = addEndSpacer(leftDate, dateLimit + 2) + "|";
             String leftFrom = " " + getSpacing(summaryArray[i][2], "CENTER", 1, fromLimit + 2) + summaryArray[i][2];
             String rightFrom = addEndSpacer(leftFrom, fromLimit + 2) + "|";
-            String leftSubject = " " + getSpacing(summaryArray[i][3], "CENTER", 1, subjectLimit + 2) + summaryArray[i][3];
-            String rightSubject = addEndSpacer(leftSubject, subjectLimit + 2) + "|";
-            String leftSaved = " " + getSpacing("N", "CENTER", 1, " Saved ".length()) + "N\n";
-            String msgLine = leftMsgNum + rightMsgNum + leftDate + rightDate + leftFrom + rightFrom + leftSubject +
-                    rightSubject + leftSaved;
+            String leftSubject = " " + getSpacing(summaryArray[i][3], "CENTER", 1, subjectLimit + 2) +
+                    summaryArray[i][3] + "\n";
+            //String rightSubject = addEndSpacer(leftSubject, subjectLimit + 2) + "|";
+            //String leftSaved = " " + getSpacing("N", "CENTER", 1, " Saved ".length()) + "N\n";
+            String msgLine = leftMsgNum + rightMsgNum + leftDate + rightDate + leftFrom + rightFrom + leftSubject;
+            //String msgLine = leftMsgNum + rightMsgNum + leftDate + rightDate + leftFrom + rightFrom + leftSubject +
+            //        rightSubject + leftSaved;
             totalList += msgLine;
         }
         return totalList;
