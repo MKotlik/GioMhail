@@ -14,6 +14,11 @@ Features:
 * Provides basic functions for accessing a mailbox (show inbox, view emails (simplified & original views), delete emails)
 * Provides basic functions for sending emails (user can specify Subject, From, To, CC, BCC, write email body, and save)
 * Continues to work even as the user messes up or server/connection issues happen (lots of code checking user input, server responses, connection status, reporting on errors & providing guidance without failing)
+ 
+Additional Tools:
+
+SMTPConsole & POPConsole - 
+We also have tools for establishing secure connections to SMTP or POP servers, respectively named SMTPConsole and POPConsole. These tools allow the user to manually enter commands to communicate with the servers, and are useful when troubleshooting connections or when developing for the email client. As of now, the connection info of the consoles can only be changed by editing the source code and recompiling.
 
 ## Running
 * Download/clone the repo, move the "final" folder inside to any location of your choice.
@@ -50,6 +55,7 @@ Misha:
 * Edited Inbox (removed Saved column since local email storage is not implemented)
 * Fixed a bug where old header/server info (from previous/failed connection) would be displayed in Setup screen
 * Added compile scripts to final/src
+* Organized repo
  
 Gio:
 * Attempted to fix mime multipart message viewing
