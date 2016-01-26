@@ -28,15 +28,28 @@ Features:
 ## Instructions
 Just follow the client's instructions! Helpful in-app prompts and command lists will guide you as you use it. It's that simple!
 
+## Compiling
+The project is precompiled, and a runnable version is within the final/compiled folder of the repo. However, if you have to recompile the project from source code:
+* Navigate to src
+* Launch the compile script appropriate for your OS & shell.
+    - Use "compileClient-Linux-OSX.sh" for regular Bash shells on Linux or OSX computers
+    - Use "compileClient-Windows-Bash.sh" for Bash shells (ex. Cygwin, Git Shell) on Windows computers
+    - Use "compileClient-Windows.bat" for cmd.exe or Powershell on Windows computers
+
 ##Semi-completed Features
 * We have code to read simple multipart messages and the outline of code to save the attachments in a file. However, upon doing more research we found that MIME was a lot more complex than we thought and that our code could not deal with some of the things it might have to (such as parts, within parts, within parts). Therefore, we are not including it in our final version although it is able to read simple MIME messages
 * We also have code to download emails locally, however we ran out of time and were not able to test it
-* We have code that should be able to read from a file, however, we did not have time to test it and since we are not implementing the saving of emails, have excluded this as well
+* We have code that should be able to read and parse a message from a locally stored file, however, we did not have time to test it and since we are not implementing the saving of emails, have excluded this as well
+
 ## Changelog
 1/25:
 
 Misha:
 * Updated readme
+* Researched MIME, realized we cannot make it work under time limit...
+* Edited Inbox (removed Saved column since local email storage is not implemented)
+* Fixed a bug where old header/server info (from previous/failed connection) would be displayed in Setup screen
+* Added compile scripts to final/src
  
 Gio:
 * Attempted to fix mime multipart message viewing
